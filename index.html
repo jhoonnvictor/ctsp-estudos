@@ -1,0 +1,1565 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="theme-color" content="#C0392B"/>
+<title>Bombeiro CTSP</title>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' https://*.googleapis.com https://*.gstatic.com https://*.firebase.com https://*.firebaseio.com https://*.firebaseapp.com data: blob:;">
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+:root{
+  --red:#C0392B;--red-dark:#96281B;--red-light:#FDECEA;
+  --gold:#B8860B;--gold-light:#FFF8E1;
+  --white:#FFFFFF;--bg:#F5F5F5;
+  --text:#1A1A1A;--text2:#666666;--text3:#999999;
+  --border:#E8E8E8;--green:#27AE60;--green-light:#E8F8F0;
+  --amber:#E67E22;--amber-light:#FEF5E7;
+  --shadow:0 2px 12px rgba(0,0,0,0.08);
+  --radius:16px;--radius-sm:10px;
+  --nav-h:64px;--header-h:60px;
+}
+html,body{height:100%;font-family:-apple-system,'SF Pro Display','Helvetica Neue',Arial,sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;}
+button{font-family:inherit;cursor:pointer;border:none;outline:none;}
+input,select,textarea{font-family:inherit;outline:none;}
+
+/* LOADING */
+#loading{position:fixed;inset:0;background:var(--red);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;gap:20px;}
+#loading .logo{width:90px;height:90px;border-radius:50%;background:white;padding:8px;object-fit:contain;animation:pulse 1.5s ease-in-out infinite;}
+#loading p{color:white;font-size:14px;font-weight:700;letter-spacing:.08em;opacity:.85;}
+@keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.06);}}
+
+/* AUTH */
+#auth-screen{display:none;min-height:100vh;background:linear-gradient(160deg,var(--red-dark) 0%,var(--red) 55%,#8B1A1A 100%);flex-direction:column;align-items:center;justify-content:center;padding:24px;}
+#auth-screen.active{display:flex;}
+.auth-logo{width:100px;height:100px;border-radius:50%;border:3px solid rgba(255,255,255,.25);margin-bottom:6px;background:white;padding:7px;object-fit:contain;}
+.auth-title{color:white;font-size:26px;font-weight:800;letter-spacing:-.02em;margin-bottom:3px;}
+.auth-sub{color:rgba(255,255,255,.7);font-size:12px;margin-bottom:28px;text-align:center;line-height:1.5;}
+.auth-card{background:white;border-radius:24px;padding:26px 22px;width:100%;max-width:360px;box-shadow:0 20px 60px rgba(0,0,0,.25);}
+.auth-tabs{display:flex;gap:4px;background:var(--bg);border-radius:12px;padding:4px;margin-bottom:22px;}
+.auth-tab{flex:1;padding:9px;border:none;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;background:transparent;color:var(--text2);transition:all .2s;}
+.auth-tab.active{background:var(--red);color:white;box-shadow:0 2px 8px rgba(192,57,43,.3);}
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:11px;font-weight:700;color:var(--text2);margin-bottom:5px;text-transform:uppercase;letter-spacing:.05em;}
+.field input,.field select,.field textarea{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:11px;font-size:15px;color:var(--text);background:var(--bg);transition:border-color .2s;}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--red);background:white;}
+.field textarea{resize:vertical;min-height:72px;}
+.btn-primary{width:100%;padding:14px;background:var(--red);color:white;border-radius:12px;font-size:15px;font-weight:700;letter-spacing:.02em;transition:all .2s;box-shadow:0 4px 16px rgba(192,57,43,.3);}
+.btn-primary:active{transform:scale(.98);}
+.btn-primary:disabled{opacity:.6;}
+.auth-msg{font-size:12px;text-align:center;margin-top:10px;min-height:18px;color:var(--red);}
+.auth-msg.ok{color:var(--green);}
+.pending-box{text-align:center;padding:16px 0;color:var(--text2);font-size:13px;line-height:1.6;}
+.pending-box .pi{font-size:36px;display:block;margin-bottom:10px;}
+
+/* APP SHELL */
+#app{display:none;flex-direction:column;min-height:100vh;}
+#app.active{display:flex;}
+
+/* HEADER */
+.app-header{height:var(--header-h);background:var(--red);display:flex;align-items:center;padding:0 14px;gap:10px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.18);}
+.header-logo{width:34px;height:34px;border-radius:50%;background:white;padding:3px;object-fit:contain;flex-shrink:0;}
+.header-titles{flex:1;}
+.header-title{color:white;font-size:15px;font-weight:800;line-height:1.1;}
+.header-sub{color:rgba(255,255,255,.65);font-size:10px;}
+.header-name{color:rgba(255,255,255,.8);font-size:11px;text-align:right;line-height:1.4;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.btn-logout{background:rgba(255,255,255,.18);color:white;border-radius:8px;padding:6px 10px;font-size:11px;font-weight:700;}
+
+/* CONTENT */
+.app-content{flex:1;overflow-y:auto;padding-bottom:calc(var(--nav-h) + 8px);}
+
+/* BOTTOM NAV */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;height:var(--nav-h);background:white;border-top:1px solid var(--border);display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom);}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--text3);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;cursor:pointer;transition:color .2s;padding:8px 2px;}
+.nav-item.active{color:var(--red);}
+.nav-item svg{width:22px;height:22px;}
+
+/* SCREENS */
+.screen{display:none;}
+.screen.active{display:block;}
+
+/* DASHBOARD */
+.dash-hero{background:linear-gradient(135deg,var(--red-dark),var(--red));padding:18px 16px 22px;color:white;position:relative;overflow:hidden;}
+.dash-hero::after{content:'';position:absolute;right:-20px;top:-20px;width:130px;height:130px;background:rgba(255,255,255,.05);border-radius:50%;}
+.dash-greeting{font-size:12px;opacity:.8;margin-bottom:1px;}
+.dash-name{font-size:21px;font-weight:800;margin-bottom:14px;}
+.dash-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+.dash-stat{background:rgba(255,255,255,.14);border-radius:11px;padding:11px 8px;text-align:center;backdrop-filter:blur(4px);}
+.dash-stat-v{font-size:20px;font-weight:800;line-height:1;}
+.dash-stat-l{font-size:9px;opacity:.8;margin-top:2px;font-weight:600;}
+.dash-body{padding:14px;}
+.sec-title{font-size:11px;font-weight:800;color:var(--text);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;}
+
+/* Ring card */
+.ring-card{background:white;border-radius:18px;padding:16px;box-shadow:var(--shadow);display:flex;align-items:center;gap:16px;margin-bottom:16px;}
+.ring-wrap{position:relative;width:76px;height:76px;flex-shrink:0;}
+.ring-wrap svg{transform:rotate(-90deg);}
+.ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.ring-pct{font-size:17px;font-weight:800;color:var(--red);line-height:1;}
+.ring-lbl{font-size:9px;color:var(--text3);font-weight:700;text-transform:uppercase;}
+.ring-info h3{font-size:14px;font-weight:700;color:var(--text);margin-bottom:3px;}
+.ring-info p{font-size:12px;color:var(--text2);line-height:1.4;}
+
+/* Area grid */
+.area-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:16px;}
+.area-card{background:white;border-radius:var(--radius-sm);padding:13px 11px;box-shadow:var(--shadow);cursor:pointer;transition:transform .15s;}
+.area-card:active{transform:scale(.97);}
+.area-icon{font-size:20px;margin-bottom:7px;}
+.area-name{font-size:11px;font-weight:800;color:var(--text);margin-bottom:5px;line-height:1.3;}
+.area-bar{height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-bottom:3px;}
+.area-bar-fill{height:100%;border-radius:2px;transition:width .5s;}
+.area-pct{font-size:11px;font-weight:700;}
+
+/* Quick button */
+.quick-btn{width:100%;background:var(--red);color:white;border-radius:var(--radius);padding:15px;font-size:15px;font-weight:800;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 18px rgba(192,57,43,.32);margin-bottom:16px;transition:transform .15s;}
+.quick-btn:active{transform:scale(.98);}
+
+/* Due banner */
+.due-banner{background:var(--gold-light);border:1.5px solid var(--gold);border-radius:var(--radius-sm);padding:13px;display:flex;align-items:center;gap:11px;margin-bottom:16px;cursor:pointer;}
+.due-icon{font-size:26px;}
+.due-title{font-size:13px;font-weight:700;color:var(--gold);}
+.due-sub{font-size:11px;color:var(--text2);}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:none;align-items:flex-end;justify-content:center;}
+.modal-overlay.active{display:flex;}
+.modal-sheet{background:white;border-radius:24px 24px 0 0;padding:22px;width:100%;max-width:480px;animation:slideUp .28s ease;}
+@keyframes slideUp{from{transform:translateY(100%);}to{transform:translateY(0);}}
+.modal-handle{width:38px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 18px;}
+.modal-title{font-size:18px;font-weight:800;margin-bottom:4px;}
+.modal-sub{font-size:13px;color:var(--text2);margin-bottom:18px;}
+.qty-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-bottom:18px;}
+.qty-btn{padding:15px 6px;border:2px solid var(--border);border-radius:12px;font-size:15px;font-weight:800;color:var(--text2);background:white;transition:all .2s;text-align:center;}
+.qty-btn.sel{border-color:var(--red);color:var(--red);background:var(--red-light);}
+.qty-btn small{display:block;font-size:11px;font-weight:600;color:var(--text3);margin-top:2px;}
+.btn-cancel{width:100%;padding:12px;background:var(--bg);color:var(--text2);border-radius:12px;font-size:14px;font-weight:700;margin-top:8px;}
+
+/* QUIZ */
+.quiz-hdr{background:var(--red);padding:12px 14px;color:white;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:50;}
+.quiz-back{background:rgba(255,255,255,.18);border-radius:8px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.quiz-info{flex:1;}
+.quiz-area-lbl{font-size:10px;opacity:.8;font-weight:600;}
+.quiz-prog-txt{font-size:13px;font-weight:800;}
+.quiz-prog-bar{height:3px;background:rgba(255,255,255,.2);margin-top:6px;border-radius:2px;}
+.quiz-prog-fill{height:100%;background:white;border-radius:2px;transition:width .3s;}
+.quiz-score{background:rgba(255,255,255,.15);border-radius:8px;padding:5px 9px;text-align:center;flex-shrink:0;}
+.quiz-score-v{font-size:15px;font-weight:800;line-height:1;}
+.quiz-score-l{font-size:9px;opacity:.8;}
+.quiz-body{padding:14px;}
+.q-doc{font-size:10px;color:var(--text3);font-weight:700;margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em;}
+.q-text{font-size:14px;color:var(--text);line-height:1.65;font-weight:600;margin-bottom:18px;}
+.opt-btn{width:100%;background:white;border:2px solid var(--border);border-radius:11px;padding:12px 13px;margin-bottom:9px;text-align:left;font-size:13px;color:var(--text);display:flex;align-items:flex-start;gap:9px;transition:all .15s;line-height:1.4;}
+.opt-btn:active:not(:disabled){transform:scale(.99);}
+.opt-letter{width:26px;height:26px;border-radius:7px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0;margin-top:1px;}
+.opt-btn.correct{border-color:var(--green);background:var(--green-light);}
+.opt-btn.correct .opt-letter{background:var(--green);color:white;}
+.opt-btn.wrong{border-color:var(--red);background:var(--red-light);}
+.opt-btn.wrong .opt-letter{background:var(--red);color:white;}
+.feedback{border-radius:11px;padding:13px;margin:4px 0 14px;font-size:13px;line-height:1.6;border-left:4px solid;}
+.feedback.ok{background:var(--green-light);border-color:var(--green);color:#1A5E38;}
+.feedback.err{background:var(--red-light);border-color:var(--red);color:#7B1A12;}
+.feedback strong{display:block;font-size:13px;font-weight:800;margin-bottom:3px;}
+.btn-next{width:100%;background:var(--red);color:white;border-radius:12px;padding:13px;font-size:14px;font-weight:700;box-shadow:0 3px 14px rgba(192,57,43,.22);}
+
+/* AREA SELECTOR */
+.area-sel{padding:16px;}
+.area-sel h1{font-size:20px;font-weight:800;margin-bottom:3px;}
+.area-sel p{font-size:13px;color:var(--text2);margin-bottom:18px;}
+.area-all{background:var(--red);color:white;border-radius:var(--radius);padding:15px;width:100%;font-size:14px;font-weight:800;margin-bottom:11px;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 14px rgba(192,57,43,.22);}
+.area-li{background:white;border-radius:var(--radius);padding:14px;margin-bottom:10px;display:flex;align-items:center;gap:13px;box-shadow:var(--shadow);cursor:pointer;transition:transform .15s;}
+.area-li:active{transform:scale(.98);}
+.area-li-icon{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.area-li-name{font-size:14px;font-weight:700;margin-bottom:1px;}
+.area-li-count{font-size:11px;color:var(--text2);}
+.area-li-pct{font-size:14px;font-weight:800;margin-left:auto;}
+
+/* FLASHCARDS */
+.cards-hdr{padding:14px 14px 0;}
+.cards-hdr h1{font-size:20px;font-weight:800;margin-bottom:3px;}
+.cards-hdr p{font-size:13px;color:var(--text2);margin-bottom:14px;}
+.cards-prog{background:white;border-radius:var(--radius-sm);padding:13px;box-shadow:var(--shadow);display:flex;align-items:center;gap:13px;margin-bottom:14px;}
+.cp-ring{position:relative;width:54px;height:54px;flex-shrink:0;}
+.cp-ring svg{transform:rotate(-90deg);}
+.cp-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:var(--red);}
+.cp-title{font-size:14px;font-weight:700;}
+.cp-sub{font-size:12px;color:var(--text2);}
+.card-counter{display:flex;justify-content:space-between;font-size:12px;color:var(--text3);font-weight:700;margin-bottom:8px;padding:0 14px;}
+.card-flip{perspective:1000px;height:196px;cursor:pointer;padding:0 14px;}
+.card-inner{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:transform .38s;}
+.card-inner.flipped{transform:rotateY(180deg);}
+.card-face{position:absolute;inset:0;border-radius:18px;padding:22px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;backface-visibility:hidden;-webkit-backface-visibility:hidden;}
+.card-front{background:linear-gradient(135deg,var(--red-dark),var(--red));color:white;box-shadow:0 6px 22px rgba(192,57,43,.28);}
+.card-back{background:white;transform:rotateY(180deg);box-shadow:0 6px 22px rgba(0,0,0,.08);border:2px solid var(--border);}
+.card-lbl{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;opacity:.7;margin-bottom:8px;}
+.card-front .card-lbl{color:rgba(255,255,255,.8);}
+.card-back .card-lbl{color:var(--green);}
+.card-txt{font-size:14px;font-weight:700;line-height:1.5;}
+.card-front .card-txt{color:white;}
+.card-back .card-txt{color:var(--text);}
+.card-hint{font-size:10px;opacity:.55;margin-top:8px;}
+.card-actions{padding:12px 14px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;}
+.ca-btn{padding:13px 6px;border-radius:13px;font-size:12px;font-weight:800;display:flex;flex-direction:column;align-items:center;gap:3px;border:2px solid;}
+.ca-btn.er{border-color:var(--red);color:var(--red);background:var(--red-light);}
+.ca-btn.le{border-color:var(--amber);color:var(--amber);background:var(--amber-light);}
+.ca-btn.fa{border-color:var(--green);color:var(--green);background:var(--green-light);}
+.ca-btn span{font-size:20px;}
+.cards-done{padding:18px 14px;text-align:center;}
+.done-icon{font-size:44px;margin-bottom:10px;}
+.done-title{font-size:19px;font-weight:800;margin-bottom:5px;}
+.done-sub{font-size:13px;color:var(--text2);margin-bottom:18px;line-height:1.5;}
+.next-list{text-align:left;background:white;border-radius:var(--radius);padding:14px;box-shadow:var(--shadow);}
+.next-item{padding:7px 0;border-bottom:1px solid var(--border);font-size:12px;}
+.next-item:last-child{border-bottom:none;}
+.next-item strong{display:block;color:var(--text);}
+.next-item span{color:var(--text3);}
+
+/* SIMULADO */
+.sim-home{padding:14px;}
+.sim-hero{background:linear-gradient(135deg,var(--red-dark),var(--red));border-radius:18px;padding:22px;color:white;margin-bottom:18px;text-align:center;}
+.sim-hero h1{font-size:21px;font-weight:800;margin-bottom:6px;}
+.sim-hero p{font-size:13px;opacity:.8;line-height:1.5;margin-bottom:16px;}
+.sim-dist{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;}
+.sim-dist-cell{background:rgba(255,255,255,.15);border-radius:9px;padding:9px 4px;text-align:center;}
+.sim-dist-v{font-size:16px;font-weight:800;}
+.sim-dist-l{font-size:9px;opacity:.8;}
+.sim-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+.sim-info-card{background:white;border-radius:12px;padding:13px;box-shadow:var(--shadow);text-align:center;}
+.sim-info-v{font-size:22px;font-weight:800;color:var(--red);}
+.sim-info-l{font-size:11px;color:var(--text2);margin-top:1px;font-weight:600;}
+.btn-start-sim{width:100%;background:var(--red);color:white;border-radius:13px;padding:15px;font-size:15px;font-weight:800;box-shadow:0 4px 18px rgba(192,57,43,.32);margin-bottom:14px;}
+.sim-hist{background:white;border-radius:var(--radius);padding:14px;box-shadow:var(--shadow);}
+.sim-hist-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;}
+.sim-hi{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border);}
+.sim-hi:last-child{border-bottom:none;}
+.sim-hi-d{font-size:12px;color:var(--text2);}
+.sim-hi-s{font-size:15px;font-weight:800;}
+
+/* Simulado running */
+.sim-running{display:none;}
+.sim-running.active{display:block;}
+.sim-topbar{background:var(--red);padding:11px 14px;color:white;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
+.sim-timer{font-size:19px;font-weight:800;font-variant-numeric:tabular-nums;}
+.sim-timer.warn{color:#FFD700;}
+.sim-qn{font-size:12px;opacity:.8;}
+.btn-enc{background:rgba(255,255,255,.2);border-radius:8px;padding:6px 11px;font-size:12px;font-weight:700;color:white;}
+.sim-nav{padding:10px 14px;display:flex;gap:5px;flex-wrap:wrap;}
+.qd{width:28px;height:28px;border-radius:7px;border:2px solid var(--border);background:white;font-size:11px;font-weight:700;color:var(--text2);cursor:pointer;transition:all .15s;}
+.qd.ans{background:var(--red);border-color:var(--red);color:white;}
+.qd.cur{border-color:var(--red);color:var(--red);}
+.sim-body{padding:14px;}
+.sim-nav-btns{display:flex;gap:9px;margin-top:10px;}
+.sim-nav-btns button{flex:1;padding:12px;border-radius:11px;font-size:13px;font-weight:700;}
+.btn-prev-sim{background:white;border:1.5px solid var(--border);color:var(--text2);}
+.btn-nxt-sim{background:var(--red);color:white;border:none;}
+
+/* Resultado */
+.res-screen{padding:14px;}
+.res-hero{border-radius:18px;padding:22px;text-align:center;margin-bottom:16px;}
+.res-hero.pass{background:linear-gradient(135deg,#1A7A3F,var(--green));}
+.res-hero.fail{background:linear-gradient(135deg,var(--red-dark),var(--red));}
+.res-pct{font-size:52px;font-weight:800;color:white;line-height:1;}
+.res-lbl{font-size:13px;color:rgba(255,255,255,.8);margin-top:3px;}
+.res-tag{display:inline-block;background:rgba(255,255,255,.2);color:white;border-radius:20px;padding:4px 13px;font-size:12px;font-weight:700;margin-top:8px;}
+.res-areas{background:white;border-radius:var(--radius);padding:14px;box-shadow:var(--shadow);margin-bottom:14px;}
+.res-area-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border);}
+.res-area-row:last-child{border-bottom:none;}
+.res-area-n{font-size:13px;font-weight:700;}
+.res-area-s{font-size:13px;font-weight:800;}
+
+/* ÁUDIO */
+.audio-wrap{padding:14px;}
+.audio-wrap h1{font-size:20px;font-weight:800;margin-bottom:3px;}
+.audio-wrap p{font-size:13px;color:var(--text2);margin-bottom:14px;}
+.dur-tabs{display:flex;gap:7px;margin-bottom:14px;}
+.dur-tab{flex:1;padding:9px 4px;border:2px solid var(--border);border-radius:9px;font-size:11px;font-weight:700;color:var(--text2);background:white;text-align:center;cursor:pointer;transition:all .2s;}
+.dur-tab.active{border-color:var(--red);color:var(--red);background:var(--red-light);}
+.voice-wrap{background:white;border-radius:var(--radius-sm);padding:13px;box-shadow:var(--shadow);margin-bottom:14px;}
+.voice-lbl{font-size:11px;font-weight:700;color:var(--text2);margin-bottom:7px;text-transform:uppercase;letter-spacing:.05em;}
+.voice-select{width:100%;padding:9px 11px;border:1.5px solid var(--border);border-radius:9px;font-size:13px;color:var(--text);background:white;}
+.audio-cards{display:flex;flex-direction:column;gap:10px;}
+.audio-card{background:white;border-radius:var(--radius);padding:14px;box-shadow:var(--shadow);}
+.audio-card-hdr{display:flex;align-items:center;gap:11px;margin-bottom:11px;}
+.audio-card-icon{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px;background:var(--red-light);flex-shrink:0;}
+.audio-card-name{font-size:14px;font-weight:700;}
+.audio-card-dur{font-size:11px;color:var(--text2);}
+.audio-text{background:var(--bg);border-radius:9px;padding:12px;font-size:13px;line-height:1.75;color:var(--text);max-height:180px;overflow-y:auto;margin-bottom:11px;border:1px solid var(--border);}
+.audio-text p{margin-bottom:6px;}
+.audio-text p.hl{background:var(--red-light);border-radius:4px;padding:2px 5px;color:var(--red-dark);font-weight:600;}
+.audio-ctls{display:flex;gap:7px;}
+.audio-play{flex:1;background:var(--red);color:white;border-radius:9px;padding:11px;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:5px;}
+.audio-stop{background:var(--bg);border:1.5px solid var(--border);color:var(--text2);border-radius:9px;padding:11px 14px;font-size:13px;font-weight:700;}
+
+/* ADMIN */
+.admin-wrap{padding:14px;}
+.admin-wrap h1{font-size:20px;font-weight:800;margin-bottom:3px;}
+.admin-wrap .sub{font-size:13px;color:var(--text2);margin-bottom:16px;}
+.admin-tabs{display:flex;gap:6px;margin-bottom:16px;overflow-x:auto;padding-bottom:4px;}
+.admin-tab{padding:8px 15px;border-radius:20px;font-size:12px;font-weight:700;white-space:nowrap;background:var(--bg);color:var(--text2);border:none;cursor:pointer;}
+.admin-tab.active{background:var(--red);color:white;}
+.admin-panel{display:none;}
+.admin-panel.active{display:block;}
+.user-card{background:white;border-radius:var(--radius-sm);padding:13px;box-shadow:var(--shadow);margin-bottom:9px;}
+.uc-email{font-size:13px;font-weight:700;margin-bottom:3px;}
+.uc-info{font-size:11px;color:var(--text2);margin-bottom:9px;}
+.uc-actions{display:flex;gap:7px;flex-wrap:wrap;}
+.btn-ap{background:var(--green-light);color:var(--green);border:1.5px solid var(--green);border-radius:8px;padding:7px 12px;font-size:12px;font-weight:700;}
+.btn-rj{background:var(--red-light);color:var(--red);border:1.5px solid var(--red);border-radius:8px;padding:7px 12px;font-size:12px;font-weight:700;}
+.btn-adm{background:var(--gold-light);color:var(--gold);border:1.5px solid var(--gold);border-radius:8px;padding:7px 12px;font-size:12px;font-weight:700;}
+.form-card{background:white;border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);}
+
+/* DESKTOP */
+@media(min-width:768px){
+  body{background:#E0E0E0;}
+  #app,#auth-screen+*{max-width:480px;margin:0 auto;}
+  #app{min-height:100vh;background:var(--bg);box-shadow:0 0 40px rgba(0,0,0,.12);}
+}
+
+/* UTILS */
+.hidden{display:none!important;}
+.empty{text-align:center;padding:36px 16px;color:var(--text2);}
+.empty-i{font-size:36px;margin-bottom:10px;}
+.empty-t{font-size:13px;line-height:1.5;}
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="loading">
+  <img class="logo" src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Bras%C3%A3o_do_Corpo_de_Bombeiros_Militar_do_Rio_Grande_do_Sul.svg/240px-Bras%C3%A3o_do_Corpo_de_Bombeiros_Militar_do_Rio_Grande_do_Sul.svg.png" alt="CBMRS" onerror="this.style.display='none'"/>
+  <p>BOMBEIRO CTSP</p>
+</div>
+
+<!-- AUTH -->
+<div id="auth-screen">
+  <img class="auth-logo" src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Bras%C3%A3o_do_Corpo_de_Bombeiros_Militar_do_Rio_Grande_do_Sul.svg/240px-Bras%C3%A3o_do_Corpo_de_Bombeiros_Militar_do_Rio_Grande_do_Sul.svg.png" alt="CBMRS" onerror="this.style.display='none'"/>
+  <h1 class="auth-title">Bombeiro CTSP</h1>
+  <p class="auth-sub">Plataforma de estudos para o CTSP 2026<br/>Corpo de Bombeiros Militar do RS</p>
+  <div class="auth-card">
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="setAuthTab('login')">Entrar</button>
+      <button class="auth-tab" onclick="setAuthTab('register')">Cadastrar</button>
+    </div>
+    <div id="tab-login">
+      <div class="field"><label>E-mail</label><input type="email" id="login-email" placeholder="seu@email.com" autocomplete="email"/></div>
+      <div class="field"><label>Senha</label><input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password"/></div>
+      <button class="btn-primary" onclick="doLogin()">Entrar</button>
+      <div class="auth-msg" id="login-msg"></div>
+    </div>
+    <div id="tab-register" class="hidden">
+      <div class="field"><label>Nome completo</label><input type="text" id="reg-name" placeholder="Sd João Silva"/></div>
+      <div class="field"><label>E-mail</label><input type="email" id="reg-email" placeholder="seu@email.com"/></div>
+      <div class="field"><label>Senha</label><input type="password" id="reg-pass" placeholder="mínimo 6 caracteres"/></div>
+      <button class="btn-primary" onclick="doRegister()">Criar conta</button>
+      <div class="auth-msg" id="reg-msg"></div>
+    </div>
+    <div id="tab-pending" class="hidden">
+      <div class="pending-box"><span class="pi">⏳</span><strong>Cadastro em análise</strong><br/>Seu acesso será liberado pelo administrador em breve.</div>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <header class="app-header">
+    <img class="header-logo" src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Bras%C3%A3o_do_Corpo_de_Bombeiros_Militar_do_Rio_Grande_do_Sul.svg/240px-Bras%C3%A3o_do_Corpo_de_Bombeiros_Militar_do_Rio_Grande_do_Sul.svg.png" alt="CBMRS" onerror="this.style.display='none'"/>
+    <div class="header-titles">
+      <div class="header-title">Bombeiro CTSP</div>
+      <div class="header-sub">CBMRS · CTSP 2026</div>
+    </div>
+    <div class="header-name" id="hdr-nome"></div>
+    <button class="btn-logout" onclick="doLogout()">Sair</button>
+  </header>
+
+  <main class="app-content">
+    <!-- HOME -->
+    <div class="screen active" id="screen-home">
+      <div class="dash-hero">
+        <div class="dash-greeting" id="dash-greeting">Olá,</div>
+        <div class="dash-name" id="dash-name">Bombeiro</div>
+        <div class="dash-stats">
+          <div class="dash-stat"><div class="dash-stat-v" id="stat-total">0</div><div class="dash-stat-l">Questões</div></div>
+          <div class="dash-stat"><div class="dash-stat-v" id="stat-taxa">0%</div><div class="dash-stat-l">Acertos</div></div>
+          <div class="dash-stat"><div class="dash-stat-v" id="stat-cards">0</div><div class="dash-stat-l">Cards</div></div>
+        </div>
+      </div>
+      <div class="dash-body">
+        <button class="quick-btn" onclick="openQuickModal()">⚡ Estudo Rápido</button>
+        <div class="due-banner hidden" id="due-banner" onclick="navTo('cards')">
+          <div class="due-icon">🃏</div>
+          <div><div class="due-title" id="due-title">Cards para revisar</div><div class="due-sub">Toque para revisar agora</div></div>
+          <svg style="margin-left:auto;flex-shrink:0" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 12l4-4-4-4" stroke="#B8860B" stroke-width="2" stroke-linecap="round"/></svg>
+        </div>
+        <div class="sec-title">📈 Desempenho por área</div>
+        <div class="ring-card">
+          <div class="ring-wrap">
+            <svg width="76" height="76" viewBox="0 0 76 76">
+              <circle cx="38" cy="38" r="30" stroke="#F0F0F0" stroke-width="7" fill="none"/>
+              <circle id="ring-c" cx="38" cy="38" r="30" stroke="#C0392B" stroke-width="7" fill="none" stroke-linecap="round" stroke-dasharray="188" stroke-dashoffset="188"/>
+            </svg>
+            <div class="ring-center"><div class="ring-pct" id="ring-pct">0%</div><div class="ring-lbl">Geral</div></div>
+          </div>
+          <div class="ring-info">
+            <h3>Progresso Geral</h3>
+            <p id="ring-sub">Comece respondendo questões para ver seu progresso.</p>
+          </div>
+        </div>
+        <div class="area-grid" id="area-grid"></div>
+      </div>
+    </div>
+
+    <!-- QUIZ AREA SELECTOR -->
+    <div class="screen" id="screen-quiz">
+      <div class="area-sel">
+        <h1>Quiz</h1>
+        <p>Escolha uma área ou pratique todas</p>
+        <button class="area-all" onclick="startQuiz('TODAS')">🎯 Todas as áreas — modo misto</button>
+        <div id="area-list-quiz"></div>
+      </div>
+    </div>
+
+    <!-- QUESTÃO -->
+    <div class="screen" id="screen-questao">
+      <div class="quiz-hdr">
+        <button class="quiz-back" onclick="navTo('quiz')">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M11 14L6 9l5-5" stroke="white" stroke-width="2.5" stroke-linecap="round"/></svg>
+        </button>
+        <div class="quiz-info">
+          <div class="quiz-area-lbl" id="quiz-area-lbl">Área</div>
+          <div class="quiz-prog-txt" id="quiz-prog-txt">0/0</div>
+          <div class="quiz-prog-bar"><div class="quiz-prog-fill" id="quiz-prog-fill" style="width:0%"></div></div>
+        </div>
+        <div class="quiz-score"><div class="quiz-score-v" id="quiz-score-v">0/0</div><div class="quiz-score-l">Sessão</div></div>
+      </div>
+      <div class="quiz-body" id="quiz-body"></div>
+    </div>
+
+    <!-- FLASHCARDS -->
+    <div class="screen" id="screen-cards">
+      <div class="cards-hdr">
+        <h1>Flashcards</h1>
+        <p>Revisão espaçada com algoritmo SM-2</p>
+        <div class="cards-prog">
+          <div class="cp-ring">
+            <svg width="54" height="54" viewBox="0 0 54 54">
+              <circle cx="27" cy="27" r="21" stroke="#F0F0F0" stroke-width="6" fill="none"/>
+              <circle id="cp-ring-c" cx="27" cy="27" r="21" stroke="#C0392B" stroke-width="6" fill="none" stroke-linecap="round" stroke-dasharray="132" stroke-dashoffset="132"/>
+            </svg>
+            <div class="cp-num" id="cp-num">0</div>
+          </div>
+          <div><div class="cp-title" id="cp-title">Carregando...</div><div class="cp-sub">Toque no card para virar</div></div>
+        </div>
+      </div>
+      <div id="cards-content"></div>
+    </div>
+
+    <!-- SIMULADO HOME -->
+    <div class="screen" id="screen-simulado">
+      <div class="sim-home">
+        <div class="sim-hero">
+          <h1>⏱ Simulado Completo</h1>
+          <p>60 questões · 3 horas · Proporção real do CTSP 2026</p>
+          <div class="sim-dist">
+            <div class="sim-dist-cell"><div class="sim-dist-v">14</div><div class="sim-dist-l">AT1</div></div>
+            <div class="sim-dist-cell"><div class="sim-dist-v">8</div><div class="sim-dist-l">AT2</div></div>
+            <div class="sim-dist-cell"><div class="sim-dist-v">14</div><div class="sim-dist-l">AT3</div></div>
+            <div class="sim-dist-cell"><div class="sim-dist-v">12</div><div class="sim-dist-l">AT4</div></div>
+            <div class="sim-dist-cell"><div class="sim-dist-v">12</div><div class="sim-dist-l">AT5</div></div>
+          </div>
+        </div>
+        <div class="sim-info-grid">
+          <div class="sim-info-card"><div class="sim-info-v" id="sim-total-n">0</div><div class="sim-info-l">Simulados feitos</div></div>
+          <div class="sim-info-card"><div class="sim-info-v" id="sim-melhor">—</div><div class="sim-info-l">Maior nota</div></div>
+        </div>
+        <button class="btn-start-sim" onclick="startSimulado()">Iniciar Simulado</button>
+        <div class="sim-hist">
+          <div class="sim-hist-title">Histórico</div>
+          <div id="sim-hist-list"><div class="empty"><div class="empty-i">📊</div><div class="empty-t">Nenhum simulado realizado ainda.</div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SIMULADO RUNNING -->
+    <div class="sim-running" id="sim-running">
+      <div class="sim-topbar">
+        <div><div class="sim-timer" id="sim-timer">03:00:00</div><div class="sim-qn" id="sim-qn">Questão 1 de 60</div></div>
+        <button class="btn-enc" onclick="encerrarSimulado()">Encerrar</button>
+      </div>
+      <div class="sim-nav" id="sim-nav"></div>
+      <div class="sim-body" id="sim-body"></div>
+    </div>
+
+    <!-- RESULTADO -->
+    <div class="screen" id="screen-resultado">
+      <div class="res-screen" id="res-content"></div>
+    </div>
+
+    <!-- ÁUDIO -->
+    <div class="screen" id="screen-audio">
+      <div class="audio-wrap">
+        <h1>🎧 Áudio e Resumos</h1>
+        <p>Ouça ou leia os pontos mais cobrados em prova</p>
+        <div class="voice-wrap">
+          <div class="voice-lbl">Voz selecionada</div>
+          <select class="voice-select" id="voice-sel"></select>
+        </div>
+        <div class="dur-tabs">
+          <button class="dur-tab active" onclick="setDur('curto',this)">⚡ ~5 min</button>
+          <button class="dur-tab" onclick="setDur('medio',this)">📖 ~10 min</button>
+          <button class="dur-tab" onclick="setDur('longo',this)">🎓 ~15 min</button>
+        </div>
+        <div class="audio-cards" id="audio-cards"></div>
+      </div>
+    </div>
+
+    <!-- ADMIN -->
+    <div class="screen" id="screen-admin">
+      <div class="admin-wrap">
+        <h1>⚙️ Painel Admin</h1>
+        <div class="sub">Gerencie usuários, questões e flashcards</div>
+        <div class="admin-tabs">
+          <button class="admin-tab active" onclick="setAdminTab('usuarios',this)">Usuários</button>
+          <button class="admin-tab" onclick="setAdminTab('questao',this)">+ Questão</button>
+          <button class="admin-tab" onclick="setAdminTab('card',this)">+ Flashcard</button>
+        </div>
+        <div class="admin-panel active" id="admin-usuarios">
+          <div id="admin-users-list"><div class="empty"><div class="empty-i">👥</div><div class="empty-t">Carregando...</div></div></div>
+        </div>
+        <div class="admin-panel" id="admin-questao">
+          <div class="form-card">
+            <div class="field"><label>Área</label><select id="q-area"><option value="AT1">AT1 - Segurança Contra Incêndios</option><option value="AT2">AT2 - Combate a Incêndios</option><option value="AT3">AT3 - Buscas e Salvamentos</option><option value="AT4">AT4 - Direito Institucional</option><option value="AT5">AT5 - Normas Administrativas</option></select></div>
+            <div class="field"><label>Documento base</label><input type="text" id="q-doc" placeholder="Ex: RT CBMRS nº 14/2016"/></div>
+            <div class="field"><label>Enunciado</label><textarea id="q-enunciado" placeholder="Digite o enunciado completo..."></textarea></div>
+            <div class="field"><label>Alternativa A</label><input type="text" id="q-op0"/></div>
+            <div class="field"><label>Alternativa B</label><input type="text" id="q-op1"/></div>
+            <div class="field"><label>Alternativa C</label><input type="text" id="q-op2"/></div>
+            <div class="field"><label>Alternativa D</label><input type="text" id="q-op3"/></div>
+            <div class="field"><label>Alternativa E</label><input type="text" id="q-op4"/></div>
+            <div class="field"><label>Gabarito</label><select id="q-gab"><option value="0">A</option><option value="1">B</option><option value="2">C</option><option value="3">D</option><option value="4">E</option></select></div>
+            <div class="field"><label>Explicação</label><textarea id="q-exp" placeholder="Por que a resposta está correta..."></textarea></div>
+            <button class="btn-primary" onclick="addQuestao()">Salvar Questão</button>
+            <div class="auth-msg" id="add-q-msg"></div>
+          </div>
+        </div>
+        <div class="admin-panel" id="admin-card">
+          <div class="form-card">
+            <div class="field"><label>Área</label><select id="fc-area"><option value="AT1">AT1</option><option value="AT2">AT2</option><option value="AT3">AT3</option><option value="AT4">AT4</option><option value="AT5">AT5</option></select></div>
+            <div class="field"><label>Frente (pergunta)</label><textarea id="fc-frente" placeholder="O que vai aparecer na frente do card?"></textarea></div>
+            <div class="field"><label>Verso (resposta)</label><textarea id="fc-verso" placeholder="Resposta completa que aparece no verso..."></textarea></div>
+            <button class="btn-primary" onclick="addFlashcard()">Salvar Flashcard</button>
+            <div class="auth-msg" id="add-fc-msg"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <nav class="bottom-nav" id="bottom-nav">
+    <div class="nav-item active" id="nav-home" onclick="navTo('home')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>Início
+    </div>
+    <div class="nav-item" id="nav-quiz" onclick="navTo('quiz')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Quiz
+    </div>
+    <div class="nav-item" id="nav-cards" onclick="navTo('cards')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="3"/><line x1="2" y1="10" x2="22" y2="10"/></svg>Cards
+    </div>
+    <div class="nav-item" id="nav-simulado" onclick="navTo('simulado')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>Simulado
+    </div>
+    <div class="nav-item" id="nav-audio" onclick="navTo('audio')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11,5 6,9 2,9 2,15 6,15 11,19 11,5"/><path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07"/></svg>Áudio
+    </div>
+  </nav>
+</div>
+
+<!-- QUICK MODAL -->
+<div class="modal-overlay" id="quick-modal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">⚡ Estudo Rápido</div>
+    <div class="modal-sub">Quantas questões você quer responder agora?</div>
+    <div class="qty-grid">
+      <button class="qty-btn sel" onclick="selQty(5,this)">5<small>~3 min</small></button>
+      <button class="qty-btn" onclick="selQty(10,this)">10<small>~6 min</small></button>
+      <button class="qty-btn" onclick="selQty(15,this)">15<small>~10 min</small></button>
+    </div>
+    <button class="btn-primary" onclick="startQuickStudy()">Começar agora →</button>
+    <button class="btn-cancel" onclick="closeQuickModal()">Cancelar</button>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════
+// FIREBASE CONFIG
+// ═══════════════════════════════
+firebase.initializeApp({
+  apiKey:"AIzaSyCnwg94KLWwyFB2-bzJOqRotsaSICdFtoM",
+  authDomain:"ctsp-estudos.firebaseapp.com",
+  databaseURL:"https://ctsp-estudos-default-rtdb.firebaseio.com",
+  projectId:"ctsp-estudos",
+  storageBucket:"ctsp-estudos.firebasestorage.app",
+  messagingSenderId:"267159679171",
+  appId:"1:267159679171:web:1ffb1853f07aff3ae2b276"
+});
+const auth = firebase.auth();
+const db = firebase.database();
+const ADMIN_EMAIL = "jvictor.projetos.ti@gmail.com";
+
+// ── SANITIZAÇÃO contra XSS ──
+function sanitize(str){
+  if(!str)return'';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+}
+
+// ── RATE LIMIT login (tentativas) ──
+const loginAttempts={count:0,lastReset:Date.now()};
+function checkRateLimit(){
+  const now=Date.now();
+  if(now-loginAttempts.lastReset>60000){loginAttempts.count=0;loginAttempts.lastReset=now;}
+  if(loginAttempts.count>=5)return false;
+  loginAttempts.count++;
+  return true;
+}
+
+// ═══════════════════════════════
+// STATE
+// ═══════════════════════════════
+let currentUser=null, userProfile=null;
+let userStats={correct:0,wrong:0,byArea:{},seenIds:[],history:[]};
+let userCards={};
+let allQuestoes={}, allFlashcards={};
+let quizQueue=[], quizIdx=0, quizArea='TODAS', quizSessao={c:0,t:0}, quizAnswered=false;
+let simQuestoes=[], simRespostas={}, simIdx=0, simTimer=null, simTempo=10800;
+let currentDur='curto', currentAudioArea=null, speechUtter=null;
+let quickQty=5;
+
+// ═══════════════════════════════
+// SM-2
+// ═══════════════════════════════
+function sm2Update(card,q){
+  let{interval=1,reps=0,ef=2.5}=card;
+  if(q>=3){interval=reps===0?1:reps===1?6:Math.round(interval*ef);reps++;}
+  else{interval=1;reps=0;}
+  ef=Math.max(1.3,ef+0.1-(5-q)*(0.08+(5-q)*0.02));
+  return{interval,reps,ef,next:Date.now()+interval*86400000};
+}
+
+function shuffle(a){
+  const r=[...a];
+  for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]];}
+  return r;
+}
+
+// ═══════════════════════════════
+// AREA INFO
+// ═══════════════════════════════
+const AI={
+  AT1:{nome:"Segurança Contra Incêndios",icon:"🔥",color:"#E74C3C",n:14},
+  AT2:{nome:"Combate a Incêndios",icon:"🚒",color:"#E67E22",n:8},
+  AT3:{nome:"Buscas e Salvamentos",icon:"🚑",color:"#2980B9",n:14},
+  AT4:{nome:"Direito Institucional",icon:"⚖️",color:"#8E44AD",n:12},
+  AT5:{nome:"Normas Administrativas",icon:"📋",color:"#27AE60",n:12}
+};
+
+// ═══════════════════════════════
+// BANCO INICIAL DE QUESTÕES
+// ═══════════════════════════════
+const QI={
+AT1:[
+{id:"a1_01",e:"Segundo a RT CBMRS nº 14/2016, a alça do extintor portátil deve estar no máximo a ___ m do piso, o fundo no mínimo a ___ m, e deve haver extintor a no máximo ___ m da porta de acesso principal.",ops:["1,80 / 0,30 / 3","1,80 / 0,10 / 5","1,60 / 0,30 / 5","1,60 / 0,10 / 3","1,60 / 0,10 / 5"],g:4,doc:"RT CBMRS nº 14/2016",exp:"Alça ≤ 1,60 m | Fundo ≥ 0,10 m | Distância da porta ≤ 5 m."},
+{id:"a1_02",e:"Segundo o art. 6º da LC Estadual nº 14.376/2013, qual definição está INCORRETA?",ops:["Ampliação é o aumento da área construída.","Altura ascendente: medida do nível de descarga ao ponto mais alto do piso do último pavimento.","Andar é o volume entre dois pavimentos consecutivos.","Carga de incêndio é a soma das energias caloríficas possíveis de serem liberadas.","Edificação térrea: um pavimento, mezaninos com soma ≤ 1/3 da área e ≤ 250 m²."],g:1,doc:"LC 14.376/2013 art.6º",exp:"Altura ascendente é medida ao PISO do último pavimento, não ao 'ponto mais alto'."},
+{id:"a1_03",e:"Mezanino é considerado 'outro pavimento' quando excede ___ m² OU ___ da área do piso do pavimento.",ops:["250 m² / terça parte","150 m² / quinta parte","250 m² / quinta parte","200 m² / terça parte","200 m² / quinta parte"],g:0,doc:"LC 14.376/2013 art.6º inciso XXII",exp:"250 m² OU 1/3 (terça parte) da área do piso."},
+{id:"a1_04",e:"Qual penalidade NÃO está prevista no art. 10 do Decreto Estadual nº 51.803/2014 para infrações às normas de SCI?",ops:["Advertência","Multa","Embargo","Multa diária","Interdição"],g:2,doc:"Decreto 51.803/2014 art.10",exp:"EMBARGO não está previsto. As penalidades são: advertência, multa, multa diária e interdição."},
+{id:"a1_05",e:"Segundo o art. 28 da LC Estadual nº 14.376/2013, qual alternativa NÃO é característica para classificar edificações e áreas de risco?",ops:["Carga de incêndio","Altura","Ocupação e uso","Grau de risco de incêndio","Área total construída"],g:3,doc:"LC 14.376/2013 art.28",exp:"O art. 28 lista: altura, área total construída, ocupação/uso e carga de incêndio. Grau de risco não é critério do art. 28."},
+{id:"a1_06",e:"Sobre o PSPCI (RT CBMRS nº 05 Parte 3.1), qual afirmativa está CORRETA?",ops:["Aplica-se apenas às edificações com todas as medidas já instaladas e em plenas condições.","É necessária apresentação de plantas baixas para análise.","Edificações F-11 e F-12 com área entre 750 e 1.500 m² podem ser licenciadas por PSPCI.","Exclusivamente no PSPCI devem ser incluídas áreas de armazenamento de GLP.","Medidas adicionais podem ser instaladas, desde que em funcionamento e inclusas no PSPCI."],g:4,doc:"RT CBMRS nº 05 Parte 3.1",exp:"Medidas adicionais são permitidas desde que mantidas em pleno funcionamento e incluídas no PSPCI."},
+{id:"a1_07",e:"Acerca do SOL-CBMRS (4ª Ed. 2022), qual alternativa está INCORRETA?",ops:["Na revistoria, é responsabilidade do proprietário manter as medidas aprovadas.","Recurso em 1ª instância: 30 dias ÚTEIS após ciência da CIA/CIV.","Recurso em 2ª instância: 15 dias úteis após ciência da decisão em 1ª instância.","Após APPCI, qualquer ampliação exige novo PPCI para análise.","O CBMRS pode realizar vistoria extraordinária a qualquer momento."],g:1,doc:"SOL-CBMRS 4ª Ed. 2022",exp:"O prazo do recurso em 1ª instância é de 30 dias CORRIDOS, não úteis."},
+{id:"a1_08",e:"Sobre as normas da Tabela 2 da RTCBMRS nº 01/2024, qual alternativa está CORRETA?",ops:["Segurança Estrutural em Incêndio: IT nº 08 do CBPMESP.","Controle de Materiais de Acabamento: IT nº 22 do CBPMESP.","Hidrantes e Mangotinhos: ABNT NBR 13744.","Detecção e Alarme: ABNT NBR 7240 e NBR ISO 17240.","Extintores: RTCBMRS nº 15."],g:3,doc:"RT CBMRS nº 01/2024 Tabela 2",exp:"Detecção e Alarme: ABNT NBR 7240 e NBR ISO 17240."},
+{id:"a1_09",e:"A interdição sanção (Dec. 51.803/2014) NÃO se aplica quando:",ops:["Iminência de risco à vida ou integridade física.","Ausência de medidas mínimas em edificações F-6.","Irregularidade persistindo por mais de 120 dias após multa.","Ausência de APPCI para evento temporário 12 horas antes do início.","Persistência de irregularidade depois de esgotado o prazo pós-multa."],g:3,doc:"Decreto 51.803/2014 cap.III",exp:"Ausência de APPCI para evento temporário configura INTERDIÇÃO PRÉVIA, não interdição sanção."},
+{id:"a1_10",e:"Sobre inviabilidade técnica (RT CBMRS nº 05 Parte 7.2), qual alternativa está CORRETA?",ops:["O CBMRS emite despacho somente na emissão do APPCI.","É vedado exigir documentos complementares para comprovar eficiência das medidas compensatórias.","Divisões F-6 só podem propor medidas compensatórias para limitação populacional.","Decisões padronizadas não podem ser aplicadas diretamente pelo analista.","São inviabilidades técnicas as limitações de alteração em prédios tombados pelo Patrimônio Histórico."],g:4,doc:"RT CBMRS nº 05 Parte 7.2",exp:"Prédios tombados: limitação de alterar características arquitetônicas originais é inviabilidade técnica."},
+{id:"a1_11",e:"Conforme a RT CBMRS nº 05 Parte 1.1/2016, qual alternativa está CORRETA?",ops:["A fase de vistoria consiste na verificação documental do PPCI.","Após a vistoria com conformidade, será emitido o APPCI.","A renovação do APPCI deve ser protocolada com no mínimo 1 mês de antecedência.","Na vistoria ordinária, poderão ser exigidos documentos complementares aos laudos técnicos.","Para edificações com APPCI, alteração de layout exige FAL mesmo com supressão de medidas."],g:1,doc:"RT CBMRS nº 05 Parte 1.1/2016",exp:"'Após a vistoria, constatado que a edificação atende ao previsto, será emitido o APPCI' — transcrição literal."},
+{id:"a1_12",e:"A RT CBMRS nº 05 Parte 06/2025 configura iminente risco à vida nas divisões F-6, F-7, F-8, F-11 e F-12 com inexistência/inoperância de:",ops:["Detecção, alarme, saídas, sinalização, iluminação, controle de acabamento.","Extintores, detecção, alarme, saídas, sinalização, iluminação, controle de acabamento.","Apenas em F-6 e F-7: detecção, alarme, saídas, sinalização, iluminação.","Apenas em F-6 e F-7: extintores + todos os demais sistemas.","Em F-6, F-7, F-11 e F-12: extintores + todos os demais sistemas."],g:1,doc:"RT CBMRS nº 05 Parte 06/2025",exp:"Para F-6, F-7, F-8, F-11 e F-12: extintores MAIS todos os demais sistemas listados."},
+{id:"a1_13",e:"Segundo a Lei Federal nº 13.425/2017, quais assertivas estão corretas? I-CBM planeja, vistoria e fiscaliza; II-Municípios sem CBM podem criar serviços independentemente; III-Curso obrigatório para setores técnicos do CBM; IV-Cursos de Engenharia incluirão conteúdo de prevenção.",ops:["Apenas I e III","Apenas II, III e IV","Apenas I, III e IV","Apenas II e III","I, II, III e IV"],g:2,doc:"Lei Federal 13.425/2017",exp:"I, III e IV corretas. II está errada: municípios sem CBM SOMENTE podem criar serviços mediante convênio."},
+{id:"a1_14",e:"O PPCI, conforme LC Estadual 14.376/2013, é o projeto técnico que:",ops:["Apenas estabelece as plantas e memoriais descritivos.","Contém medidas para prevenir, permitir abandono seguro, dificultar propagação, controlar e extinguir incêndio e permitir acesso ao CBM.","É aplicável somente a edificações de risco alto.","Substitui o PSPCI para edificações acima de 750 m².","É emitido pelo proprietário sem necessidade de responsável técnico."],g:1,doc:"LC 14.376/2013",exp:"Definição literal do PPCI: projeto técnico completo com todas as medidas."}
+],
+AT2:[
+{id:"a2_01",e:"Sobre mangueiras de combate a incêndio (Manual CBMMG 2020), qual alternativa está CORRETA?",ops:["Diâmetros 1½\" e 2½\", pressão mínima de TRABALHO de 28 kgf/cm².","Apenas diâmetro 2½\", pressão de trabalho 42 kgf/cm².","Mangueiras de 1½\" e 2½\" resistem a pressão mínima de PROVA de 42 kgf/cm².","Pressão mínima de prova 14 kgf/cm², ruptura 28 kgf/cm².","Testadas por estanqueidade; ruptura mínima de 42 kgf/cm²."],g:2,doc:"Manual Combate a Incêndio Urbano CBMMG Cap.2",exp:"Pressão mínima de PROVA = 42 kgf/cm² para ambos os diâmetros."},
+{id:"a2_02",e:"Incêndio é combustão ___. Manifestação visual é ___. Energia interna dos movimentos moleculares é ___. Medida da agitação molecular é ___. Energia térmica em trânsito é ___.",ops:["fora de controle/chama/combustão/temperatura/calor","controlada/chama/combustão/temperatura/calor","fora de controle/calor/reação em cadeia/calor/calor","controlada/queima/energia térmica/energia/calor","fora de controle/chama/energia térmica/temperatura/calor"],g:4,doc:"Manual Combate a Incêndio Urbano CBMMG Cap.1",exp:"I-fora de controle; II-chama; III-energia térmica; IV-temperatura; V-calor."},
+{id:"a2_03",e:"Para que a queima seja 'viva' (produz calor e chama visível), qual concentração de O₂ deve haver no ambiente?",ops:["Entre 21% e 13%","Entre 21% e 14%","Entre 22% e 15%","Entre 20% e 14%","Entre 14% e 7%"],g:1,doc:"Manual Combate a Incêndio Urbano CBMMG Cap.1",exp:"Queima viva: O₂ entre 21% e 14%. Abaixo de 14%, a chama se apaga."},
+{id:"a2_04",e:"Sobre critérios antes de adentrar ambiente incendiado, quais itens estão CORRETOS? I-Abertura brusca perturba balanço térmico; II-Não há necessidade de verificar trancamento; III-Dinâmica do incêndio: leitura do avanço para evitar intervenções desnecessárias; IV-Princípio do menor dano possível.",ops:["Apenas I, II e III","Apenas I e III","Apenas I, III e IV","Apenas II e IV","Apenas II, III e IV"],g:1,doc:"Manual Combate a Incêndio Urbano CBMMG Cap.3",exp:"I e III corretas. II errada (sempre verificar trancamento). IV errada (do MENOS dano para o MAIS dano)."},
+{id:"a2_05",e:"Sobre técnicas de ataque a incêndio, qual alternativa está CORRETA?",ops:["Ataque direto combina pulso atomizado e pacote d'água.","Ataque indireto/tridimensional: aplica água nas camadas quentes de fumaça quando não é possível combater o foco diretamente.","Ataque combinado: aplica água diretamente na base do foco.","Ataque envolvente: jato compacto de fora mirando teto com incêndio visível.","Ataque transicional: duas ou mais linhas de ataque por diversas frentes."],g:1,doc:"Manual Combate a Incêndio Urbano CBMMG Cap.5",exp:"Ataque indireto/tridimensional = água nas camadas quentes de fumaça, quando não é possível atacar o foco diretamente."},
+{id:"a2_06",e:"Sobre cuidados para evitar danos às mangueiras, qual alternativa está CORRETA?",ops:["Desenrolar periodicamente para evitar ressecamento.","Armazenar em local úmido e exposto ao sol.","Arrastar sobre materiais perfurocortantes ou superfícies quentes.","Deixar veículos passarem por cima, estejam pressurizadas ou não.","Não lavar com água e sabão neutro para garantir integridade."],g:0,doc:"Manual Combate a Incêndio Urbano CBMMG Cap.2",exp:"Desenrolar periodicamente mangueiras pouco usadas evita ressecamento e mantém a flexibilidade."},
+{id:"a2_07",e:"Quais materiais são utilizados para arrombamento e entradas forçadas (Manual CBMMG 2020)?",ops:["Pé de Cabra, malho 10 kg, gadanho, corta-vergalhão.","Pé de Cabra, malho 10 kg, alavanca Halligan, corta-vergalhão.","Croque, malho 10 kg, alavanca Halligan, enxada.","Croque, malho 10 kg, alavanca Halligan, pá de bico.","Pá de bico, malho 10 kg, alavanca Halligan, corta-vergalhão."],g:1,doc:"Manual Combate a Incêndio Urbano CBMMG Cap.3",exp:"Pé de Cabra + malho 10 kg + alavanca Halligan + corta-vergalhão são os 4 materiais padrão."},
+{id:"a2_08",e:"Sobre fenômenos em incêndios, qual definição está CORRETA?",ops:["Slop-over: água no fundo do tanque vaporiza e empurra o líquido, fazendo-o transbordar.","Boil-over: perturbação súbita com vaporização violenta ao combater incêndio com água.","Temperatura de ignição: temperatura mínima para iniciar combustão com fonte DIRETA de calor.","Ponto de fulgor: menor temperatura em que o líquido produz combustão sustentada sem fonte externa.","Ponto de combustão: menor temperatura em que vapores se inflamam momentaneamente."],g:2,doc:"Manual Combate a Incêndio Urbano CBMMG Cap.1",exp:"Temperatura de ignição = mínima para iniciar combustão com fonte DIRETA. Slop-over e Boil-over estão trocados nas demais."}
+],
+AT3:[
+{id:"a3_01",e:"PCR em lactente com 2 socorristas (ITO 23) — proporção CORRETA:",ops:["15:1 — um comprime, outro ventila.","30:2 — os dois em conjunto.","Apenas compressões contínuas sem ventilação.","15:2 — um comprime, outro ventila.","30:2 — um comprime, outro ventila."],g:3,doc:"ITO 23 CBMMG 3ª Ed. 2021",exp:"Lactente com 2 socorristas: 15:2. Com 1 socorrista: 30:2. Em adultos com 2 socorristas: 30:2."},
+{id:"a3_02",e:"Qual a sequência CORRETA da avaliação primária pelo protocolo XABCDE?",ops:["Controle hemorragias, vias aéreas, respiração, circulação, exposição, disfunção neurológica.","Controle hemorragias, vias aéreas, respiração, circulação, disfunção neurológica, exposição.","Circulação, vias aéreas, respiração, exposição, disfunção neurológica, controle hemorragias.","Controle hemorragias, circulação, vias aéreas, respiração, disfunção neurológica, exposição.","Exposição, controle hemorragias, vias aéreas, respiração, circulação, disfunção neurológica."],g:1,doc:"ITO 23 CBMMG - XABCDE",exp:"X=eXsanguinação → A=Airway → B=Breathing → C=Circulation → D=Disability → E=Exposure."},
+{id:"a3_03",e:"Quais são os principais sinais e sintomas do TCE?",ops:["Sinal de Guaxinim; formigamento no braço esquerdo e sudorese.","Sinal de Battle; pupilas mióticas e abdômen rígido.","Pupilas desiguais (anisocoria); sangramento genital e cefaleia.","Otorragia; pupilas iguais (isocóricas) e sudorese.","Sinal de Guaxinim; Sinal de Battle; anisocoria (pupilas desiguais)."],g:4,doc:"ITO 23 CBMMG - TCE",exp:"Tríade clássica: Sinal de Guaxinim + Sinal de Battle + Anisocoria."},
+{id:"a3_04",e:"Na etapa D do XABCDE: qual escala é usada e o que fazer se o resultado for ≤ 8?",ops:["Etapa D – ECG – inserir cânula orofaríngea (COF).","Etapa E – Escala de Cincinnati – inserir COF.","Etapa E – SAMPLE – reposição volêmica.","Etapa D – Escala de Cincinnati – inserir COF.","Etapa E – ECG – cobrir com manta aluminizada."],g:0,doc:"ITO 23 CBMMG - Avaliação primária D",exp:"D = Disability. Escala de Coma de Glasgow (ECG). ECG ≤ 8 → inserir COF."},
+{id:"a3_05",e:"Sobre o DEA, qual item está INCORRETO? I-Indica desfibrilação em FV ou AESP; II-<8 anos ou <25 kg: pás pediátricas; III-'Analisando ritmo': continuar RCP; IV-PCR na UR: parar, desligar viatura, iniciar RCP.",ops:["Somente I e II.","Somente I, III e IV.","Somente II e IV.","Somente III está incorreto.","Todos estão corretos."],g:3,doc:"ITO 23 CBMMG - DEA",exp:"Apenas III está incorreto: ao 'analisar o ritmo', TODOS se afastam e PARAM a RCP."},
+{id:"a3_06",e:"'Dimensionamento da Cena' no POP de Salvamento Veicular — qual alternativa está CORRETA?",ops:["Realizar o isolamento do local.","Solicitar apoio conforme informações preliminares.","Estabelecer linha de combate a incêndio preventiva.","O Chefe de Guarnição informa a SO, assume o comando, avalia 360° identificando riscos, veículos, vítimas e necessidade de apoio.","Manter comunicação constante durante operação de ferramentas."],g:3,doc:"POP Salvamento Veicular CBMRS",exp:"Dimensionamento = informa SO → assume comando → avaliação completa de riscos, veículos, vítimas."},
+{id:"a3_07",e:"Reunião Tripartida (POP Salvamento Veicular CBMRS) — qual alternativa está CORRETA?",ops:["O plano emergencial não precisa ser garantido no início.","Extração rápida: tempo máximo ideal de 15 minutos.","Reunião com todos os integrantes da guarnição.","Reunião: Chefe de GU + resgatista com o paciente + operador; define plano considerando segurança, tempo, deformação, desencarceramento e condições do paciente.","Plano principal: paciente estável, extração por ângulo 0°, 30°, 60° ou 90°."],g:3,doc:"POP Salvamento Veicular CBMRS",exp:"Reunião tripartida = Chefe GU + resgatista (com o paciente) + operador."},
+{id:"a3_08",e:"Para obtenção de acesso em veículo sinistrado (POP CBMRS), qual a ordem correta?",ops:["Portas não destrutivo → Portas destrutivo → Janelas não destrutivo → Janelas destrutivo","Portas não destrutivo → Janelas não destrutivo → Portas destrutivo → Janelas destrutivo","Portas não destrutivo → Janelas não destrutivo → Janelas destrutivo → Portas destrutivo","Janelas não destrutivo → Portas não destrutivo → Portas destrutivo → Janelas destrutivo","Janelas não destrutivo → Janelas destrutivo → Portas não destrutivo → Portas destrutivo"],g:2,doc:"POP Salvamento Veicular CBMRS",exp:"Ordem: Portas não destrutivo → Janelas não destrutivo → Janelas destrutivo → Portas destrutivo."},
+{id:"a3_09",e:"Sobre RMC, sequência CORRETA (V/F): () Transporte com maca rígida; () Rolamento aceito em decúbito ventral; () TCE elevar parte superior 30°; () Gestante: posição no lado DIREITO; () Prancha: máximo 1 hora.",ops:["V,V,V,F,F","F,F,V,V,V","F,F,F,V,F","F,V,F,F,F","F,V,V,F,V"],g:3,doc:"ITO 23 CBMMG 3ª Ed. 2021 - RMC",exp:"F-V-F-F-F: maca COLHER é preferida. Rolamento em decúbito ventral é aceito (V). Gestante: lado ESQUERDO."},
+{id:"a3_10",e:"Sobre as FEAs de Salvamento Veicular (ITO 34), qual conceito NÃO confere?",ops:["Motobomba: motor a combustão/elétrico com bomba hidráulica de alta pressão.","Bomba Manual: dispositivo back-up para falha da motobomba.","Cortador: ferramenta para cortes de estruturas metálicas.","Alargador: combina funções do cortador e alargador.","Extensor: ferramenta para abertura de espaços com maior distanciamento."],g:3,doc:"ITO 34 CBMMG - FEAs",exp:"O 'Alargador' NÃO combina funções de cortador e alargador — essa é a 'Ferramenta Combinada'."},
+{id:"a3_11",e:"Qual etapa NÃO faz parte do passo 12 (Encerramento) no POP de Salvamento Veicular?",ops:["Informar sala de operações do término.","Realizar checagem de efetivo, viaturas e FEAs.","Retornar ao quartel.","Preencher documentação pertinente.","Realizar debriefing com a guarnição."],g:2,doc:"POP Salvamento Veicular CBMRS - passo 12",exp:"'Retornar ao quartel' não é etapa formal do passo 12."},
+{id:"a3_12",e:"TCE grave ou moderado — conduta CORRETA (ITO 23):",ops:["Monitorar sinais de elevação de PIC e avaliar ajuste do colar, considerando estabilização manual como alternativa.","Manter colar firmemente independente dos sinais de PIC.","Ignorar monitoramento de PIC e priorizar apenas imobilização cervical.","Remover colar imediatamente em todos os casos de TCE grave.","Manter colar apertado mesmo que cause elevação de PIC."],g:0,doc:"ITO 23 CBMMG - TCE conduta",exp:"Correto: monitorar PIC e avaliar o colar. Se causar elevação de PIC, considerar estabilização manual."},
+{id:"a3_13",e:"Sobre a avaliação 360° (ITO 34 CBMMG), qual afirmativa está INCORRETA?",ops:["Qualquer risco pode ser verbalizado ao Comandante da Operação.","O círculo externo avalia a área em torno da zona quente.","Círculo interno: interior, abaixo e próximo aos veículos.","A avaliação 360° deve ser realizada pelo Comandante e pelos demais militares.","Círculo externo pode ser refeito por equipes de apoio em cenários com ribanceiras e rios."],g:1,doc:"ITO 34 CBMMG - avaliação 360°",exp:"O círculo externo avalia a zona MORNA e arredores, não a zona quente."},
+{id:"a3_14",e:"Segundo o POP CBMRS, qual a rotina CORRETA de atendimento em Salvamento Veicular?",ops:["Acionamento→Dimensionamento→Gerenciamento→Estabilização→Acesso→Av.Inicial→Tripartida→Desencarceramento→Extração→Av.Sistematizada→Transporte→Encerramento","Acionamento→Gerenciamento→Dimensionamento→Estabilização→Acesso→Avaliação→Tripartida→Extração→Desencarceramento→Transporte→Encerramento","Dimensionamento→Acionamento→Gerenciamento→Estabilização→Acesso→Tripartida→Avaliação→Desencarceramento→Extração→Transporte→Encerramento","Acionamento→Dimensionamento→Estabilização→Gerenciamento→Acesso→Avaliação→Desencarceramento→Tripartida→Extração→Transporte→Encerramento","Acionamento→Dimensionamento→Gerenciamento→Acesso→Estabilização→Avaliação→Tripartida→Desencarceramento→Extração→Transporte→Encerramento"],g:0,doc:"POP Salvamento Veicular CBMRS - Rotina",exp:"Rotina correta: Acionamento→Dimensionamento→Gerenciamento→Estabilização→Acesso→Av.Inicial→Tripartida→Desencarceramento→Extração→Av.Sistematizada→Transporte→Encerramento."}
+],
+AT4:[
+{id:"a4_01",e:"Sobre uniformes do CBM (LC 10.990/1997), qual alternativa está INCORRETA?",ops:["Modelos e descrições dos uniformes são estabelecidos na regulamentação da Brigada Militar.","É FACULTADO ao servidor militar usar uniforme em reuniões de caráter político-partidário.","O servidor militar fardado tem obrigações correspondentes ao uniforme que usa.","É vedado a civis usar uniformes ou distintivos iguais ou confundíveis com os da BM.","Militares na inatividade com conduta ofensiva podem ser definitivamente proibidos de usar uniformes."],g:1,doc:"LC 10.990/1997 - Uniformes",exp:"É VEDADO (não facultado) ao servidor militar usar uniforme em reuniões político-partidárias."},
+{id:"a4_02",e:"Sobre a Organização Básica do CBMRS (LC 14.920/2016), qual alternativa está CORRETA?",ops:["CBMRS estrutura-se em órgãos de planejamento, organização, direção e controle.","Ao Comando-Geral, órgão de direção geral, compete a administração da Instituição.","Comandante-Geral: indicado pelo Conselho Superior e nomeado pelo Chefe do Executivo.","Subcomandante-Geral: indicado pelo Conselho Superior e nomeado pelo Comandante-Geral.","Ao Gabinete do Comandante-Geral compete a apuração de responsabilidade criminal e disciplinar."],g:1,doc:"LC 14.920/2016",exp:"'Ao Comando-Geral, órgão de direção geral do CBMRS, compete a administração da Instituição.'"},
+{id:"a4_03",e:"Sobre exercício de funções (LC 14.920/2016), qual afirmativa está CORRETA?",ops:["Comandante Regional: privativo de Oficiais do último e penúltimo posto QOEM.","Diretor dos Departamentos: privativo de Oficiais do penúltimo posto QOEM.","Comandante de Pelotão: privativo de Praças do QPBM.","Comandante de Companhia: privativo de Oficiais Superiores QOEM.","Comandante de Pelotão: privativo de Oficiais Intermediários da ativa QOEM."],g:4,doc:"LC 14.920/2016 - Funções",exp:"Comandante de Pelotão de Bombeiro Militar: privativo de Oficiais Intermediários da ativa do QOEM."},
+{id:"a4_04",e:"Sobre férias e afastamentos (LC 10.990/97), qual alternativa está CORRETA?",ops:["Licença para saúde prejudica as férias e anula o direito a licenças.","Férias podem acumular até 3 períodos anuais por absoluta necessidade de serviço.","A critério do Comandante-Geral ou na inatividade, férias podem ser interrompidas.","Se o militar falecer com direito a férias implementado, o valor é pago aos dependentes legais.","O exonerado não faz jus ao pagamento de férias proporcionais."],g:3,doc:"LC 10.990/1997 - Férias",exp:"Se o militar falecer com direito a férias já implementado, o valor proporcional é pago aos dependentes."},
+{id:"a4_05",e:"Sobre o art. 144 da CF/1988, qual alternativa está INCORRETA?",ops:["Polícias civis: polícia judiciária e apuram infrações penais (exceto militares).","Polícias militares: polícia ostensiva; corpos de bombeiros: defesa civil além das atribuições legais.","Polícia rodoviária federal: patrulhamento ostensivo das rodovias federais.","Municípios podem constituir guardas municipais para proteção de bens, serviços e instalações.","Prevenir e reprimir tráfico de entorpecentes, contrabando e descaminho são atribuições das polícias civis."],g:4,doc:"CF/1988 art.144",exp:"Tráfico de entorpecentes, contrabando e descaminho são atribuições da POLÍCIA FEDERAL, não das polícias civis."},
+{id:"a4_06",e:"Sobre o art. 37 da CF/1988: I-Princípios incluem 'eficácia'; II-Cargos EXCLUSIVAMENTE a brasileiros; III-Aprovado em concurso tem prioridade mesmo após prazo improrrogável.",ops:["Apenas a III está correta.","Apenas I e II corretas.","Apenas I está correta.","Todas erradas.","Apenas II está correta."],g:0,doc:"CF/1988 art.37",exp:"Apenas III correta. I errado: o princípio é EFICIÊNCIA. II errado: cargos acessíveis também a estrangeiros na forma da lei."},
+{id:"a4_07",e:"Sobre o art. 37 CF/1988: I-Vencimentos do Executivo não podem superar os do Legislativo; II-Lei reservará percentual de cargos para pessoas com deficiência; III-Prazo do concurso: até 2 anos, prorrogável DUAS vezes.",ops:["Apenas III correta.","Apenas I e II corretas.","Apenas II correta.","Apenas I correta.","Todas erradas."],g:2,doc:"CF/1988 art.37",exp:"Apenas II correta. III errado: prorrogável UMA vez, não duas."},
+{id:"a4_08",e:"Sobre art. 144 CF: I-Inclui polícia ferroviária federal; II-Segurança pública é responsabilidade DO ESTADO; III-PM e CBM subordinam-se com PC e polícias penais aos Governadores.",ops:["Apenas III correta.","Apenas I e III corretas.","Apenas I correta.","Todas erradas.","Apenas II correta."],g:1,doc:"CF/1988 art.144",exp:"I e III corretas. II errada: a responsabilidade é 'de todos', não apenas do Estado."},
+{id:"a4_09",e:"Sobre o IPM, qual alternativa está INCORRETA quanto às competências do art. 10 do CPPM?",ops:["Por decisão do Superior Tribunal de Justiça nos termos do art. 25 do CPPM.","De ofício pela autoridade militar em cuja jurisdição ocorreu a infração.","Por determinação ou delegação de autoridade militar superior.","Em virtude de requisição do Ministério Público.","A requerimento da parte ofendida ou de quem tenha conhecimento da infração."],g:0,doc:"CPPM - IPM art.10",exp:"O art. 25 refere-se ao STM (Superior Tribunal MILITAR), não ao STJ."},
+{id:"a4_10",e:"Autoridades COMPETENTES para instaurar IPM no âmbito do CBMRS (IR 008), EXCETO:",ops:["Comandante-Geral do CBMRS.","Corregedor-Geral do CBMRS.","Chefes de OBM.","Diretores.","Subcomandantes."],g:4,doc:"IR 008 Corregedoria-Geral CBMRS",exp:"Subcomandantes NÃO são autoridades competentes para instaurar IPM no CBMRS."},
+{id:"a4_11",e:"Prazo para conclusão da Sindicância Militar (IR 006/Corregedoria-Geral):",ops:["20 dias prorrogáveis por mais 30 dias.","30 dias improrrogáveis.","30 dias prorrogáveis por mais 20 dias, pedido do Sindicante com 2 dias úteis de antecedência.","40 dias prorrogáveis por mais 20 dias.","30 dias prorrogáveis por mais 20 dias, pedido do SINDICADO."],g:2,doc:"IR 006 Corregedoria-Geral - Prazos",exp:"Sindicância: 30 dias + 20 dias. Pedido do SINDICANTE (não sindicado), 2 dias úteis de antecedência."},
+{id:"a4_12",e:"Prazo para conclusão do IPM (IR 008/Corregedoria-Geral):",ops:["40 dias prorrogáveis por mais 20.","30 dias prorrogáveis por mais 20.","40 dias prorrogáveis por mais 10.","20 dias prorrogáveis por mais 20.","20 dias improrrogáveis."],g:0,doc:"IR 008 Corregedoria-Geral - Prazos IPM",exp:"IPM: 40 dias prorrogáveis por mais 20 dias."}
+],
+AT5:[
+{id:"a5_01",e:"Qual NÃO é motivo para transferência do militar estadual (Dec. 57.390/2023)?",ops:["Por motivo de saúde própria ou de dependente, com avaliação da Junta Policial Militar de Saúde.","Por interesse do militar estadual.","Para acompanhamento de cônjuge.","Por necessidade da administração.","Pela conveniência reconhecida em procedimento investigatório."],g:1,doc:"Decreto 57.390/2023 - Transferência",exp:"'Por interesse do militar estadual' não é motivo formal de transferência."},
+{id:"a5_02",e:"Sobre serviço extraordinário (Dec. 40.986/2001), quais itens estão CORRETOS? I-Exclui etapa de alimentação durante horas extras; II-Limite de 48h extras mensais; III-Gratificação = 100% sobre hora normal; IV-Horas extras não autorizadas: compensadas em folga.",ops:["Apenas I, II e III.","Apenas I, II e IV.","Apenas II e III.","Apenas I e IV.","Apenas II, III e IV."],g:1,doc:"Decreto 40.986/2001",exp:"I, II e IV corretos. III errado: a gratificação é de 50% sobre a hora normal (não 100%)."},
+{id:"a5_03",e:"Sobre Trânsito e Instalação (Dec. 57.390/2023): I-Trânsito: 2 dias até 100 km, 5 dias acima; II-Mesmo município: 48h, apresentação no expediente seguinte; III-Instalação concedida pelo Cmt do OPM de ORIGEM; IV-Instalação: solicitada em até 6 meses.",ops:["Apenas I e II.","Apenas I, II e IV.","Apenas I, III e IV.","Apenas II, III e IV.","Apenas III e IV."],g:1,doc:"Decreto 57.390/2023 - Trânsito",exp:"I, II e IV corretos. III errado: instalação concedida pelo Cmt do OPM de DESTINO."},
+{id:"a5_04",e:"Atos administrativos de movimentação: I-___ integra o militar, fica 'não apresentado' até chegar; II-___ deixa de integrar; III-___ vincula sem integrar; IV-___ atribui efetivo no mesmo OPM; V-___ desvincula do OPM.",ops:["Inclusão/Exclusão/Adição/Efetivação/Desligamento","Adição/Exclusão/Inclusão/Efetivação/Desligamento","Inclusão/Desligamento/Adição/Efetivação/Exclusão","Efetivação/Exclusão/Adição/Inclusão/Desligamento","Inclusão/Exclusão/Adição/Desligamento/Efetivação"],g:0,doc:"Decreto 57.390/2023 - Atos Administrativos",exp:"I-Inclusão, II-Exclusão, III-Adição, IV-Efetivação, V-Desligamento."},
+{id:"a5_05",e:"Sobre o emprego da FR² (IT 04.3/AODC-GCG), como se dá a solicitação de apoio?",ops:["Cmt de BBM solicita ao Oficial Coordenador.","Cmt de BBM solicita ao CCOB.","Cmt de BBM solicita ao COBOM.","Cmt de BBM solicita ao Comandante Geral.","Cmt de CRBM solicita ao CCOB."],g:2,doc:"IT 04.3/AODC-GCG - FR²",exp:"O Cmt de BBM solicita apoio da FR² diretamente ao COBOM."},
+{id:"a5_06",e:"Sobre a IPO (IT 03/AODC-GCG), quais são os procedimentos obrigatórios para ocorrências de vulto?",ops:["Registrar no E193 e aguardar confirmação automática do CCOB.","Usar exclusivamente e-mail institucional ao Comando Geral.","Incluir tipo, prefixo, síntese, endereço e horário, enviando via WhatsApp ou Telegram ao CCOB.","Encaminhar IPO apenas após encerramento completo.","Solicitar autorização prévia do Cmt do Batalhão antes de qualquer comunicação."],g:2,doc:"IT 03/AODC-GCG - IPO",exp:"IPO: tipo + prefixo + síntese + endereço + horário → via WhatsApp ou Telegram ao CCOB imediatamente."},
+{id:"a5_07",e:"Sobre as atribuições do COBOM (IT 03/AODC-GCG), qual alternativa está CORRETA?",ops:["Conferir a escala da guarnição dos OBM com vinculação 193.","Ao receber chamado: atender, cadastrar e empenhar guarnições dentro dos protocolos no Ebombeiro WEB.","Ao selecionar a ocorrência, o texto é aplicado no Twitter @CBMRS193.","Na assunção: comunicar o Chefe de Guarnição de todas as ocorrências.","Todas as alternativas estão corretas."],g:1,doc:"IT 03/AODC-GCG - COBOM",exp:"COBOM: recebe chamado → atende, cadastra e empenha guarnições conforme protocolos no Ebombeiro WEB."},
+{id:"a5_08",e:"Qual órgão define a Certificação Logística das Células da FR² (IT 04.3)?",ops:["Academia de Bombeiro Militar (ABM).","Batalhão de Busca e Salvamento (BBS).","Assessoria de Operações e Defesa Civil (AODC).","Departamento Administrativo (DA).","Centro de Controle Operacional de Bombeiro (CCOB)."],g:2,doc:"IT 04.3/AODC-GCG",exp:"A AODC define a Certificação Logística das Células da FR²."},
+{id:"a5_09",e:"Sobre a Parte Disciplinar (Caderno Temático ABM 2023), qual alternativa está INCORRETA?",ops:["Todo militar que souber de fato contrário à disciplina deve participar ao superior, verbalmente (confirmado em 2 dias úteis).","A parte deve ser clara e precisa, com dados identificadores, local, data, hora, circunstâncias e alegações.","É PERMITIDO ao comunicante tecer comentários ou opiniões pessoais.","A parte deve ser apresentada em até 2 dias úteis da constatação.","'A parte disciplinar é o relato de uma transgressão cometida por um militar estadual' (RDBM)."],g:2,doc:"Caderno Temático ABM 2023",exp:"NÃO é permitido tecer comentários ou opiniões pessoais na parte disciplinar."},
+{id:"a5_10",e:"Sobre valências para elaborar documento oficial, quais estão CORRETAS? I-Selecionar documentos adequados; II-Elaborar conforme padrões; III-Utilizar norma culta; IV-Buscar clareza e precisão; V-Identificar grau de sigilosidade.",ops:["Apenas II e IV corretas.","I, II, III, IV e V corretas.","Todas incorretas.","Incorretas: I, II e V.","Apenas V incorreta."],g:1,doc:"Caderno Temático ABM 2023",exp:"Todas as 5 valências estão corretas e constam no Caderno Temático ABM 2023."},
+{id:"a5_11",e:"\"Documento de comunicação interna, pelo qual o subordinado participa ao superior informações inerentes à rotina administrativa, operacional, pessoal ou disciplinar.\" Que documento é esse?",ops:["Parte","Memorando","Ofício","Mensagem Eletrônica","Processo (PROA)"],g:0,doc:"Caderno Temático ABM 2023",exp:"É a PARTE — comunicação interna (subordinado → superior) sobre rotina do serviço."},
+{id:"a5_12",e:"Numa parte de acidente de serviço (Caderno Temático ABM 2023), qual informação NÃO deve constar?",ops:["Dia, data e horário; militares envolvidos.","Testemunhas, relato do acontecimento e repercussões imediatas.","Medidas saneadoras; viaturas despachadas e empregadas.","Comentários ou opiniões pessoais; custeio das despesas.","Dados do atendimento médico (hospital, hora, etc.)."],g:3,doc:"Caderno Temático ABM 2023",exp:"Comentários pessoais e custeio de despesas NÃO devem constar na parte de acidente de serviço."}
+]
+};
+
+const FCI=[
+{id:"fc01",a:"AT1",f:"Alturas para instalação de extintores portáteis (RT 14/2016)",v:"Alça ≤ 1,60 m | Fundo ≥ 0,10 m | Extintor ≤ 5 m da porta principal"},
+{id:"fc02",a:"AT1",f:"Mezanino vira 'outro pavimento' quando excede...",v:">250 m² OU >1/3 da área do piso (por unidade autônoma)"},
+{id:"fc03",a:"AT1",f:"Penalidades do Decreto 51.803/2014",v:"Advertência → Multa → Multa diária → Interdição (EMBARGO não existe!)"},
+{id:"fc04",a:"AT1",f:"Diferença: Interdição Sanção × Interdição Prévia",v:"Sanção = decurso do tempo sem sanar | Prévia = poder de polícia por iminente risco à vida"},
+{id:"fc05",a:"AT2",f:"Pressão mínima de PROVA das mangueiras",v:"42 kgf/cm² — para ambos os diâmetros (1½\" e 2½\")"},
+{id:"fc06",a:"AT2",f:"Concentração de O₂ para 'queima viva'",v:"Entre 21% e 14% | Abaixo de 14%: chama se apaga"},
+{id:"fc07",a:"AT2",f:"4 ferramentas de arrombamento (Manual CBMMG)",v:"Pé de Cabra + Malho 10 kg + Alavanca Halligan + Corta-vergalhão"},
+{id:"fc08",a:"AT2",f:"Ataque indireto/tridimensional — quando usar?",v:"Quando NÃO é possível atacar o foco diretamente → água nas camadas quentes de fumaça"},
+{id:"fc09",a:"AT3",f:"XABCDE — significado completo",v:"X=eXsanguinação | A=Airway | B=Breathing | C=Circulation | D=Disability | E=Exposure"},
+{id:"fc10",a:"AT3",f:"ECG ≤ 8 → qual medida?",v:"Inserir Cânula Orofaríngea (COF) para proteção de via aérea"},
+{id:"fc11",a:"AT3",f:"RCP em lactente: 2 socorristas × 1 socorrista",v:"2 socorristas: 15:2 | 1 socorrista: 30:2 | Adulto com 2: 30:2"},
+{id:"fc12",a:"AT3",f:"Tríade clássica do TCE",v:"Sinal de Guaxinim (hematoma periorbitário) + Sinal de Battle (equimose retroauricular) + Anisocoria"},
+{id:"fc13",a:"AT3",f:"DEA — quando PARAR a RCP?",v:"Ao ouvir 'analisando o ritmo' → TODOS se afastam e PARAM (não continuar!)"},
+{id:"fc14",a:"AT3",f:"Reunião Tripartida — quem participa?",v:"Chefe de Guarnição + Resgatista (com o paciente) + Operador"},
+{id:"fc15",a:"AT3",f:"Ordem de acesso em veículo sinistrado",v:"1° Portas não destrutivo → 2° Janelas não destrutivo → 3° Janelas destrutivo → 4° Portas destrutivo"},
+{id:"fc16",a:"AT4",f:"Uso de uniforme em atividade político-partidária",v:"É VEDADO — não facultado! (LC 10.990/97)"},
+{id:"fc17",a:"AT4",f:"Princípios da Administração Pública — LIMPE",v:"Legalidade + Impessoalidade + Moralidade + Publicidade + EFICIÊNCIA (não 'eficácia')"},
+{id:"fc18",a:"AT4",f:"Prazo do concurso público (art. 37 CF)",v:"Até 2 anos, prorrogável UMA vez por igual período"},
+{id:"fc19",a:"AT4",f:"Prazo do IPM (IR 008/Corregedoria CBMRS)",v:"40 dias + 20 dias (prorrogação) → pedido fundamentado do encarregado"},
+{id:"fc20",a:"AT4",f:"Prazo da Sindicância Militar (IR 006/Corregedoria CBMRS)",v:"30 dias + 20 dias → pedido do SINDICANTE, 2 dias úteis de antecedência"},
+{id:"fc21",a:"AT5",f:"Como enviar a IPO (IT 03/AODC-GCG)?",v:"Via WhatsApp ou Telegram ao CCOB — imediatamente, com: tipo + prefixo + síntese + endereço + horário"},
+{id:"fc22",a:"AT5",f:"Quem define a Certificação Logística das Células da FR²?",v:"AODC — Assessoria de Operações e Defesa Civil"},
+{id:"fc23",a:"AT5",f:"Inclusão × Adição × Efetivação (Dec. 57.390/2023)",v:"Inclusão = integra no OPM (fica 'não apresentado' até chegar) | Adição = vincula sem integrar | Efetivação = atribui efetivo no mesmo OPM"},
+{id:"fc24",a:"AT5",f:"É permitido opinião pessoal na Parte Disciplinar?",v:"NÃO — expressamente proibido. A parte deve ser objetiva e impessoal."}
+];
+
+// ═══════════════════════════════
+// ROTEIROS DE ÁUDIO
+// ═══════════════════════════════
+const ROT={
+AT1:{
+curto:`Segurança Contra Incêndios. Cinco pontos mais cobrados em prova.
+
+Ponto um. Extintores portáteis, conforme Resolução Técnica catorze. Alça no máximo um vírgula sessenta metros do piso. Fundo no mínimo zero vírgula dez metros. Extintor a no máximo cinco metros da porta principal.
+
+Ponto dois. Mezanino. É considerado outro pavimento quando excede duzentos e cinquenta metros quadrados ou um terço da área do piso do pavimento.
+
+Ponto três. Penalidades do Decreto cinquenta e um mil oitocentos e três. São quatro: advertência, multa, multa diária e interdição. Embargo NÃO está previsto.
+
+Ponto quatro. Interdição sanção é aplicada pelo decurso do tempo sem sanar a irregularidade. Interdição prévia é por iminente risco à vida.
+
+Ponto cinco. Inviabilidade técnica. Prédios tombados pelo Patrimônio Histórico-Cultural são caso de inviabilidade técnica.`,
+medio:`Segurança Contra Incêndios. Revisão completa dos pontos mais cobrados.
+
+Sobre os extintores portáteis, conforme a Resolução Técnica catorze de dois mil e dezesseis. A alça deve estar no máximo a um vírgula sessenta metros do piso. O fundo deve estar no mínimo a zero vírgula dez metros. Deve haver um extintor a no máximo cinco metros da porta de acesso principal.
+
+Sobre o mezanino, conforme o artigo sexto da Lei Complementar quatorze mil trezentos e setenta e seis. Mezanino é uma plataforma elevada que subdivide parcialmente um andar em dois. Quando excede duzentos e cinquenta metros quadrados ou um terço da área do piso de pavimento, deve ser considerado outro pavimento. O limite é por unidade autônoma.
+
+As penalidades previstas no Decreto cinquenta e um mil oitocentos e três são quatro: advertência, multa, multa diária e interdição. Atenção: embargo não está listado e é recorrente em questões de prova.
+
+Há dois tipos de interdição. A interdição sanção é aplicada pelo decurso do tempo, quando a irregularidade persiste por mais de cento e vinte dias após a ciência da multa, exceto nos grupos A e H e divisões específicas. A interdição prévia é ato do poder de polícia por iminente risco à vida, integridade física ou funcionamento da edificação.
+
+O PPCI é o projeto técnico com o conjunto de medidas que visam prevenir o incêndio, permitir o abandono seguro, dificultar a propagação, proporcionar meios de controle e extinção, e permitir o acesso do Corpo de Bombeiros.`,
+longo:`Segurança Contra Incêndios. Aprofundamento completo.
+
+Vamos começar pela Resolução Técnica catorze de dois mil e dezesseis, que trata dos extintores de incêndio. Os extintores portáteis devem ser instalados com a alça no máximo a um vírgula sessenta metros do piso acabado. O fundo deve estar no mínimo a zero vírgula dez metros do piso, mesmo que apoiado em suporte. Deve haver no mínimo um extintor adequado às classes de incêndio do local, distante a não mais de cinco metros da porta de acesso da entrada principal da edificação, entrada do pavimento ou entrada da área de risco de incêndio.
+
+Sobre o mezanino, previsto no inciso vinte e dois do artigo sexto da Lei Complementar quatorze mil trezentos e setenta e seis. Mezanino é uma plataforma elevada circulável que subdivide parcialmente um andar em dois. Quando excede duzentos e cinquenta metros quadrados ou a terça parte da área do piso de pavimento, deve ser considerado outro pavimento para fins de prevenção. Este limite é por unidade autônoma.
+
+As penalidades previstas no artigo dez do Decreto cinquenta e um mil oitocentos e três de dois mil e catorze são: advertência, multa, multa diária e interdição. O Decreto não prevê embargo. Esta distinção tem sido cobrada com frequência.
+
+Sobre as modalidades de interdição. A interdição sanção é uma penalidade aplicada quando a irregularidade persiste por prazo superior a cento e vinte dias após a ciência do auto de imposição da pena de multa, com exceção das ocupações dos grupos A e H e divisões E-um, E-cinco, E-seis, M-um, M-três e M-seis. Já a interdição prévia é ato derivado do exercício do poder de polícia, aplicado em decorrência de situação que configure iminente risco à vida, à integridade física de pessoas ou ao funcionamento da edificação.
+
+O PPCI é o Plano de Prevenção e Proteção Contra Incêndio. Trata-se do projeto técnico que contém o conjunto de medidas que visam prevenir e evitar o incêndio, permitir o abandono seguro dos ocupantes, dificultar a propagação do incêndio, proporcionar meios de controle e extinção do incêndio e permitir o acesso para as operações do Corpo de Bombeiros.
+
+Sobre inviabilidade técnica e medidas compensatórias, previstas na Resolução Técnica cinco, parte sete vírgula dois: são consideradas inviabilidades técnicas as limitações de alteração das características arquitetônicas originais dos prédios tombados e de interesse do Patrimônio Histórico-Cultural.
+
+Sobre o SOL-CBMRS: o recurso em primeira instância deve ser encaminhado em até trinta dias corridos após a ciência da CIA ou CIV. O recurso em segunda instância deve ser encaminhado em até quinze dias úteis após a ciência da decisão em primeira instância.`
+},
+AT2:{
+curto:`Combate a Incêndios. Cinco pontos mais cobrados.
+
+Ponto um. Mangueiras. Pressão mínima de PROVA é quarenta e dois quilogramas força por centímetro quadrado, para os dois diâmetros: um e meio e dois e meio polegadas.
+
+Ponto dois. Queima viva. Oxigênio entre vinte e um e quatorze por cento. Abaixo de quatorze por cento a chama se apaga.
+
+Ponto três. Ataque indireto. Água nas camadas quentes de fumaça, quando não é possível atacar o foco diretamente.
+
+Ponto quatro. Arrombamento. Pé de cabra, malho de dez quilos, alavanca Halligan e corta-vergalhão.
+
+Ponto cinco. Entrada forçada. Princípio do menor dano possível. Do método com menos dano para o com mais dano.`,
+medio:`Combate a Incêndios. Revisão completa.
+
+Sobre as mangueiras de combate a incêndio, conforme o Manual do Corpo de Bombeiros de Minas Gerais de dois mil e vinte. As mangueiras possuem diâmetro de um e meio polegada e dois e meio polegadas. A pressão mínima de prova é de quarenta e dois quilogramas força por centímetro quadrado para ambos os diâmetros. Não confundir com pressão de trabalho.
+
+A queima viva ocorre quando a concentração de oxigênio está entre vinte e um por cento e quatorze por cento. Abaixo de quatorze por cento a reação de queima viva cessa.
+
+O ataque direto aplica água diretamente na base do foco. O ataque indireto ou tridimensional aplica água nas camadas quentes de fumaça, sendo utilizado quando não é possível combater as chamas diretamente. O ataque combinado mistura as técnicas do direto e do indireto.
+
+As quatro ferramentas padrão para arrombamento são: pé de cabra, malho de dez quilos, alavanca Halligan e ferramenta corta-a-frio, também chamada corta-vergalhão.
+
+O princípio da entrada forçada é o do menor dano possível. A graduação vai do método com menos destrutibilidade para o com mais.`,
+longo:`Combate a Incêndios. Aprofundamento completo.
+
+Sobre as mangueiras de combate a incêndio. As mangueiras possuem diâmetros de um e meio polegada, equivalente a trinta e oito milímetros, e dois e meio polegadas, equivalente a sessenta e três milímetros. Ambas devem resistir a uma pressão mínima de prova de quarenta e dois quilogramas força por centímetro quadrado. Os cuidados incluem: desenrolar periodicamente para evitar ressecamento, não expor ao sol, não arrastar sobre superfícies cortantes ou quentes, e lavar com água e sabão neutro após o uso.
+
+Sobre os fundamentos da combustão: incêndio é a reação de combustão fora de controle. Chama é a manifestação visual. Energia térmica é a energia interna dos movimentos moleculares. Temperatura é a medida da agitação molecular. Calor é a energia térmica em trânsito.
+
+A concentração de oxigênio determina o tipo de queima. Entre vinte e um e quatorze por cento: queima viva com chama visível. Entre quatorze e sete por cento: queima sem chama. Abaixo de sete por cento: a combustão não se sustenta.
+
+Sobre os tipos de ataque. Ataque direto: água na base do foco. Ataque indireto ou tridimensional: água nas camadas quentes de fumaça, quando não é possível atacar o foco. Ataque combinado: mistura das técnicas do direto e do indireto. O pacote d'água é técnica do ataque direto. O pulso atomizado é técnica do ataque indireto.
+
+Sobre fenômenos extremos. O Flashover é a ignição súbita generalizada causada pelo feedback radiativo da camada de fumaça. O Backdraft é uma deflagração resultante de súbita introdução de ar em espaço confinado com produtos de combustão incompleta.
+
+As ferramentas de arrombamento são quatro: pé de cabra, malho de dez quilos, alavanca Halligan e ferramenta corta-a-frio. Princípio: do método com menos destrutibilidade para o com mais. Sempre verificar se a porta está simplesmente fechada antes de forçar.`
+},
+AT3:{
+curto:`Buscas e Salvamentos. Cinco pontos mais cobrados.
+
+Ponto um. XABCDE: eXsanguinação, Airway, Breathing, Circulation, Disability e Exposure.
+
+Ponto dois. ECG menor ou igual a oito: inserir cânula orofaríngea na etapa D.
+
+Ponto três. RCP em lactente com dois socorristas: quinze para dois. Com um socorrista ou adulto: trinta para dois.
+
+Ponto quatro. DEA: ao analisar o ritmo, TODOS param a RCP e se afastam.
+
+Ponto cinco. Reunião tripartida: Chefe de GU, resgatista com o paciente e operador.`,
+medio:`Buscas e Salvamentos. Revisão completa.
+
+O protocolo XABCDE: X de eXsanguinação, controle de hemorragias externas graves. A de Airway, vias aéreas. B de Breathing, respiração. C de Circulation, circulação. D de Disability, disfunção neurológica, onde se utiliza a Escala de Coma de Glasgow. E de Exposure, exposição.
+
+Quando a Escala de Glasgow resultar em valor igual ou inferior a oito, a conduta na etapa D é inserir a cânula orofaríngea para proteção da via aérea.
+
+Sobre a RCP: em lactente com dois socorristas a proporção é quinze compressões para duas ventilações. Com apenas um socorrista: trinta para duas. Em vítimas adultas: trinta para duas, com frequência mínima de cem e máxima de cento e vinte compressões por minuto, com profundidade de cinco a seis centímetros.
+
+Sobre o DEA: ao ouvir analisando o ritmo, todos se afastam e param completamente a RCP. O DEA indica desfibrilação em Fibrilação Ventricular e Taquicardia Ventricular Sem Pulso. Para menores de oito anos ou com menos de vinte e cinco quilos, usar pás pediátricas.
+
+A tríade clássica do TCE: Sinal de Guaxinim, hematoma periorbitário. Sinal de Battle, equimose retroauricular. E anisocoria, pupilas com diâmetros desiguais.
+
+A Reunião Tripartida reúne: Chefe de Guarnição, resgatista com o paciente e operador. Definem o plano de desencarceramento.`,
+longo:`Buscas e Salvamentos. Aprofundamento completo.
+
+O protocolo XABCDE da Instrução Técnica Operacional vinte e três. X: controle de hemorragias externas graves com torniquete ou curativo compressivo. A: avaliação e abertura das vias aéreas. B: avaliação da respiração quanto à frequência, ritmo e movimentos torácicos. C: avaliação da circulação incluindo pulso, perfusão e controle de hemorragias internas. D: disfunção neurológica com a Escala de Coma de Glasgow e avaliação pupilar. E: exposição do corpo com atenção à prevenção de hipotermia.
+
+Quando a Escala de Coma de Glasgow resultar em valor igual ou inferior a oito, a conduta na etapa D é inserir imediatamente a cânula orofaríngea. Este é um ponto muito cobrado.
+
+Sobre a RCP. Em lactente com dois socorristas: quinze para duas. Em lactente com um socorrista: trinta para duas. Em adulto com um ou dois socorristas: trinta para duas. Frequência: mínimo cem e máximo cento e vinte compressões por minuto. Profundidade: cinco a seis centímetros em adultos.
+
+Sobre o DEA. Ao ouvir analisando o ritmo, TODOS se afastam e param a RCP. O equipamento indica choque em Fibrilação Ventricular e Taquicardia Ventricular Sem Pulso. A Atividade Elétrica Sem Pulso NÃO é indicação de choque. Para crianças menores de oito anos ou com menos de vinte e cinco quilos: pás pediátricas ou atenuadores de carga.
+
+A tríade clássica do TCE: Sinal de Guaxinim, hematoma periorbitário bilateral. Sinal de Battle, equimose retroauricular. Anisocoria, pupilas com diâmetros desiguais. No manejo do TCE grave ou moderado, monitorar sinais de elevação da pressão intracraniana e avaliar o colar cervical, considerando estabilização manual caso o colar cause elevação da PIC.
+
+Sobre a RMC: transporte com maca colher, não com a rígida. Rolamento aceito apenas em decúbito ventral ou ausência da colher. Para gestantes: posição angulada sobre o lado esquerdo.
+
+A rotina de salvamento veicular tem doze passos: acionamento, dimensionamento em trezentos e sessenta graus, gerenciamento dos riscos, estabilização veicular, obtenção de acesso, avaliação inicial, reunião tripartida, desencarceramento, extração, avaliação sistematizada, transporte e encerramento.`
+},
+AT4:{
+curto:`Direito Institucional e Militar. Cinco pontos mais cobrados.
+
+Ponto um. Uniforme em atividade político-partidária: é VEDADO, não facultado.
+
+Ponto dois. Princípios da Administração Pública: LIMPE. Legalidade, Impessoalidade, Moralidade, Publicidade e EFICIÊNCIA. Não é eficácia.
+
+Ponto três. Concurso público: prazo de até dois anos, prorrogável UMA vez por igual período.
+
+Ponto quatro. IPM: quarenta dias prorrogáveis por mais vinte dias.
+
+Ponto cinco. Sindicância: trinta dias prorrogáveis por mais vinte dias. Pedido do Sindicante.`,
+medio:`Direito Institucional e Militar. Revisão completa.
+
+Sobre a Lei Complementar dez mil novecentos e noventa de noventa e sete: é VEDADO ao servidor militar usar uniforme em reuniões de caráter político-partidário. A palavra facultado está errada. O servidor militar fardado tem as obrigações correspondentes ao uniforme que usa.
+
+Os cinco princípios da Administração Pública formam o acrônimo LIMPE: Legalidade, Impessoalidade, Moralidade, Publicidade e Eficiência. O princípio é EFICIÊNCIA, nunca eficácia. Os cargos são acessíveis aos brasileiros e, na forma da lei, também aos estrangeiros. O prazo do concurso público é de até dois anos, prorrogável uma única vez por igual período.
+
+Sobre a organização básica do CBMRS: ao Comando-Geral, órgão de direção geral, compete a administração da Instituição. A função de Comandante de Pelotão é privativa de Oficiais Intermediários da ativa do QOEM.
+
+Sobre os prazos das investigações no CBMRS: o Inquérito Policial Militar tem prazo de quarenta dias, prorrogáveis por mais vinte dias. A Sindicância Militar tem prazo de trinta dias, prorrogáveis por mais vinte dias, pedido do SINDICANTE, não do sindicado, com dois dias úteis de antecedência.
+
+Sobre segurança pública no artigo cento e quarenta e quatro: prevenir e reprimir tráfico de entorpecentes, contrabando e descaminho são atribuições da POLÍCIA FEDERAL, não das polícias civis.`,
+longo:`Direito Institucional e Militar. Aprofundamento completo.
+
+Sobre a Lei Complementar dez mil novecentos e noventa de noventa e sete, Estatuto dos Militares Estaduais. Sobre o uso de uniformes: é VEDADO ao servidor militar usar uniforme em reuniões de caráter político-partidário. É vedado também a qualquer organização ou pessoa civil usar uniformes iguais ou confundíveis com os da Brigada Militar.
+
+Os cinco princípios do caput do artigo trinta e sete da Constituição Federal formam o acrônimo LIMPE: Legalidade, Impessoalidade, Moralidade, Publicidade e Eficiência. Os cargos são acessíveis aos brasileiros que preencham os requisitos e, na forma da lei, também aos estrangeiros. O prazo de validade do concurso público é de até dois anos, prorrogável UMA vez por igual período. A lei reservará percentual de cargos para pessoas portadoras de deficiência.
+
+Sobre a Lei Complementar quatorze mil novecentos e vinte: o CBMRS é instituição permanente e regular, organizada com base na hierarquia e na disciplina. Ao Comando-Geral compete a administração da Instituição. A função de Comandante Regional é privativa de Oficiais do último e penúltimo posto do QOEM. A função de Comandante de Pelotão é privativa de Oficiais Intermediários da ativa do QOEM.
+
+Sobre os prazos das investigações. O Inquérito Policial Militar tem prazo de quarenta dias, prorrogável por mais vinte dias, mediante pedido fundamentado do encarregado. A Sindicância Militar tem prazo de trinta dias, prorrogável por mais vinte dias, mediante pedido do SINDICANTE à autoridade instauradora, com antecedência mínima de dois dias úteis. As autoridades competentes para instaurar IPM no CBMRS são: Comandante-Geral, Corregedor-Geral, Chefes de OBM e Diretores. Subcomandantes NÃO são competentes.
+
+Sobre o artigo cento e quarenta e quatro da Constituição Federal: os órgãos de segurança pública incluem a polícia rodoviária federal, a polícia ferroviária federal, as polícias civis, as polícias militares, os corpos de bombeiros militares, a polícia federal, as polícias penais e as guardas municipais. Prevenir e reprimir o tráfico de entorpecentes, contrabando e descaminho são atribuições da POLÍCIA FEDERAL.`
+},
+AT5:{
+curto:`Normas Administrativas e Documentação Técnica. Cinco pontos mais cobrados.
+
+Ponto um. IPO: via WhatsApp ou Telegram ao CCOB imediatamente, com tipo, prefixo, síntese, endereço e horário.
+
+Ponto dois. FR dois: o Cmt de BBM solicita apoio diretamente ao COBOM.
+
+Ponto três. Certificação Logística das Células da FR dois: definida pela AODC.
+
+Ponto quatro. Parte Disciplinar: comentários ou opiniões pessoais NÃO são permitidos.
+
+Ponto cinco. Atos de movimentação: Inclusão integra no OPM, Adição vincula sem integrar, Efetivação atribui efetivo no mesmo OPM.`,
+medio:`Normas Administrativas e Documentação Técnica. Revisão completa.
+
+Sobre a Instrução Técnica zero três barra AODC: a Informação Preliminar de Ocorrência deve ser enviada via mensagem de texto em aplicativo WhatsApp ou Telegram ao CCOB de forma imediata. A IPO deve conter: tipo de ocorrência, prefixo da viatura, síntese da ocorrência, endereço e horário.
+
+Sobre a FR dois: o Comandante de BBM pode solicitar diretamente ao COBOM apoio para eventos que excedam a capacidade operativa da Célula. A Certificação Logística das Células é definida pela AODC, Assessoria de Operações e Defesa Civil.
+
+Sobre a Parte Disciplinar: não é permitido ao comunicante tecer comentários ou opiniões pessoais. A parte deve ser clara, precisa e objetiva. O prazo é de até dois dias úteis da constatação do fato.
+
+Sobre os atos administrativos de movimentação: Inclusão integra o militar no OPM, sendo considerado não apresentado até sua chegada. Exclusão retira como efetivo. Adição vincula sem integrar como efetivo. Efetivação atribui situação de efetivo dentro de um mesmo OPM. Desligamento desvincula do OPM.
+
+Sobre as transferências: o Trânsito é de dois dias se a distância não ultrapassar cem quilômetros, e de cinco dias se ultrapassar. O período de instalação pode ser solicitado dentro de seis meses da apresentação no OPM de destino.`,
+longo:`Normas Administrativas e Documentação Técnica. Aprofundamento completo.
+
+Sobre a Instrução Técnica zero três barra AODC, modificada pela Portaria zero cinquenta e cinco de dois mil e vinte e três. A Informação Preliminar de Ocorrência é um mecanismo para relatar eventos significativos de forma imediata. Os procedimentos obrigatórios: incluir tipo de ocorrência, prefixo da viatura, síntese da ocorrência, endereço e horário, enviando via mensagem de texto em aplicativo WhatsApp ou Telegram ao CCOB. A IPO não deve aguardar o encerramento da ocorrência.
+
+Sobre as atribuições do COBOM: ao receber o chamado de emergência, deve atender, cadastrar e empenhar as guarnições adequadas dentro dos protocolos padronizados, fixados no Ebombeiro WEB.
+
+Sobre a FR dois, regulada pela Instrução Técnica quatro vírgula três barra AODC: o Comandante de BBM pode solicitar diretamente ao COBOM apoio para eventos que excedam a capacidade operativa da Célula. A Certificação Logística das Células é definida pela AODC, Assessoria de Operações e Defesa Civil.
+
+Sobre o Regulamento de Movimentação, Decreto cinquenta e sete mil trezentos e noventa de dois mil e vinte e três. Os motivos para transferência incluem: necessidade da administração, motivo de saúde própria ou de dependente, acompanhamento de cônjuge e conveniência reconhecida em procedimento investigatório. Por interesse pessoal do militar NÃO é motivo formal de transferência.
+
+Os atos administrativos de movimentação são cinco. Inclusão integra o militar no OPM como efetivo, mas fica não apresentado até chegar. Exclusão retira da condição de efetivo. Adição vincula a um OPM sem integrá-lo como efetivo. Efetivação atribui situação de efetivo dentro de um mesmo OPM. Desligamento desvincula o militar do OPM.
+
+O Trânsito é de dois dias quando a distância não ultrapassar cem quilômetros e de cinco dias quando ultrapassar. O período de instalação é concedido pelo Comandante do OPM de DESTINO, não de origem, e pode ser solicitado dentro de seis meses da apresentação.
+
+Sobre a Documentação Técnica: as valências para elaborar um documento oficial são cinco: selecionar documentos adequados à finalidade, elaborar conforme padrões da Corporação, utilizar a norma culta da língua portuguesa, buscar clareza e precisão, e identificar o grau de sigilosidade. A Parte é o documento de comunicação interna pelo qual o subordinado participa ao superior informações sobre a rotina de serviço. Não é permitido tecer comentários ou opiniões pessoais.`
+}
+};
+
+// ═══════════════════════════════
+// AUTH
+// ═══════════════════════════════
+function setAuthTab(t){
+  document.querySelectorAll('.auth-tab').forEach(b=>b.classList.remove('active'));
+  ['login','register','pending'].forEach(id=>document.getElementById('tab-'+id).classList.add('hidden'));
+  document.getElementById('tab-'+t).classList.remove('hidden');
+  if(t==='login')document.querySelectorAll('.auth-tab')[0].classList.add('active');
+  else if(t==='register')document.querySelectorAll('.auth-tab')[1].classList.add('active');
+}
+
+async function doLogin(){
+  const email=document.getElementById('login-email').value.trim();
+  const pass=document.getElementById('login-pass').value;
+  const msg=document.getElementById('login-msg');
+  if(!email||!pass){msg.textContent='Preencha todos os campos.';return;}
+  if(!checkRateLimit()){msg.textContent='Muitas tentativas. Aguarde 1 minuto.';return;}
+  msg.textContent='Entrando...';msg.className='auth-msg';
+  try{await auth.signInWithEmailAndPassword(email,pass);}
+  catch(e){msg.textContent=e.code==='auth/user-not-found'||e.code==='auth/wrong-password'?'Email ou senha incorretos.':'Erro ao entrar. Tente novamente.';}
+}
+
+async function doRegister(){
+  const name=document.getElementById('reg-name').value.trim();
+  const email=document.getElementById('reg-email').value.trim();
+  const pass=document.getElementById('reg-pass').value;
+  const msg=document.getElementById('reg-msg');
+  if(!name||!email||!pass){msg.textContent='Preencha todos os campos.';return;}
+  if(pass.length<6){msg.textContent='Senha deve ter no mínimo 6 caracteres.';return;}
+  msg.textContent='Criando conta...';msg.className='auth-msg';
+  try{
+    const cred=await auth.createUserWithEmailAndPassword(email,pass);
+    await db.ref('usuarios/'+cred.user.uid).set({nome:name,email,admin:false,aprovado:false,criadoEm:Date.now()});
+    msg.textContent='Cadastro realizado! Aguarde aprovação do administrador.';msg.className='auth-msg ok';
+    setTimeout(()=>setAuthTab('login'),2500);
+  }catch(e){msg.textContent=e.code==='auth/email-already-in-use'?'Este email já está cadastrado.':'Erro ao criar conta. Tente novamente.';}
+}
+
+function doLogout(){
+  if(simTimer)clearInterval(simTimer);
+  if(speechSynthesis)speechSynthesis.cancel();
+  auth.signOut();
+}
+
+// ═══════════════════════════════
+// AUTH STATE
+// ═══════════════════════════════
+auth.onAuthStateChanged(async user=>{
+  document.getElementById('loading').style.display='none';
+  if(!user){showAuth();return;}
+  currentUser=user;
+  const snap=await db.ref('usuarios/'+user.uid).get();
+  if(!snap.exists()){
+    await db.ref('usuarios/'+user.uid).set({nome:user.email,email:user.email,admin:false,aprovado:user.email===ADMIN_EMAIL,criadoEm:Date.now()});
+  }
+  userProfile={nome:user.email,email:user.email,admin:false,aprovado:user.email===ADMIN_EMAIL,...(snap.val()||{})};
+  if(user.email===ADMIN_EMAIL)userProfile.aprovado=true;
+  if(!userProfile.aprovado){
+    document.getElementById('auth-screen').classList.add('active');
+    document.getElementById('app').classList.remove('active');
+    ['login','register'].forEach(id=>document.getElementById('tab-'+id).classList.add('hidden'));
+    document.getElementById('tab-pending').classList.remove('hidden');
+    document.querySelectorAll('.auth-tab').forEach(t=>t.classList.remove('active'));
+    return;
+  }
+  showApp();
+});
+
+function showAuth(){
+  document.getElementById('auth-screen').classList.add('active');
+  document.getElementById('app').classList.remove('active');
+}
+
+async function showApp(){
+  document.getElementById('auth-screen').classList.remove('active');
+  document.getElementById('app').classList.add('active');
+  document.getElementById('hdr-nome').textContent=(userProfile.nome||'').split(' ')[0]||'';
+  if(userProfile.admin||currentUser.email===ADMIN_EMAIL){
+    if(!document.getElementById('nav-admin')){
+      const nav=document.getElementById('bottom-nav');
+      const btn=document.createElement('div');
+      btn.className='nav-item';btn.id='nav-admin';
+      btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>Admin';
+      btn.onclick=()=>navTo('admin');
+      nav.appendChild(btn);
+    }
+  }
+  await loadUserData();
+  await loadQuestoes();
+  await loadFlashcards();
+  renderDashboard();
+  renderAreaList();
+  renderCards();
+  renderSimHome();
+  renderAudio();
+  loadVoices();
+  if(userProfile.admin||currentUser.email===ADMIN_EMAIL)loadAdminUsers();
+}
+
+// ═══════════════════════════════
+// DATA
+// ═══════════════════════════════
+async function loadUserData(){
+  const snap=await db.ref('progresso/'+currentUser.uid).get();
+  if(snap.exists())userStats={correct:0,wrong:0,byArea:{},seenIds:[],history:[],...snap.val()};
+  const cs=await db.ref('cards/'+currentUser.uid).get();
+  if(cs.exists())userCards=cs.val();
+  db.ref('progresso/'+currentUser.uid).on('value',s=>{if(s.exists()){userStats={correct:0,wrong:0,byArea:{},seenIds:[],history:[],...s.val()};renderDashboard();}});
+  db.ref('cards/'+currentUser.uid).on('value',s=>{if(s.exists()){userCards=s.val();renderCards();}});
+}
+
+async function saveProg(){await db.ref('progresso/'+currentUser.uid).set(userStats);}
+async function saveCard(id,data){userCards[id]=data;await db.ref('cards/'+currentUser.uid+'/'+id).set(data);}
+
+async function loadQuestoes(){
+  const snap=await db.ref('questoes').get();
+  if(snap.exists()){allQuestoes=snap.val();}
+  else{
+    const toSave={};
+    Object.entries(QI).forEach(([area,qs])=>qs.forEach(q=>{toSave[q.id]={...q,area};}));
+    await db.ref('questoes').set(toSave);
+    allQuestoes=toSave;
+  }
+}
+
+async function loadFlashcards(){
+  const snap=await db.ref('flashcards').get();
+  if(snap.exists()){allFlashcards=snap.val();}
+  else{
+    const toSave={};FCI.forEach(fc=>{toSave[fc.id]=fc;});
+    await db.ref('flashcards').set(toSave);
+    allFlashcards=toSave;
+  }
+}
+
+function getQsByArea(area){return Object.values(allQuestoes).filter(q=>area==='TODAS'||q.area===area);}
+
+function buildQueue(area){
+  const qs=getQsByArea(area);
+  const seen=new Set(userStats.seenIds||[]);
+  const erradas=new Set();
+  Object.values(userStats.byArea||{}).forEach(a=>{(a.errors||[]).forEach(id=>erradas.add(id));});
+  const novas=shuffle(qs.filter(q=>!seen.has(q.id)));
+  const errs=shuffle(qs.filter(q=>seen.has(q.id)&&erradas.has(q.id)));
+  const vistas=shuffle(qs.filter(q=>seen.has(q.id)&&!erradas.has(q.id)));
+  return[...novas,...errs,...vistas];
+}
+
+// ═══════════════════════════════
+// NAV
+// ═══════════════════════════════
+function navTo(screen){
+  if(speechSynthesis)speechSynthesis.cancel();
+  currentAudioArea=null;
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('sim-running').classList.remove('active');
+  const s=document.getElementById('screen-'+screen);
+  if(s)s.classList.add('active');
+  const n=document.getElementById('nav-'+screen);
+  if(n)n.classList.add('active');
+  if(screen==='cards')renderCards();
+  if(screen==='simulado')renderSimHome();
+  if(screen==='audio')renderAudio();
+}
+
+// ═══════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════
+function renderDashboard(){
+  const h=new Date().getHours();
+  document.getElementById('dash-greeting').textContent=h<12?'Bom dia,':h<18?'Boa tarde,':'Boa noite,';
+  document.getElementById('dash-name').textContent=(userProfile?.nome||'').split(' ')[0]||'Bombeiro';
+  const total=userStats.correct+userStats.wrong;
+  const taxa=total>0?Math.round(userStats.correct/total*100):0;
+  document.getElementById('stat-total').textContent=total;
+  document.getElementById('stat-taxa').textContent=taxa+'%';
+  const due=getDue();
+  document.getElementById('stat-cards').textContent=due.length;
+  const circ=188,offset=circ-(circ*taxa/100);
+  document.getElementById('ring-c').style.strokeDashoffset=offset;
+  document.getElementById('ring-pct').textContent=taxa+'%';
+  document.getElementById('ring-sub').textContent=total>0?userStats.correct+' acertos de '+total+' questões respondidas.':'Comece respondendo questões para ver seu progresso.';
+  const banner=document.getElementById('due-banner');
+  if(due.length>0){banner.classList.remove('hidden');document.getElementById('due-title').textContent=due.length+' card'+(due.length>1?'s':'')+' para revisar hoje';}
+  else banner.classList.add('hidden');
+  const grid=document.getElementById('area-grid');
+  grid.innerHTML='';
+  Object.entries(AI).forEach(([key,info])=>{
+    const d=userStats.byArea?.[key]||{c:0,w:0};
+    const t=d.c+d.w,p=t>0?Math.round(d.c/t*100):0;
+    const col=p>=70?'#27AE60':p>=50?'#E67E22':'#C0392B';
+    grid.innerHTML+=`<div class="area-card" onclick="startQuiz('${key}')">
+      <div class="area-icon">${info.icon}</div>
+      <div class="area-name">${info.nome}</div>
+      <div class="area-bar"><div class="area-bar-fill" style="width:${p}%;background:${col}"></div></div>
+      <div class="area-pct" style="color:${col}">${t>0?p+'%':'—'}</div>
+    </div>`;
+  });
+}
+
+// ═══════════════════════════════
+// QUICK STUDY
+// ═══════════════════════════════
+function openQuickModal(){document.getElementById('quick-modal').classList.add('active');}
+function closeQuickModal(){document.getElementById('quick-modal').classList.remove('active');}
+function selQty(n,btn){quickQty=n;document.querySelectorAll('.qty-btn').forEach(b=>b.classList.remove('sel'));btn.classList.add('sel');}
+function startQuickStudy(){closeQuickModal();startQuiz('TODAS',quickQty);}
+
+// ═══════════════════════════════
+// QUIZ
+// ═══════════════════════════════
+function renderAreaList(){
+  const list=document.getElementById('area-list-quiz');
+  list.innerHTML='';
+  Object.entries(AI).forEach(([key,info])=>{
+    const qs=getQsByArea(key);
+    const d=userStats.byArea?.[key]||{c:0,w:0};
+    const t=d.c+d.w,p=t>0?Math.round(d.c/t*100):0;
+    list.innerHTML+=`<div class="area-li" onclick="startQuiz('${key}')">
+      <div class="area-li-icon" style="background:${info.color}18">${info.icon}</div>
+      <div><div class="area-li-name">${info.nome}</div><div class="area-li-count">${qs.length} questões · ${info.n} na prova</div></div>
+      <div class="area-li-pct" style="color:${p>=70?'#27AE60':p>=50?'#E67E22':'#C0392B'}">${t>0?p+'%':'—'}</div>
+    </div>`;
+  });
+}
+
+function startQuiz(area,limit){
+  quizArea=area;
+  quizQueue=buildQueue(area);
+  if(limit)quizQueue=quizQueue.slice(0,limit);
+  if(quizQueue.length===0){quizQueue=shuffle(getQsByArea(area));}
+  quizIdx=0;quizSessao={c:0,t:0};quizAnswered=false;
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-questao').classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('nav-quiz').classList.add('active');
+  renderQ();
+}
+
+function renderQ(){
+  if(quizIdx>=quizQueue.length){
+    quizQueue=shuffle(getQsByArea(quizArea));quizIdx=0;
+  }
+  const q=quizQueue[quizIdx];
+  const info=AI[q.area]||AI['AT1'];
+  document.getElementById('quiz-area-lbl').textContent=info.icon+' '+info.nome;
+  document.getElementById('quiz-prog-txt').textContent=(quizIdx+1)+' / '+quizQueue.length;
+  document.getElementById('quiz-prog-fill').style.width=((quizIdx+1)/quizQueue.length*100)+'%';
+  document.getElementById('quiz-score-v').textContent=quizSessao.c+'/'+quizSessao.t;
+  quizAnswered=false;
+  const body=document.getElementById('quiz-body');
+  body.innerHTML=(q.doc?`<div class="q-doc">📚 ${sanitize(q.doc)}</div>`:'')+
+    `<div class="q-text">${sanitize(q.e)}</div>`+
+    q.ops.map((op,i)=>`<button class="opt-btn" id="opt-${i}" onclick="answerQ(${i})">
+      <div class="opt-letter">${['A','B','C','D','E'][i]}</div><span>${sanitize(op)}</span>
+    </button>`).join('');
+}
+
+async function answerQ(sel){
+  if(quizAnswered)return;
+  quizAnswered=true;
+  const q=quizQueue[quizIdx];
+  const ok=sel===q.g;
+  quizSessao.t++;if(ok)quizSessao.c++;
+  if(!userStats.byArea[q.area])userStats.byArea[q.area]={c:0,w:0,errors:[]};
+  userStats.byArea[q.area].c+=ok?1:0;
+  userStats.byArea[q.area].w+=ok?0:1;
+  if(!ok){
+    if(!userStats.byArea[q.area].errors)userStats.byArea[q.area].errors=[];
+    if(!userStats.byArea[q.area].errors.includes(q.id))userStats.byArea[q.area].errors.push(q.id);
+  }else{
+    if(userStats.byArea[q.area].errors)userStats.byArea[q.area].errors=userStats.byArea[q.area].errors.filter(id=>id!==q.id);
+  }
+  userStats.correct+=ok?1:0;userStats.wrong+=ok?0:1;
+  if(!userStats.seenIds)userStats.seenIds=[];
+  if(!userStats.seenIds.includes(q.id))userStats.seenIds.push(q.id);
+  await saveProg();
+  for(let i=0;i<q.ops.length;i++){
+    const btn=document.getElementById('opt-'+i);
+    btn.disabled=true;
+    if(i===q.g)btn.classList.add('correct');
+    else if(i===sel)btn.classList.add('wrong');
+  }
+  document.getElementById('quiz-score-v').textContent=quizSessao.c+'/'+quizSessao.t;
+  const body=document.getElementById('quiz-body');
+  body.innerHTML+=`<div class="feedback ${ok?'ok':'err'}"><strong>${ok?'✅ Correto!':'❌ Errado!'}</strong>${sanitize(q.exp)}</div>
+    <button class="btn-next" onclick="nextQ()">Próxima →</button>`;
+  body.scrollTo(0,body.scrollHeight);
+}
+
+function nextQ(){quizIdx++;renderQ();document.getElementById('quiz-body').scrollTop=0;}
+
+// ═══════════════════════════════
+// FLASHCARDS
+// ═══════════════════════════════
+function getDue(){
+  return Object.values(allFlashcards).filter(fc=>{
+    const c=userCards[fc.id]||{};
+    return !c.next||c.next<=Date.now();
+  });
+}
+
+function renderCards(){
+  const due=getDue();
+  const total=Object.keys(allFlashcards).length;
+  const done=total-due.length;
+  const pct=total>0?Math.round(done/total*100):0;
+  const circ=132,offset=circ-(circ*pct/100);
+  const rc=document.getElementById('cp-ring-c');
+  if(rc)rc.style.strokeDashoffset=offset;
+  const cn=document.getElementById('cp-num');if(cn)cn.textContent=done;
+  const ct=document.getElementById('cp-title');if(ct)ct.textContent=due.length>0?due.length+' card'+(due.length>1?'s':'')+' para revisar hoje':'Tudo em dia! 🎉';
+  const content=document.getElementById('cards-content');if(!content)return;
+  if(due.length===0){
+    const future=Object.values(allFlashcards).filter(fc=>{const c=userCards[fc.id]||{};return c.next&&c.next>Date.now();}).sort((a,b)=>(userCards[a.id]?.next||0)-(userCards[b.id]?.next||0));
+    content.innerHTML=`<div class="cards-done"><div class="done-icon">🎉</div><div class="done-title">Revisão concluída!</div><div class="done-sub">Todos os cards revisados. Continue praticando no Quiz para reforçar o conteúdo.</div>
+      ${future.length>0?`<div class="next-list"><div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);margin-bottom:8px;">Próximas revisões</div>${future.slice(0,5).map(fc=>{const d=Math.ceil(((userCards[fc.id]?.next||0)-Date.now())/86400000);return`<div class="next-item"><strong>${fc.f.slice(0,48)}${fc.f.length>48?'...':''}</strong><span>Em ${d} dia${d!==1?'s':''}</span></div>`;}).join('')}</div>`:''}
+    </div>`;return;
+  }
+  const queue=shuffle(due);
+  renderCardAt(queue,0,content);
+}
+
+function renderCardAt(queue,idx,content){
+  if(idx>=queue.length){renderCards();return;}
+  const fc=queue[idx];
+  content.innerHTML=`<div class="card-counter"><span>${idx+1} / ${queue.length}</span><span>${queue.length-idx-1} restante${queue.length-idx-1!==1?'s':''}</span></div>
+    <div class="card-flip" onclick="flipCard()">
+      <div class="card-inner" id="ci">
+        <div class="card-face card-front"><div class="card-lbl">Pergunta · toque para virar</div><div class="card-txt">${sanitize(fc.f)}</div><div class="card-hint">Tap para ver a resposta</div></div>
+        <div class="card-face card-back"><div class="card-lbl">Resposta</div><div class="card-txt">${sanitize(fc.v)}</div></div>
+      </div>
+    </div>
+    <div class="card-actions" id="ca" style="display:none">
+      <button class="ca-btn er" onclick="rateCard('${fc.id}',1,queue,${idx},content)"><span>😓</span>Errei</button>
+      <button class="ca-btn le" onclick="rateCard('${fc.id}',3,queue,${idx},content)"><span>🤔</span>Lembrei</button>
+      <button class="ca-btn fa" onclick="rateCard('${fc.id}',5,queue,${idx},content)"><span>😊</span>Fácil</button>
+    </div>`;
+  content._queue=queue;content._idx=idx;
+}
+
+function flipCard(){
+  const ci=document.getElementById('ci'),ca=document.getElementById('ca');
+  if(ci)ci.classList.toggle('flipped');
+  if(ca)ca.style.display=ci.classList.contains('flipped')?'grid':'none';
+}
+
+async function rateCard(id,quality){
+  const content=document.getElementById('cards-content');
+  const queue=content._queue,idx=content._idx;
+  const updated=sm2Update(userCards[id]||{},quality);
+  await saveCard(id,updated);
+  renderCardAt(queue,idx+1,content);
+}
+
+// ═══════════════════════════════
+// SIMULADO
+// ═══════════════════════════════
+function renderSimHome(){
+  const hist=(userStats.history||[]).filter(h=>h.tipo==='simulado');
+  document.getElementById('sim-total-n').textContent=hist.length;
+  document.getElementById('sim-melhor').textContent=hist.length>0?Math.max(...hist.map(s=>s.pct||0))+'%':'—';
+  const list=document.getElementById('sim-hist-list');
+  if(hist.length===0){list.innerHTML='<div class="empty"><div class="empty-i">📊</div><div class="empty-t">Nenhum simulado realizado ainda.</div></div>';return;}
+  list.innerHTML=hist.slice(0,5).map(s=>`<div class="sim-hi"><div><div style="font-size:13px;font-weight:700;">${s.data||'—'}</div><div class="sim-hi-d">${s.respondidas||0} respondidas</div></div><div class="sim-hi-s" style="color:${(s.pct||0)>=60?'#27AE60':'#C0392B'}">${s.pct||0}%</div></div>`).join('');
+}
+
+function startSimulado(){
+  const todas=Object.values(allQuestoes);
+  const ga=(area,n)=>shuffle(todas.filter(q=>q.area===area)).slice(0,n);
+  simQuestoes=shuffle([...ga('AT1',14),...ga('AT2',8),...ga('AT3',14),...ga('AT4',12),...ga('AT5',12)]);
+  simRespostas={};simIdx=0;simTempo=10800;
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('sim-running').classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('nav-simulado').classList.add('active');
+  updateSimTimer();renderSimNav();renderSimQ();
+  simTimer=setInterval(()=>{simTempo--;updateSimTimer();if(simTempo<=0)encerrarSimulado();},1000);
+}
+
+function updateSimTimer(){
+  const h=Math.floor(simTempo/3600).toString().padStart(2,'0');
+  const m=Math.floor((simTempo%3600)/60).toString().padStart(2,'0');
+  const s=(simTempo%60).toString().padStart(2,'0');
+  const el=document.getElementById('sim-timer');
+  if(el){el.textContent=h+':'+m+':'+s;el.classList.toggle('warn',simTempo<600);}
+  const qn=document.getElementById('sim-qn');if(qn)qn.textContent='Questão '+(simIdx+1)+' de '+simQuestoes.length;
+}
+
+function renderSimNav(){
+  const nav=document.getElementById('sim-nav');
+  nav.innerHTML=simQuestoes.map((q,i)=>`<button class="qd ${simRespostas[q.id]!==undefined?'ans':''} ${i===simIdx?'cur':''}" onclick="goSimQ(${i})">${i+1}</button>`).join('');
+}
+
+function goSimQ(i){simIdx=i;renderSimNav();renderSimQ();}
+
+function renderSimQ(){
+  const q=simQuestoes[simIdx];
+  const body=document.getElementById('sim-body');
+  body.innerHTML=(q.doc?`<div class="q-doc">📚 ${sanitize(q.doc)}</div>`:'')+
+    `<div class="q-text">${sanitize(q.e)}</div>`+
+    q.ops.map((op,i)=>`<button class="opt-btn ${simRespostas[q.id]===i?'selected':''}" style="${simRespostas[q.id]===i?'border-color:var(--red);background:var(--red-light);color:var(--red);':''}" onclick="selSimOp(${i})">
+      <div class="opt-letter">${['A','B','C','D','E'][i]}</div><span>${sanitize(op)}</span>
+    </button>`).join('')+
+    `<div class="sim-nav-btns">
+      <button class="btn-prev-sim" ${simIdx===0?'disabled':''} onclick="goSimQ(${simIdx-1})">← Anterior</button>
+      ${simIdx<simQuestoes.length-1?`<button class="btn-nxt-sim" onclick="goSimQ(${simIdx+1})">Próxima →</button>`:`<button class="btn-nxt-sim" style="background:var(--green)" onclick="encerrarSimulado()">✅ Finalizar</button>`}
+    </div>`;
+}
+
+function selSimOp(i){simRespostas[simQuestoes[simIdx].id]=i;renderSimNav();renderSimQ();}
+
+async function encerrarSimulado(){
+  clearInterval(simTimer);
+  let acertos=0,total=0;
+  const byArea={};
+  simQuestoes.forEach(q=>{
+    const r=simRespostas[q.id];
+    if(r!==undefined){
+      total++;
+      if(!byArea[q.area])byArea[q.area]={c:0,t:0};
+      byArea[q.area].t++;
+      if(r===q.g){acertos++;byArea[q.area].c++;}
+    }
+  });
+  const pct=total>0?Math.round(acertos/total*100):0;
+  const data=new Date().toLocaleDateString('pt-BR');
+  if(!userStats.history)userStats.history=[];
+  userStats.history.unshift({tipo:'simulado',pct,acertos,respondidas:total,data,ts:Date.now()});
+  await saveProg();
+  document.getElementById('sim-running').classList.remove('active');
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-resultado').classList.add('active');
+  document.getElementById('res-content').innerHTML=`
+    <div class="res-hero ${pct>=60?'pass':'fail'}">
+      <div class="res-pct">${pct}%</div>
+      <div class="res-lbl">${acertos} de ${total} corretas</div>
+      <div class="res-tag">${pct>=60?'✅ Aprovado':'❌ Abaixo da média'}</div>
+    </div>
+    <div class="res-areas">
+      <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;">Por área</div>
+      ${Object.entries(byArea).map(([a,d])=>`<div class="res-area-row">
+        <div class="res-area-n">${AI[a]?.icon||''} ${AI[a]?.nome||a}</div>
+        <div class="res-area-s" style="color:${d.t>0&&d.c/d.t>=.6?'#27AE60':'#C0392B'}">${d.c}/${d.t} (${d.t>0?Math.round(d.c/d.t*100):0}%)</div>
+      </div>`).join('')}
+    </div>
+    <button onclick="navTo('simulado')" style="width:100%;background:var(--red);color:white;border:none;border-radius:13px;padding:14px;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 3px 14px rgba(192,57,43,.2);">Novo Simulado</button>`;
+}
+
+// ═══════════════════════════════
+// ÁUDIO
+// ═══════════════════════════════
+function loadVoices(){
+  function set(){
+    const vs=speechSynthesis.getVoices().filter(v=>v.lang.startsWith('pt'));
+    const sel=document.getElementById('voice-sel');if(!sel)return;
+    sel.innerHTML=vs.length>0?vs.map(v=>`<option value="${v.name}">${v.name}</option>`):'<option value="">Voz padrão</option>';
+    const pref=vs.find(v=>v.name.includes('Luciana')||v.name.includes('Fernanda')||v.localService);
+    if(pref)sel.value=pref.name;
+  }
+  set();speechSynthesis.onvoiceschanged=set;
+}
+
+function setDur(d,btn){
+  currentDur=d;
+  document.querySelectorAll('.dur-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  renderAudio();
+}
+
+function renderAudio(){
+  const list=document.getElementById('audio-cards');if(!list)return;
+  const durLabel={curto:'~5 min',medio:'~10 min',longo:'~15 min'};
+  list.innerHTML=Object.entries(AI).map(([key,info])=>{
+    const roteiro=ROT[key]?.[currentDur]||'';
+    const paras=roteiro.split('\n\n').filter(p=>p.trim());
+    return`<div class="audio-card">
+      <div class="audio-card-hdr">
+        <div class="audio-card-icon">${info.icon}</div>
+        <div><div class="audio-card-name">${info.nome}</div><div class="audio-card-dur">${durLabel[currentDur]}</div></div>
+      </div>
+      <div class="audio-text" id="txt-${key}">${paras.map((p,i)=>`<p id="p-${key}-${i}">${p}</p>`).join('')}</div>
+      <div class="audio-ctls">
+        <button class="audio-play" id="btn-${key}" onclick="toggleAudio('${key}')">▶ Ouvir</button>
+        <button class="audio-stop" onclick="stopAudio()">■ Parar</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleAudio(area){
+  if(currentAudioArea===area){stopAudio();return;}
+  stopAudio();currentAudioArea=area;
+  const roteiro=ROT[area]?.[currentDur]||'';
+  const paras=roteiro.split('\n\n').filter(p=>p.trim());
+  let pi=0;
+  function speak(){
+    if(pi>=paras.length){stopAudio();return;}
+    document.querySelectorAll(`[id^="p-${area}-"]`).forEach(el=>el.classList.remove('hl'));
+    const el=document.getElementById('p-'+area+'-'+pi);
+    if(el){el.classList.add('hl');el.scrollIntoView({behavior:'smooth',block:'nearest'});}
+    const u=new SpeechSynthesisUtterance(paras[pi]);
+    u.lang='pt-BR';u.rate=0.88;
+    const sel=document.getElementById('voice-sel');
+    if(sel?.value){const v=speechSynthesis.getVoices().find(v=>v.name===sel.value);if(v)u.voice=v;}
+    u.onend=()=>{pi++;speak();};
+    u.onerror=()=>stopAudio();
+    speechUtter=u;speechSynthesis.speak(u);
+  }
+  const btn=document.getElementById('btn-'+area);if(btn)btn.textContent='⏸ Pausar';
+  speak();
+}
+
+function stopAudio(){
+  speechSynthesis.cancel();
+  if(currentAudioArea){
+    const btn=document.getElementById('btn-'+currentAudioArea);if(btn)btn.textContent='▶ Ouvir';
+    document.querySelectorAll(`[id^="p-${currentAudioArea}-"]`).forEach(el=>el.classList.remove('hl'));
+  }
+  currentAudioArea=null;
+}
+
+// ═══════════════════════════════
+// ADMIN
+// ═══════════════════════════════
+function setAdminTab(tab,btn){
+  document.querySelectorAll('.admin-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.admin-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('admin-'+tab).classList.add('active');
+  btn.classList.add('active');
+}
+
+async function loadAdminUsers(){
+  const snap=await db.ref('usuarios').get();if(!snap.exists())return;
+  const users=snap.val();
+  const list=document.getElementById('admin-users-list');
+  list.innerHTML='';
+  Object.entries(users).forEach(([uid,u])=>{
+    list.innerHTML+=`<div class="user-card">
+      <div class="uc-email">${sanitize(u.nome||u.email)}</div>
+      <div class="uc-info">${sanitize(u.email)} · ${u.admin?'Admin':'Usuário'} · ${u.aprovado?'Aprovado':'Pendente'}</div>
+      <div class="uc-actions">
+        ${!u.aprovado?`<button class="btn-ap" onclick="approveUser('${uid}')">✅ Aprovar</button>`:''}
+        ${u.aprovado&&!u.admin?`<button class="btn-adm" onclick="makeAdmin('${uid}')">⭐ Admin</button>`:''}
+        ${u.aprovado?`<button class="btn-rj" onclick="revokeUser('${uid}')">❌ Revogar</button>`:''}
+      </div>
+    </div>`;
+  });
+}
+
+function isAdmin(){return currentUser&&(currentUser.email===ADMIN_EMAIL||(userProfile&&userProfile.admin===true));}
+async function approveUser(uid){if(!isAdmin())return;await db.ref('usuarios/'+uid).update({aprovado:true});loadAdminUsers();}
+async function revokeUser(uid){if(!isAdmin())return;await db.ref('usuarios/'+uid).update({aprovado:false});loadAdminUsers();}
+async function makeAdmin(uid){if(currentUser.email!==ADMIN_EMAIL)return;await db.ref('usuarios/'+uid).update({admin:true});loadAdminUsers();}
+
+async function addQuestao(){
+  if(!isAdmin()){alert('Acesso negado.');return;}
+  const area=document.getElementById('q-area').value;
+  const doc=document.getElementById('q-doc').value.trim();
+  const e=document.getElementById('q-enunciado').value.trim();
+  const ops=[0,1,2,3,4].map(i=>document.getElementById('q-op'+i).value.trim());
+  const g=parseInt(document.getElementById('q-gab').value);
+  const exp=document.getElementById('q-exp').value.trim();
+  const msg=document.getElementById('add-q-msg');
+  if(!e||ops.some(o=>!o)||!exp){msg.textContent='Preencha todos os campos.';return;}
+  const id='q_'+Date.now();
+  await db.ref('questoes/'+id).set({id,area,doc,e,ops,g,exp});
+  allQuestoes[id]={id,area,doc,e,ops,g,exp};
+  msg.textContent='✅ Questão salva com sucesso!';msg.className='auth-msg ok';
+  document.getElementById('q-enunciado').value='';
+  document.getElementById('q-doc').value='';
+  [0,1,2,3,4].forEach(i=>{document.getElementById('q-op'+i).value='';});
+  document.getElementById('q-exp').value='';
+  setTimeout(()=>{msg.textContent='';msg.className='auth-msg';},3000);
+}
+
+async function addFlashcard(){
+  if(!isAdmin()){alert('Acesso negado.');return;}
+  const area=document.getElementById('fc-area').value;
+  const f=document.getElementById('fc-frente').value.trim();
+  const v=document.getElementById('fc-verso').value.trim();
+  const msg=document.getElementById('add-fc-msg');
+  if(!f||!v){msg.textContent='Preencha frente e verso.';return;}
+  const id='fc_'+Date.now();
+  await db.ref('flashcards/'+id).set({id,a:area,f,v});
+  allFlashcards[id]={id,a:area,f,v};
+  document.getElementById('fc-frente').value='';
+  document.getElementById('fc-verso').value='';
+  msg.textContent='✅ Flashcard salvo!';msg.className='auth-msg ok';
+  setTimeout(()=>{msg.textContent='';msg.className='auth-msg';},3000);
+  renderCards();
+}
+
+</script>
+</body>
+</html>
