@@ -7,55 +7,57 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="theme-color" content="#C0392B"/>
 <title>Bombeiro CTSP</title>
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' https://*.googleapis.com https://*.gstatic.com https://*.firebase.com https://*.firebaseio.com https://*.firebaseapp.com data: blob:;">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' https://*.googleapis.com https://*.gstatic.com https://*.firebase.com https://*.firebaseio.com https://*.firebaseapp.com https://api.anthropic.com data: blob:;">
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 :root{
-  --red:#C0392B;--red-dark:#96281B;--red-light:#FDECEA;
-  --gold:#B8860B;--gold-light:#FFF8E1;
-  --white:#FFFFFF;--bg:#F5F5F5;
+  --red:#C0392B;--red-dark:#96281B;--red-mid:#A93226;--red-light:#FDECEA;
+  --white:#FFFFFF;--bg:#F2F2F7;
   --text:#1A1A1A;--text2:#666666;--text3:#999999;
   --border:#E8E8E8;--green:#27AE60;--green-light:#E8F8F0;
   --amber:#E67E22;--amber-light:#FEF5E7;
-  --shadow:0 2px 12px rgba(0,0,0,0.08);
-  --radius:16px;--radius-sm:10px;
-  --nav-h:64px;--header-h:60px;
+  --blue:#2980B9;--blue-light:#EBF5FB;
+  --shadow:0 2px 12px rgba(0,0,0,0.08);--shadow-md:0 4px 20px rgba(0,0,0,0.12);
+  --radius:16px;--radius-sm:10px;--radius-xs:8px;
+  --nav-h:68px;--header-h:60px;
 }
 html,body{height:100%;font-family:-apple-system,'SF Pro Display','Helvetica Neue',Arial,sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;}
 button{font-family:inherit;cursor:pointer;border:none;outline:none;}
 input,select,textarea{font-family:inherit;outline:none;}
 
 /* LOADING */
-#loading{position:fixed;inset:0;background:var(--red);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;gap:20px;}
-#loading .logo{width:90px;height:90px;border-radius:50%;background:white;padding:8px;object-fit:contain;animation:pulse 1.5s ease-in-out infinite;}
-#loading p{color:white;font-size:14px;font-weight:700;letter-spacing:.08em;opacity:.85;}
+#loading{position:fixed;inset:0;background:var(--red);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;gap:16px;}
+#loading img{width:90px;height:90px;border-radius:50%;background:white;padding:8px;object-fit:contain;animation:pulse 1.5s ease-in-out infinite;}
+#loading p{color:white;font-size:13px;font-weight:700;letter-spacing:.08em;opacity:.85;}
 @keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.06);}}
 
 /* AUTH */
-#auth-screen{display:none;min-height:100vh;background:linear-gradient(160deg,var(--red-dark) 0%,var(--red) 55%,#8B1A1A 100%);flex-direction:column;align-items:center;justify-content:center;padding:24px;}
+#auth-screen{display:none;min-height:100vh;position:relative;flex-direction:column;align-items:center;justify-content:flex-end;padding:0;}
 #auth-screen.active{display:flex;}
-.auth-logo{width:100px;height:100px;border-radius:50%;border:3px solid rgba(255,255,255,.25);margin-bottom:6px;background:white;padding:7px;object-fit:contain;}
-.auth-title{color:white;font-size:26px;font-weight:800;letter-spacing:-.02em;margin-bottom:3px;}
-.auth-sub{color:rgba(255,255,255,.7);font-size:12px;margin-bottom:28px;text-align:center;line-height:1.5;}
-.auth-card{background:white;border-radius:24px;padding:26px 22px;width:100%;max-width:360px;box-shadow:0 20px 60px rgba(0,0,0,.25);}
+.auth-bg{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.15) 0%,rgba(150,40,27,.7) 45%,rgba(96,26,18,.98) 100%);z-index:1;}
+.auth-bg-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center top;}
+.auth-content{position:relative;z-index:2;width:100%;padding:0 0 env(safe-area-inset-bottom);}
+.auth-hero{text-align:center;padding:32px 24px 24px;}
+.auth-hero img.logo{width:80px;height:80px;border-radius:50%;border:3px solid rgba(255,255,255,.3);background:white;padding:6px;object-fit:contain;margin-bottom:12px;}
+.auth-hero h1{color:white;font-size:28px;font-weight:800;letter-spacing:-.02em;line-height:1.1;}
+.auth-hero p{color:rgba(255,255,255,.75);font-size:13px;margin-top:4px;}
+.auth-card{background:white;border-radius:28px 28px 0 0;padding:28px 22px 32px;width:100%;max-width:480px;margin:0 auto;}
 .auth-tabs{display:flex;gap:4px;background:var(--bg);border-radius:12px;padding:4px;margin-bottom:22px;}
 .auth-tab{flex:1;padding:9px;border:none;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;background:transparent;color:var(--text2);transition:all .2s;}
 .auth-tab.active{background:var(--red);color:white;box-shadow:0 2px 8px rgba(192,57,43,.3);}
 .field{margin-bottom:14px;}
 .field label{display:block;font-size:11px;font-weight:700;color:var(--text2);margin-bottom:5px;text-transform:uppercase;letter-spacing:.05em;}
 .field input,.field select,.field textarea{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:11px;font-size:15px;color:var(--text);background:var(--bg);transition:border-color .2s;}
-.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--red);background:white;}
-.field textarea{resize:vertical;min-height:72px;}
+.field input:focus,.field select:focus{border-color:var(--red);background:white;}
 .btn-primary{width:100%;padding:14px;background:var(--red);color:white;border-radius:12px;font-size:15px;font-weight:700;letter-spacing:.02em;transition:all .2s;box-shadow:0 4px 16px rgba(192,57,43,.3);}
 .btn-primary:active{transform:scale(.98);}
 .btn-primary:disabled{opacity:.6;}
 .auth-msg{font-size:12px;text-align:center;margin-top:10px;min-height:18px;color:var(--red);}
 .auth-msg.ok{color:var(--green);}
 .pending-box{text-align:center;padding:16px 0;color:var(--text2);font-size:13px;line-height:1.6;}
-.pending-box .pi{font-size:36px;display:block;margin-bottom:10px;}
 
 /* APP SHELL */
 #app{display:none;flex-direction:column;min-height:100vh;}
@@ -67,7 +69,9 @@ input,select,textarea{font-family:inherit;outline:none;}
 .header-titles{flex:1;}
 .header-title{color:white;font-size:15px;font-weight:800;line-height:1.1;}
 .header-sub{color:rgba(255,255,255,.65);font-size:10px;}
-.header-name{color:rgba(255,255,255,.8);font-size:11px;text-align:right;line-height:1.4;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.header-right{display:flex;align-items:center;gap:6px;}
+.streak-badge{background:rgba(255,255,255,.2);color:white;border-radius:20px;padding:4px 8px;font-size:11px;font-weight:700;display:flex;align-items:center;gap:3px;}
+.header-name{color:rgba(255,255,255,.8);font-size:11px;text-align:right;max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .btn-logout{background:rgba(255,255,255,.18);color:white;border-radius:8px;padding:6px 10px;font-size:11px;font-weight:700;}
 
 /* CONTENT */
@@ -75,527 +79,810 @@ input,select,textarea{font-family:inherit;outline:none;}
 
 /* BOTTOM NAV */
 .bottom-nav{position:fixed;bottom:0;left:0;right:0;height:var(--nav-h);background:white;border-top:1px solid var(--border);display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom);}
-.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--text3);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;cursor:pointer;transition:color .2s;padding:8px 2px;}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--text3);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;cursor:pointer;transition:color .2s;padding:8px 2px;position:relative;}
 .nav-item.active{color:var(--red);}
 .nav-item svg{width:22px;height:22px;}
+.nav-badge{position:absolute;top:6px;right:calc(50% - 18px);background:var(--red);color:white;border-radius:10px;font-size:9px;font-weight:800;padding:1px 5px;min-width:16px;text-align:center;}
 
 /* SCREENS */
 .screen{display:none;}
 .screen.active{display:block;}
 
-/* DASHBOARD */
-.dash-hero{background:linear-gradient(135deg,var(--red-dark),var(--red));padding:18px 16px 22px;color:white;position:relative;overflow:hidden;}
-.dash-hero::after{content:'';position:absolute;right:-20px;top:-20px;width:130px;height:130px;background:rgba(255,255,255,.05);border-radius:50%;}
-.dash-greeting{font-size:12px;opacity:.8;margin-bottom:1px;}
-.dash-name{font-size:21px;font-weight:800;margin-bottom:14px;}
-.dash-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
-.dash-stat{background:rgba(255,255,255,.14);border-radius:11px;padding:11px 8px;text-align:center;backdrop-filter:blur(4px);}
-.dash-stat-v{font-size:20px;font-weight:800;line-height:1;}
+/* ═══ DASHBOARD ═══ */
+.dash-hero{background:linear-gradient(135deg,var(--red-dark),var(--red));padding:16px 16px 20px;color:white;position:relative;overflow:hidden;}
+.dash-hero::after{content:'';position:absolute;right:-30px;top:-30px;width:150px;height:150px;background:rgba(255,255,255,.05);border-radius:50%;}
+.dash-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;}
+.dash-greeting{font-size:12px;opacity:.75;margin-bottom:2px;}
+.dash-name{font-size:22px;font-weight:800;}
+.dash-ring-wrap{display:flex;flex-direction:column;align-items:center;gap:2px;}
+.dash-ring-label{font-size:10px;opacity:.7;font-weight:600;}
+.dash-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px;}
+.dash-stat{background:rgba(255,255,255,.14);border-radius:11px;padding:10px 8px;text-align:center;backdrop-filter:blur(4px);}
+.dash-stat-v{font-size:19px;font-weight:800;line-height:1;}
 .dash-stat-l{font-size:9px;opacity:.8;margin-top:2px;font-weight:600;}
+.dash-meta{background:rgba(255,255,255,.18);border-radius:12px;padding:10px 14px;display:flex;align-items:center;gap:12px;}
+.dash-meta-info{flex:1;}
+.dash-meta-title{font-size:11px;font-weight:700;opacity:.8;margin-bottom:4px;}
+.dash-meta-bar{height:6px;background:rgba(255,255,255,.25);border-radius:3px;overflow:hidden;}
+.dash-meta-fill{height:100%;background:white;border-radius:3px;transition:width .4s ease;}
+.dash-meta-count{font-size:13px;font-weight:800;}
 .dash-body{padding:14px;}
-.sec-title{font-size:11px;font-weight:800;color:var(--text);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;}
+.sec-title{font-size:11px;font-weight:800;color:var(--text);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;}
+.sec-title a{font-size:11px;color:var(--red);font-weight:700;text-transform:none;letter-spacing:0;}
 
-/* Ring card */
-.ring-card{background:white;border-radius:18px;padding:16px;box-shadow:var(--shadow);display:flex;align-items:center;gap:16px;margin-bottom:16px;}
-.ring-wrap{position:relative;width:76px;height:76px;flex-shrink:0;}
-.ring-wrap svg{transform:rotate(-90deg);}
+/* Ring SVG */
+.ring-svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:rgba(255,255,255,.2);stroke-width:5;}
+.ring-fg{fill:none;stroke:white;stroke-width:5;stroke-linecap:round;transition:stroke-dashoffset .6s ease;}
 .ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
-.ring-pct{font-size:17px;font-weight:800;color:var(--red);line-height:1;}
-.ring-lbl{font-size:9px;color:var(--text3);font-weight:700;text-transform:uppercase;}
-.ring-info h3{font-size:14px;font-weight:700;color:var(--text);margin-bottom:3px;}
-.ring-info p{font-size:12px;color:var(--text2);line-height:1.4;}
+.ring-pct{font-size:14px;font-weight:800;color:white;line-height:1;}
+.ring-lbl{font-size:8px;color:rgba(255,255,255,.7);font-weight:600;margin-top:1px;}
 
-/* Area grid */
-.area-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:16px;}
-.area-card{background:white;border-radius:var(--radius-sm);padding:13px 11px;box-shadow:var(--shadow);cursor:pointer;transition:transform .15s;}
-.area-card:active{transform:scale(.97);}
-.area-icon{font-size:20px;margin-bottom:7px;}
-.area-name{font-size:11px;font-weight:800;color:var(--text);margin-bottom:5px;line-height:1.3;}
-.area-bar{height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-bottom:3px;}
-.area-bar-fill{height:100%;border-radius:2px;transition:width .5s;}
-.area-pct{font-size:11px;font-weight:700;}
+/* Cards de progresso por área */
+.area-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.area-card{background:white;border-radius:14px;padding:12px;box-shadow:var(--shadow);}
+.area-card-top{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.area-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.area-card-name{font-size:11px;font-weight:700;color:var(--text);line-height:1.2;}
+.area-card-code{font-size:10px;color:var(--text2);}
+.area-prog-bar{height:5px;background:var(--border);border-radius:3px;overflow:hidden;margin-bottom:4px;}
+.area-prog-fill{height:100%;border-radius:3px;transition:width .4s;}
+.area-prog-pct{font-size:11px;font-weight:700;}
 
-/* Quick button */
-.quick-btn{width:100%;background:var(--red);color:white;border-radius:var(--radius);padding:15px;font-size:15px;font-weight:800;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 18px rgba(192,57,43,.32);margin-bottom:16px;transition:transform .15s;}
-.quick-btn:active{transform:scale(.98);}
+/* Alerta ponto fraco */
+.weak-card{background:linear-gradient(135deg,#FEF5E7,#FDECEA);border-radius:14px;padding:14px;margin-bottom:14px;display:flex;align-items:center;gap:12px;border:1px solid rgba(192,57,43,.1);}
+.weak-icon{width:42px;height:42px;background:var(--red-light);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.weak-info{flex:1;}
+.weak-title{font-size:11px;font-weight:800;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px;}
+.weak-area{font-size:14px;font-weight:700;color:var(--text);}
+.weak-pct{font-size:12px;color:var(--red);font-weight:600;}
+.btn-weak{background:var(--red);color:white;border-radius:10px;padding:8px 14px;font-size:12px;font-weight:700;flex-shrink:0;}
 
-/* Due banner */
-.due-banner{background:var(--gold-light);border:1.5px solid var(--gold);border-radius:var(--radius-sm);padding:13px;display:flex;align-items:center;gap:11px;margin-bottom:16px;cursor:pointer;}
-.due-icon{font-size:26px;}
-.due-title{font-size:13px;font-weight:700;color:var(--gold);}
-.due-sub{font-size:11px;color:var(--text2);}
+/* Quick actions */
+.quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.quick-btn{background:white;border-radius:14px;padding:14px 12px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:6px;cursor:pointer;transition:transform .15s;border:1.5px solid transparent;}
+.quick-btn:active{transform:scale(.97);}
+.quick-btn.destaque{border-color:var(--red);background:var(--red-light);}
+.quick-btn-icon{font-size:24px;}
+.quick-btn-title{font-size:13px;font-weight:700;color:var(--text);}
+.quick-btn-sub{font-size:11px;color:var(--text2);}
 
-/* MODAL */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:none;align-items:flex-end;justify-content:center;}
-.modal-overlay.active{display:flex;}
-.modal-sheet{background:white;border-radius:24px 24px 0 0;padding:22px;width:100%;max-width:480px;animation:slideUp .28s ease;}
-@keyframes slideUp{from{transform:translateY(100%);}to{transform:translateY(0);}}
-.modal-handle{width:38px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 18px;}
-.modal-title{font-size:18px;font-weight:800;margin-bottom:4px;}
-.modal-sub{font-size:13px;color:var(--text2);margin-bottom:18px;}
-.qty-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-bottom:18px;}
-.qty-btn{padding:15px 6px;border:2px solid var(--border);border-radius:12px;font-size:15px;font-weight:800;color:var(--text2);background:white;transition:all .2s;text-align:center;}
-.qty-btn.sel{border-color:var(--red);color:var(--red);background:var(--red-light);}
-.qty-btn small{display:block;font-size:11px;font-weight:600;color:var(--text3);margin-top:2px;}
-.btn-cancel{width:100%;padding:12px;background:var(--bg);color:var(--text2);border-radius:12px;font-size:14px;font-weight:700;margin-top:8px;}
+/* Gráfico mensal simples */
+.chart-wrap{background:white;border-radius:14px;padding:14px;box-shadow:var(--shadow);margin-bottom:14px;}
+.chart-bars{display:flex;align-items:flex-end;gap:4px;height:60px;margin-top:10px;}
+.chart-bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;}
+.chart-bar{width:100%;background:var(--red-light);border-radius:4px 4px 0 0;transition:height .4s ease;min-height:4px;}
+.chart-bar.hoje{background:var(--red);}
+.chart-bar-label{font-size:9px;color:var(--text3);font-weight:600;}
 
-/* QUIZ */
-.quiz-hdr{background:var(--red);padding:12px 14px;color:white;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:50;}
-.quiz-back{background:rgba(255,255,255,.18);border-radius:8px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.quiz-info{flex:1;}
-.quiz-area-lbl{font-size:10px;opacity:.8;font-weight:600;}
-.quiz-prog-txt{font-size:13px;font-weight:800;}
-.quiz-prog-bar{height:3px;background:rgba(255,255,255,.2);margin-top:6px;border-radius:2px;}
+/* ═══ QUIZ ═══ */
+.quiz-header{background:linear-gradient(135deg,var(--red-dark),var(--red));padding:14px 16px;color:white;}
+.quiz-meta{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.quiz-area-tag{background:rgba(255,255,255,.2);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:700;}
+.quiz-score-box{background:rgba(255,255,255,.2);border-radius:10px;padding:6px 12px;text-align:center;}
+.quiz-score-v{font-size:16px;font-weight:800;line-height:1;}
+.quiz-score-l{font-size:9px;opacity:.8;font-weight:600;}
+.quiz-prog{height:4px;background:rgba(255,255,255,.25);border-radius:2px;overflow:hidden;}
 .quiz-prog-fill{height:100%;background:white;border-radius:2px;transition:width .3s;}
-.quiz-score{background:rgba(255,255,255,.15);border-radius:8px;padding:5px 9px;text-align:center;flex-shrink:0;}
-.quiz-score-v{font-size:15px;font-weight:800;line-height:1;}
-.quiz-score-l{font-size:9px;opacity:.8;}
 .quiz-body{padding:14px;}
-.q-doc{font-size:10px;color:var(--text3);font-weight:700;margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em;}
-.q-text{font-size:14px;color:var(--text);line-height:1.65;font-weight:600;margin-bottom:18px;}
-.opt-btn{width:100%;background:white;border:2px solid var(--border);border-radius:11px;padding:12px 13px;margin-bottom:9px;text-align:left;font-size:13px;color:var(--text);display:flex;align-items:flex-start;gap:9px;transition:all .15s;line-height:1.4;}
-.opt-btn:active:not(:disabled){transform:scale(.99);}
-.opt-letter{width:26px;height:26px;border-radius:7px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0;margin-top:1px;}
-.opt-btn.correct{border-color:var(--green);background:var(--green-light);}
-.opt-btn.correct .opt-letter{background:var(--green);color:white;}
-.opt-btn.wrong{border-color:var(--red);background:var(--red-light);}
-.opt-btn.wrong .opt-letter{background:var(--red);color:white;}
-.feedback{border-radius:11px;padding:13px;margin:4px 0 14px;font-size:13px;line-height:1.6;border-left:4px solid;}
-.feedback.ok{background:var(--green-light);border-color:var(--green);color:#1A5E38;}
-.feedback.err{background:var(--red-light);border-color:var(--red);color:#7B1A12;}
-.feedback strong{display:block;font-size:13px;font-weight:800;margin-bottom:3px;}
-.btn-next{width:100%;background:var(--red);color:white;border-radius:12px;padding:13px;font-size:14px;font-weight:700;box-shadow:0 3px 14px rgba(192,57,43,.22);}
+.quiz-q-num{font-size:11px;font-weight:700;color:var(--text2);margin-bottom:8px;}
+.quiz-q-text{font-size:15px;font-weight:600;color:var(--text);line-height:1.5;margin-bottom:16px;}
+.quiz-doc{font-size:11px;color:var(--text3);margin-bottom:16px;font-style:italic;}
+.quiz-opts{display:flex;flex-direction:column;gap:10px;}
+.quiz-opt{background:white;border:2px solid var(--border);border-radius:12px;padding:12px 14px;font-size:14px;color:var(--text);text-align:left;transition:all .2s;display:flex;align-items:flex-start;gap:10px;line-height:1.4;}
+.quiz-opt-letter{width:22px;height:22px;border-radius:50%;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;margin-top:1px;}
+.quiz-opt:active{transform:scale(.98);}
+.quiz-opt.selected{border-color:var(--red);background:var(--red-light);}
+.quiz-opt.correta{border-color:var(--green);background:var(--green-light);}
+.quiz-opt.errada{border-color:#E74C3C;background:#FDECEA;}
+.quiz-feedback{background:white;border-radius:14px;padding:14px;margin-top:16px;box-shadow:var(--shadow);display:none;}
+.quiz-feedback.show{display:block;}
+.quiz-feedback-title{font-size:12px;font-weight:800;margin-bottom:6px;}
+.quiz-feedback-text{font-size:13px;color:var(--text2);line-height:1.5;}
+.quiz-ai-tip{background:linear-gradient(135deg,var(--red-light),#FFF8E1);border-radius:10px;padding:10px;margin-top:10px;font-size:12px;color:var(--text2);line-height:1.5;border-left:3px solid var(--red);}
+.quiz-next-btn{width:100%;margin-top:16px;padding:14px;background:var(--red);color:white;border-radius:12px;font-size:15px;font-weight:700;display:none;}
+.quiz-next-btn.show{display:block;}
 
-/* AREA SELECTOR */
-.area-sel{padding:16px;}
-.area-sel h1{font-size:20px;font-weight:800;margin-bottom:3px;}
-.area-sel p{font-size:13px;color:var(--text2);margin-bottom:18px;}
-.area-all{background:var(--red);color:white;border-radius:var(--radius);padding:15px;width:100%;font-size:14px;font-weight:800;margin-bottom:11px;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 14px rgba(192,57,43,.22);}
-.area-li{background:white;border-radius:var(--radius);padding:14px;margin-bottom:10px;display:flex;align-items:center;gap:13px;box-shadow:var(--shadow);cursor:pointer;transition:transform .15s;}
-.area-li:active{transform:scale(.98);}
-.area-li-icon{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
-.area-li-name{font-size:14px;font-weight:700;margin-bottom:1px;}
-.area-li-count{font-size:11px;color:var(--text2);}
-.area-li-pct{font-size:14px;font-weight:800;margin-left:auto;}
+/* Quiz home */
+.quiz-home{padding:16px;}
+.quiz-home-title{font-size:18px;font-weight:800;margin-bottom:4px;}
+.quiz-home-sub{font-size:13px;color:var(--text2);margin-bottom:20px;}
+.area-list{display:flex;flex-direction:column;gap:10px;}
+.area-row{background:white;border-radius:14px;padding:14px;box-shadow:var(--shadow);display:flex;align-items:center;gap:12px;cursor:pointer;transition:transform .15s;}
+.area-row:active{transform:scale(.98);}
+.area-row-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.area-row-info{flex:1;}
+.area-row-name{font-size:14px;font-weight:700;color:var(--text);}
+.area-row-meta{font-size:11px;color:var(--text2);margin-top:2px;}
+.area-row-pct{font-size:13px;font-weight:800;}
+.erro-mode-btn{width:100%;padding:14px;background:white;border:2px solid var(--red);color:var(--red);border-radius:14px;font-size:14px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;justify-content:center;gap:8px;}
+.trilha-btn{width:100%;padding:14px;background:linear-gradient(135deg,var(--red-dark),var(--red));color:white;border-radius:14px;font-size:14px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 16px rgba(192,57,43,.3);}
 
-/* FLASHCARDS */
-.cards-hdr{padding:14px 14px 0;}
-.cards-hdr h1{font-size:20px;font-weight:800;margin-bottom:3px;}
-.cards-hdr p{font-size:13px;color:var(--text2);margin-bottom:14px;}
-.cards-prog{background:white;border-radius:var(--radius-sm);padding:13px;box-shadow:var(--shadow);display:flex;align-items:center;gap:13px;margin-bottom:14px;}
-.cp-ring{position:relative;width:54px;height:54px;flex-shrink:0;}
-.cp-ring svg{transform:rotate(-90deg);}
-.cp-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:var(--red);}
-.cp-title{font-size:14px;font-weight:700;}
-.cp-sub{font-size:12px;color:var(--text2);}
-.card-counter{display:flex;justify-content:space-between;font-size:12px;color:var(--text3);font-weight:700;margin-bottom:8px;padding:0 14px;}
-.card-flip{perspective:1000px;height:196px;cursor:pointer;padding:0 14px;}
-.card-inner{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:transform .38s;}
-.card-inner.flipped{transform:rotateY(180deg);}
-.card-face{position:absolute;inset:0;border-radius:18px;padding:22px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;backface-visibility:hidden;-webkit-backface-visibility:hidden;}
-.card-front{background:linear-gradient(135deg,var(--red-dark),var(--red));color:white;box-shadow:0 6px 22px rgba(192,57,43,.28);}
-.card-back{background:white;transform:rotateY(180deg);box-shadow:0 6px 22px rgba(0,0,0,.08);border:2px solid var(--border);}
-.card-lbl{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;opacity:.7;margin-bottom:8px;}
-.card-front .card-lbl{color:rgba(255,255,255,.8);}
-.card-back .card-lbl{color:var(--green);}
-.card-txt{font-size:14px;font-weight:700;line-height:1.5;}
-.card-front .card-txt{color:white;}
-.card-back .card-txt{color:var(--text);}
-.card-hint{font-size:10px;opacity:.55;margin-top:8px;}
-.card-actions{padding:12px 14px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;}
-.ca-btn{padding:13px 6px;border-radius:13px;font-size:12px;font-weight:800;display:flex;flex-direction:column;align-items:center;gap:3px;border:2px solid;}
-.ca-btn.er{border-color:var(--red);color:var(--red);background:var(--red-light);}
-.ca-btn.le{border-color:var(--amber);color:var(--amber);background:var(--amber-light);}
-.ca-btn.fa{border-color:var(--green);color:var(--green);background:var(--green-light);}
-.ca-btn span{font-size:20px;}
-.cards-done{padding:18px 14px;text-align:center;}
-.done-icon{font-size:44px;margin-bottom:10px;}
-.done-title{font-size:19px;font-weight:800;margin-bottom:5px;}
-.done-sub{font-size:13px;color:var(--text2);margin-bottom:18px;line-height:1.5;}
-.next-list{text-align:left;background:white;border-radius:var(--radius);padding:14px;box-shadow:var(--shadow);}
-.next-item{padding:7px 0;border-bottom:1px solid var(--border);font-size:12px;}
-.next-item:last-child{border-bottom:none;}
-.next-item strong{display:block;color:var(--text);}
-.next-item span{color:var(--text3);}
+/* ═══ TRILHA ═══ */
+.trilha-screen{padding:16px;}
+.trilha-header-card{background:linear-gradient(135deg,var(--red-dark),var(--red));border-radius:16px;padding:16px;color:white;margin-bottom:16px;}
+.trilha-fase{font-size:11px;font-weight:700;opacity:.7;margin-bottom:4px;}
+.trilha-titulo{font-size:17px;font-weight:800;margin-bottom:8px;}
+.trilha-prog-bar{height:6px;background:rgba(255,255,255,.25);border-radius:3px;overflow:hidden;}
+.trilha-prog-fill{height:100%;background:white;border-radius:3px;transition:width .4s;}
+.trilha-prog-label{font-size:10px;opacity:.75;margin-top:4px;}
+.topico-card{background:white;border-radius:14px;padding:14px;box-shadow:var(--shadow);margin-bottom:10px;cursor:pointer;transition:transform .15s;}
+.topico-card:active{transform:scale(.98);}
+.topico-card.visto{opacity:.6;}
+.topico-top{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.topico-prob{border-radius:6px;padding:3px 8px;font-size:10px;font-weight:800;}
+.prob-alta{background:#FDECEA;color:#C0392B;}
+.prob-media{background:#FEF5E7;color:#E67E22;}
+.prob-baixa{background:#E8F8F0;color:#27AE60;}
+.topico-titulo{font-size:14px;font-weight:700;flex:1;}
+.topico-check{width:22px;height:22px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.topico-check.ok{background:var(--green);border-color:var(--green);color:white;}
+.topico-doc{font-size:11px;color:var(--text3);}
+.topico-content{background:var(--bg);border-radius:10px;padding:12px;font-size:13px;color:var(--text2);line-height:1.6;margin-top:10px;display:none;}
+.topico-card.open .topico-content{display:block;}
+.topico-questoes-btn{margin-top:10px;width:100%;padding:10px;background:var(--red);color:white;border-radius:10px;font-size:13px;font-weight:700;}
 
-/* SIMULADO */
-.sim-home{padding:14px;}
-.sim-hero{background:linear-gradient(135deg,var(--red-dark),var(--red));border-radius:18px;padding:22px;color:white;margin-bottom:18px;text-align:center;}
-.sim-hero h1{font-size:21px;font-weight:800;margin-bottom:6px;}
-.sim-hero p{font-size:13px;opacity:.8;line-height:1.5;margin-bottom:16px;}
-.sim-dist{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;}
-.sim-dist-cell{background:rgba(255,255,255,.15);border-radius:9px;padding:9px 4px;text-align:center;}
-.sim-dist-v{font-size:16px;font-weight:800;}
-.sim-dist-l{font-size:9px;opacity:.8;}
-.sim-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
-.sim-info-card{background:white;border-radius:12px;padding:13px;box-shadow:var(--shadow);text-align:center;}
-.sim-info-v{font-size:22px;font-weight:800;color:var(--red);}
-.sim-info-l{font-size:11px;color:var(--text2);margin-top:1px;font-weight:600;}
-.btn-start-sim{width:100%;background:var(--red);color:white;border-radius:13px;padding:15px;font-size:15px;font-weight:800;box-shadow:0 4px 18px rgba(192,57,43,.32);margin-bottom:14px;}
-.sim-hist{background:white;border-radius:var(--radius);padding:14px;box-shadow:var(--shadow);}
-.sim-hist-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;}
-.sim-hi{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border);}
-.sim-hi:last-child{border-bottom:none;}
-.sim-hi-d{font-size:12px;color:var(--text2);}
-.sim-hi-s{font-size:15px;font-weight:800;}
+/* ═══ CARDS ═══ */
+.cards-header{background:linear-gradient(135deg,var(--red-dark),var(--red));padding:16px;color:white;}
+.cards-h-title{font-size:18px;font-weight:800;margin-bottom:2px;}
+.cards-h-sub{font-size:12px;opacity:.75;}
+.cards-h-stats{display:flex;gap:12px;margin-top:12px;}
+.cards-h-stat{background:rgba(255,255,255,.18);border-radius:10px;padding:8px 12px;text-align:center;}
+.cards-h-stat-v{font-size:16px;font-weight:800;}
+.cards-h-stat-l{font-size:9px;opacity:.8;font-weight:600;}
+.cards-body{padding:14px;}
+.card-flip-wrap{perspective:1000px;width:100%;margin:0 auto 16px;}
+.card-flip{width:100%;min-height:200px;position:relative;transform-style:preserve-3d;transition:transform .5s;cursor:pointer;}
+.card-flip.flipped{transform:rotateY(180deg);}
+.card-face{position:absolute;inset:0;border-radius:18px;padding:24px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;backface-visibility:hidden;-webkit-backface-visibility:hidden;}
+.card-front{background:white;box-shadow:var(--shadow-md);}
+.card-back{background:linear-gradient(135deg,var(--red-dark),var(--red));color:white;transform:rotateY(180deg);}
+.card-label{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;opacity:.5;margin-bottom:12px;}
+.card-text{font-size:16px;font-weight:600;line-height:1.5;color:var(--text);}
+.card-back .card-text{color:white;}
+.card-hint{font-size:11px;color:var(--text3);margin-top:10px;}
+.card-area-tag{font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;margin-bottom:14px;}
+.card-btns{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+.card-btn{padding:12px 8px;border-radius:12px;font-size:12px;font-weight:700;border:none;cursor:pointer;}
+.card-btn.dif{background:#FDECEA;color:#C0392B;}
+.card-btn.med{background:#FEF5E7;color:#E67E22;}
+.card-btn.fac{background:#E8F8F0;color:#27AE60;}
+.cards-done{text-align:center;padding:40px 20px;}
+.cards-done-icon{font-size:48px;margin-bottom:12px;}
+.cards-done-title{font-size:20px;font-weight:800;margin-bottom:8px;}
+.cards-done-sub{font-size:14px;color:var(--text2);}
 
-/* Simulado running */
-.sim-running{display:none;}
-.sim-running.active{display:block;}
-.sim-topbar{background:var(--red);padding:11px 14px;color:white;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
-.sim-timer{font-size:19px;font-weight:800;font-variant-numeric:tabular-nums;}
-.sim-timer.warn{color:#FFD700;}
-.sim-qn{font-size:12px;opacity:.8;}
-.btn-enc{background:rgba(255,255,255,.2);border-radius:8px;padding:6px 11px;font-size:12px;font-weight:700;color:white;}
-.sim-nav{padding:10px 14px;display:flex;gap:5px;flex-wrap:wrap;}
-.qd{width:28px;height:28px;border-radius:7px;border:2px solid var(--border);background:white;font-size:11px;font-weight:700;color:var(--text2);cursor:pointer;transition:all .15s;}
-.qd.ans{background:var(--red);border-color:var(--red);color:white;}
-.qd.cur{border-color:var(--red);color:var(--red);}
-.sim-body{padding:14px;}
-.sim-nav-btns{display:flex;gap:9px;margin-top:10px;}
-.sim-nav-btns button{flex:1;padding:12px;border-radius:11px;font-size:13px;font-weight:700;}
-.btn-prev-sim{background:white;border:1.5px solid var(--border);color:var(--text2);}
-.btn-nxt-sim{background:var(--red);color:white;border:none;}
+/* ═══ SIMULADO ═══ */
+.sim-home{padding:16px;}
+.sim-home h2{font-size:18px;font-weight:800;margin-bottom:4px;}
+.sim-home p{font-size:13px;color:var(--text2);margin-bottom:20px;}
+.sim-cards{display:flex;flex-direction:column;gap:10px;margin-bottom:20px;}
+.sim-card{background:white;border-radius:14px;padding:16px;box-shadow:var(--shadow);display:flex;align-items:center;gap:14px;cursor:pointer;transition:transform .15s;}
+.sim-card:active{transform:scale(.98);}
+.sim-card-icon{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+.sim-card-info h3{font-size:14px;font-weight:700;margin-bottom:2px;}
+.sim-card-info p{font-size:12px;color:var(--text2);}
+.sim-hist-title{font-size:13px;font-weight:700;color:var(--text2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em;}
+.sim-hist-item{background:white;border-radius:12px;padding:12px 14px;box-shadow:var(--shadow);margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;}
+.sim-hist-date{font-size:12px;color:var(--text2);}
+.sim-hist-score{font-size:16px;font-weight:800;}
+.sim-running-header{background:linear-gradient(135deg,var(--red-dark),var(--red));padding:14px 16px;color:white;position:sticky;top:var(--header-h);z-index:10;}
+.sim-timer{font-size:28px;font-weight:800;letter-spacing:.04em;}
+.sim-timer-sub{font-size:11px;opacity:.75;}
+.sim-end-btn{background:rgba(255,255,255,.2);color:white;border-radius:10px;padding:8px 16px;font-size:12px;font-weight:700;}
+.sim-q-wrap{padding:14px;}
+.sim-result{padding:20px 16px;text-align:center;}
+.sim-result-ring{margin:0 auto 20px;}
+.sim-result-score{font-size:42px;font-weight:800;color:var(--red);}
+.sim-result-label{font-size:14px;color:var(--text2);margin-bottom:20px;}
+.sim-result-areas{background:white;border-radius:14px;padding:14px;box-shadow:var(--shadow);text-align:left;margin-bottom:16px;}
+.sim-result-area-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);}
+.sim-result-area-row:last-child{border-bottom:none;}
+.sim-ai-diag{background:var(--red-light);border-radius:12px;padding:14px;text-align:left;font-size:13px;color:var(--text2);line-height:1.6;border-left:3px solid var(--red);margin-bottom:16px;}
 
-/* Resultado */
-.res-screen{padding:14px;}
-.res-hero{border-radius:18px;padding:22px;text-align:center;margin-bottom:16px;}
-.res-hero.pass{background:linear-gradient(135deg,#1A7A3F,var(--green));}
-.res-hero.fail{background:linear-gradient(135deg,var(--red-dark),var(--red));}
-.res-pct{font-size:52px;font-weight:800;color:white;line-height:1;}
-.res-lbl{font-size:13px;color:rgba(255,255,255,.8);margin-top:3px;}
-.res-tag{display:inline-block;background:rgba(255,255,255,.2);color:white;border-radius:20px;padding:4px 13px;font-size:12px;font-weight:700;margin-top:8px;}
-.res-areas{background:white;border-radius:var(--radius);padding:14px;box-shadow:var(--shadow);margin-bottom:14px;}
-.res-area-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border);}
-.res-area-row:last-child{border-bottom:none;}
-.res-area-n{font-size:13px;font-weight:700;}
-.res-area-s{font-size:13px;font-weight:800;}
+/* ═══ RESUMOS ═══ */
+.resumos-screen{padding:16px;}
+.resumos-header{background:linear-gradient(135deg,var(--red-dark),var(--red));border-radius:16px;padding:16px;color:white;margin-bottom:16px;}
+.resumos-queue{display:flex;align-items:center;gap:8px;margin-top:10px;}
+.resumo-queue-n{background:rgba(255,255,255,.2);border-radius:20px;padding:4px 12px;font-size:12px;font-weight:700;}
+.resumo-card{background:white;border-radius:16px;padding:16px;box-shadow:var(--shadow-md);margin-bottom:16px;}
+.resumo-card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.resumo-area-tag{font-size:10px;font-weight:800;padding:3px 10px;border-radius:20px;}
+.resumo-dif-tag{font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;}
+.resumo-titulo{font-size:16px;font-weight:800;margin-bottom:10px;}
+.resumo-texto{font-size:14px;color:var(--text2);line-height:1.7;margin-bottom:14px;}
+.resumo-audio-btn{width:100%;padding:12px;background:var(--red-light);color:var(--red);border-radius:12px;font-size:14px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;justify-content:center;gap:8px;}
+.resumo-audio-btn.playing{background:var(--red);color:white;}
+.resumo-avaliar{margin-top:4px;}
+.resumo-avaliar-title{font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;text-align:center;}
+.resumo-btns{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+.resumo-btn{padding:12px 8px;border-radius:12px;font-size:12px;font-weight:700;border:none;cursor:pointer;}
+.resumo-btn.dif{background:#FDECEA;color:#C0392B;}
+.resumo-btn.med{background:#FEF5E7;color:#E67E22;}
+.resumo-btn.fac{background:#E8F8F0;color:#27AE60;}
+.resumos-list{display:flex;flex-direction:column;gap:10px;}
+.resumo-list-item{background:white;border-radius:12px;padding:12px 14px;box-shadow:var(--shadow);display:flex;align-items:center;gap:10px;cursor:pointer;}
+.resumo-list-vence{font-size:11px;color:var(--text3);}
 
-/* ÁUDIO */
-.audio-wrap{padding:14px;}
-.audio-wrap h1{font-size:20px;font-weight:800;margin-bottom:3px;}
-.audio-wrap p{font-size:13px;color:var(--text2);margin-bottom:14px;}
-.dur-tabs{display:flex;gap:7px;margin-bottom:14px;}
-.dur-tab{flex:1;padding:9px 4px;border:2px solid var(--border);border-radius:9px;font-size:11px;font-weight:700;color:var(--text2);background:white;text-align:center;cursor:pointer;transition:all .2s;}
-.dur-tab.active{border-color:var(--red);color:var(--red);background:var(--red-light);}
-.voice-wrap{background:white;border-radius:var(--radius-sm);padding:13px;box-shadow:var(--shadow);margin-bottom:14px;}
-.voice-lbl{font-size:11px;font-weight:700;color:var(--text2);margin-bottom:7px;text-transform:uppercase;letter-spacing:.05em;}
-.voice-select{width:100%;padding:9px 11px;border:1.5px solid var(--border);border-radius:9px;font-size:13px;color:var(--text);background:white;}
-.audio-cards{display:flex;flex-direction:column;gap:10px;}
-.audio-card{background:white;border-radius:var(--radius);padding:14px;box-shadow:var(--shadow);}
-.audio-card-hdr{display:flex;align-items:center;gap:11px;margin-bottom:11px;}
-.audio-card-icon{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px;background:var(--red-light);flex-shrink:0;}
+/* ═══ ÁUDIO ═══ */
+.audio-screen{padding:16px;}
+.audio-header{background:linear-gradient(135deg,var(--red-dark),var(--red));border-radius:16px;padding:16px;color:white;margin-bottom:16px;}
+.audio-header h2{font-size:18px;font-weight:800;margin-bottom:4px;}
+.audio-header p{font-size:12px;opacity:.75;}
+.voice-sel{background:white;border-radius:12px;padding:12px 14px;box-shadow:var(--shadow);margin-bottom:14px;}
+.voice-sel label{font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:6px;}
+.voice-sel select{width:100%;background:transparent;border:none;font-size:14px;color:var(--text);}
+.audio-dur-tabs{display:flex;gap:6px;margin-bottom:14px;}
+.audio-dur-tab{flex:1;padding:8px;background:white;border-radius:10px;font-size:12px;font-weight:700;color:var(--text2);box-shadow:var(--shadow);transition:all .2s;}
+.audio-dur-tab.active{background:var(--red);color:white;}
+.audio-card{background:white;border-radius:14px;padding:14px;box-shadow:var(--shadow);margin-bottom:10px;}
+.audio-card-top{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.audio-card-icon{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
 .audio-card-name{font-size:14px;font-weight:700;}
 .audio-card-dur{font-size:11px;color:var(--text2);}
-.audio-text{background:var(--bg);border-radius:9px;padding:12px;font-size:13px;line-height:1.75;color:var(--text);max-height:180px;overflow-y:auto;margin-bottom:11px;border:1px solid var(--border);}
-.audio-text p{margin-bottom:6px;}
-.audio-text p.hl{background:var(--red-light);border-radius:4px;padding:2px 5px;color:var(--red-dark);font-weight:600;}
-.audio-ctls{display:flex;gap:7px;}
-.audio-play{flex:1;background:var(--red);color:white;border-radius:9px;padding:11px;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:5px;}
-.audio-stop{background:var(--bg);border:1.5px solid var(--border);color:var(--text2);border-radius:9px;padding:11px 14px;font-size:13px;font-weight:700;}
+.audio-text-preview{background:var(--bg);border-radius:10px;padding:10px;font-size:12px;color:var(--text2);line-height:1.6;max-height:80px;overflow:hidden;margin-bottom:10px;}
+.audio-btns{display:flex;gap:8px;}
+.btn-ouvir{flex:1;padding:11px;background:var(--red);color:white;border-radius:10px;font-size:13px;font-weight:700;}
+.btn-parar{padding:11px 16px;background:var(--bg);color:var(--text);border-radius:10px;font-size:13px;font-weight:700;}
 
-/* ADMIN */
-.admin-wrap{padding:14px;}
-.admin-wrap h1{font-size:20px;font-weight:800;margin-bottom:3px;}
-.admin-wrap .sub{font-size:13px;color:var(--text2);margin-bottom:16px;}
-.admin-tabs{display:flex;gap:6px;margin-bottom:16px;overflow-x:auto;padding-bottom:4px;}
-.admin-tab{padding:8px 15px;border-radius:20px;font-size:12px;font-weight:700;white-space:nowrap;background:var(--bg);color:var(--text2);border:none;cursor:pointer;}
+/* ═══ MATERIAL ═══ */
+.material-screen{padding:16px;}
+.material-header{background:linear-gradient(135deg,var(--red-dark),var(--red));border-radius:16px;padding:16px;color:white;margin-bottom:16px;}
+.material-header h2{font-size:18px;font-weight:800;margin-bottom:4px;}
+.material-header p{font-size:12px;opacity:.75;}
+.material-tabs{display:flex;gap:6px;margin-bottom:16px;overflow-x:auto;padding-bottom:2px;}
+.material-tab{padding:8px 16px;background:white;border-radius:20px;font-size:12px;font-weight:700;color:var(--text2);white-space:nowrap;box-shadow:var(--shadow);flex-shrink:0;cursor:pointer;}
+.material-tab.active{background:var(--red);color:white;}
+.material-section{display:none;}
+.material-section.active{display:block;}
+.material-upload-card{background:white;border-radius:14px;padding:16px;box-shadow:var(--shadow);margin-bottom:10px;}
+.material-upload-card h3{font-size:14px;font-weight:700;margin-bottom:4px;}
+.material-upload-card p{font-size:12px;color:var(--text2);margin-bottom:12px;}
+.upload-btn{width:100%;padding:12px;background:var(--bg);border:2px dashed var(--border);border-radius:10px;font-size:13px;color:var(--text2);font-weight:600;cursor:pointer;}
+.upload-btn:hover{border-color:var(--red);color:var(--red);}
+.material-file-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);}
+.material-file-item:last-child{border-bottom:none;}
+.material-file-icon{width:36px;height:36px;background:var(--red-light);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.material-file-name{flex:1;font-size:13px;font-weight:600;}
+.material-file-size{font-size:11px;color:var(--text2);}
+.btn-ver-pdf{padding:6px 12px;background:var(--red);color:white;border-radius:8px;font-size:11px;font-weight:700;}
+.consulta-box{background:white;border-radius:14px;padding:16px;box-shadow:var(--shadow);}
+.consulta-box h3{font-size:15px;font-weight:800;margin-bottom:4px;}
+.consulta-box p{font-size:12px;color:var(--text2);margin-bottom:14px;}
+.consulta-input-wrap{display:flex;gap:8px;margin-bottom:12px;}
+.consulta-input-wrap textarea{flex:1;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;resize:none;height:80px;color:var(--text);}
+.consulta-input-wrap textarea:focus{border-color:var(--red);}
+.btn-consultar{padding:10px 16px;background:var(--red);color:white;border-radius:10px;font-size:13px;font-weight:700;align-self:flex-end;}
+.consulta-resp{background:var(--bg);border-radius:10px;padding:12px;font-size:13px;color:var(--text2);line-height:1.7;min-height:60px;white-space:pre-wrap;}
+.consulta-fonte{font-size:11px;color:var(--text3);margin-top:6px;}
+.material-source-tag{font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;background:var(--red-light);color:var(--red);display:inline-block;margin-bottom:8px;}
+
+/* ═══ PADRÕES ═══ */
+.padroes-screen{padding:16px;}
+.padroes-header{background:linear-gradient(135deg,var(--red-dark),var(--red));border-radius:16px;padding:16px;color:white;margin-bottom:16px;}
+.padroes-header h2{font-size:18px;font-weight:800;margin-bottom:4px;}
+.padroes-header p{font-size:12px;opacity:.75;}
+.padrao-card{background:white;border-radius:14px;padding:14px;box-shadow:var(--shadow);margin-bottom:10px;cursor:pointer;}
+.padrao-top{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.padrao-pct-badge{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;flex-shrink:0;}
+.padrao-info h3{font-size:14px;font-weight:700;}
+.padrao-info p{font-size:11px;color:var(--text2);}
+.padrao-detail{display:none;border-top:1px solid var(--border);padding-top:12px;margin-top:2px;}
+.padrao-card.open .padrao-detail{display:block;}
+.padrao-dica{background:var(--amber-light);border-radius:10px;padding:10px;font-size:13px;color:var(--text2);line-height:1.5;margin-bottom:10px;border-left:3px solid var(--amber);}
+.padrao-estrategia{font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:10px;}
+.padrao-exemplo-btn{width:100%;padding:10px;background:var(--red-light);color:var(--red);border-radius:10px;font-size:12px;font-weight:700;}
+.incidencia-card{background:white;border-radius:14px;padding:14px;box-shadow:var(--shadow);margin-bottom:10px;}
+.incidencia-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);}
+.incidencia-row:last-child{border-bottom:none;}
+.incidencia-assunto{font-size:13px;color:var(--text);}
+.incidencia-prob{font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;}
+
+/* ═══ ADMIN ═══ */
+.admin-screen{padding:16px;}
+.admin-screen h2{font-size:18px;font-weight:800;margin-bottom:4px;}
+.admin-screen>p{font-size:13px;color:var(--text2);margin-bottom:16px;}
+.admin-tabs{display:flex;gap:6px;margin-bottom:16px;}
+.admin-tab{padding:8px 16px;background:white;border-radius:20px;font-size:12px;font-weight:700;color:var(--text2);box-shadow:var(--shadow);}
 .admin-tab.active{background:var(--red);color:white;}
-.admin-panel{display:none;}
-.admin-panel.active{display:block;}
-.user-card{background:white;border-radius:var(--radius-sm);padding:13px;box-shadow:var(--shadow);margin-bottom:9px;}
-.uc-email{font-size:13px;font-weight:700;margin-bottom:3px;}
-.uc-info{font-size:11px;color:var(--text2);margin-bottom:9px;}
-.uc-actions{display:flex;gap:7px;flex-wrap:wrap;}
-.btn-ap{background:var(--green-light);color:var(--green);border:1.5px solid var(--green);border-radius:8px;padding:7px 12px;font-size:12px;font-weight:700;}
-.btn-rj{background:var(--red-light);color:var(--red);border:1.5px solid var(--red);border-radius:8px;padding:7px 12px;font-size:12px;font-weight:700;}
-.btn-adm{background:var(--gold-light);color:var(--gold);border:1.5px solid var(--gold);border-radius:8px;padding:7px 12px;font-size:12px;font-weight:700;}
-.form-card{background:white;border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);}
+.admin-section{display:none;}
+.admin-section.active{display:block;}
+.user-item{background:white;border-radius:12px;padding:12px 14px;box-shadow:var(--shadow);margin-bottom:8px;display:flex;align-items:center;gap:10px;}
+.user-item-info{flex:1;}
+.user-item-name{font-size:13px;font-weight:700;}
+.user-item-email{font-size:11px;color:var(--text2);}
+.user-badges{display:flex;gap:4px;margin-top:4px;}
+.badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;}
+.badge-admin{background:#FFF8E1;color:#B8860B;}
+.badge-ok{background:var(--green-light);color:var(--green);}
+.badge-pend{background:var(--red-light);color:var(--red);}
+.user-actions{display:flex;flex-direction:column;gap:4px;}
+.btn-sm{padding:5px 10px;border-radius:8px;font-size:11px;font-weight:700;}
+.btn-approve{background:var(--green-light);color:var(--green);}
+.btn-revoke{background:var(--red-light);color:var(--red);}
+.btn-mkadmin{background:#FFF8E1;color:#B8860B;}
 
-/* DESKTOP */
-@media(min-width:768px){
-  body{background:#E0E0E0;}
-  #app,#auth-screen+*{max-width:480px;margin:0 auto;}
-  #app{min-height:100vh;background:var(--bg);box-shadow:0 0 40px rgba(0,0,0,.12);}
-}
+/* Ring SVG helper */
+.ring-container{position:relative;display:inline-flex;align-items:center;justify-content:center;}
 
-/* UTILS */
+/* Toast */
+.toast{position:fixed;bottom:calc(var(--nav-h)+16px);left:50%;transform:translateX(-50%) translateY(20px);background:#1A1A1A;color:white;border-radius:12px;padding:10px 20px;font-size:13px;font-weight:600;opacity:0;transition:all .3s;z-index:9998;white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* Util */
 .hidden{display:none!important;}
-.empty{text-align:center;padding:36px 16px;color:var(--text2);}
-.empty-i{font-size:36px;margin-bottom:10px;}
-.empty-t{font-size:13px;line-height:1.5;}
+.mt8{margin-top:8px;}
+.mt14{margin-top:14px;}
 </style>
 </head>
 <body>
 
 <!-- LOADING -->
 <div id="loading">
-  <img class="logo" src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Bras%C3%A3o_do_Corpo_de_Bombeiros_Militar_do_Rio_Grande_do_Sul.svg/240px-Bras%C3%A3o_do_Corpo_de_Bombeiros_Militar_do_Rio_Grande_do_Sul.svg.png" alt="CBMRS" onerror="this.style.display='none'"/>
-  <p>BOMBEIRO CTSP</p>
+  <img src="img/logo.png" onerror="this.style.display='none'" alt="CBMRS">
+  <p>BOMBEIRO CTSP 2026</p>
 </div>
 
 <!-- AUTH -->
 <div id="auth-screen">
-  <img class="auth-logo" src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Bras%C3%A3o_do_Corpo_de_Bombeiros_Militar_do_Rio_Grande_do_Sul.svg/240px-Bras%C3%A3o_do_Corpo_de_Bombeiros_Militar_do_Rio_Grande_do_Sul.svg.png" alt="CBMRS" onerror="this.style.display='none'"/>
-  <h1 class="auth-title">Bombeiro CTSP</h1>
-  <p class="auth-sub">Plataforma de estudos para o CTSP 2026<br/>Corpo de Bombeiros Militar do RS</p>
-  <div class="auth-card">
-    <div class="auth-tabs">
-      <button class="auth-tab active" onclick="setAuthTab('login')">Entrar</button>
-      <button class="auth-tab" onclick="setAuthTab('register')">Cadastrar</button>
+  <img class="auth-bg-img" src="img/banner.jpg" alt="" onerror="this.style.display='none'">
+  <div class="auth-bg"></div>
+  <div class="auth-content">
+    <div class="auth-hero">
+      <img class="logo" src="img/logo.png" onerror="this.style.background='var(--red)'" alt="CBMRS">
+      <h1>Bombeiro CTSP</h1>
+      <p>CBMRS · CTSP 2026</p>
     </div>
-    <div id="tab-login">
-      <div class="field"><label>E-mail</label><input type="email" id="login-email" placeholder="seu@email.com" autocomplete="email"/></div>
-      <div class="field"><label>Senha</label><input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password"/></div>
-      <button class="btn-primary" onclick="doLogin()">Entrar</button>
-      <div class="auth-msg" id="login-msg"></div>
-    </div>
-    <div id="tab-register" class="hidden">
-      <div class="field"><label>Nome completo</label><input type="text" id="reg-name" placeholder="Sd João Silva"/></div>
-      <div class="field"><label>E-mail</label><input type="email" id="reg-email" placeholder="seu@email.com"/></div>
-      <div class="field"><label>Senha</label><input type="password" id="reg-pass" placeholder="mínimo 6 caracteres"/></div>
-      <button class="btn-primary" onclick="doRegister()">Criar conta</button>
-      <div class="auth-msg" id="reg-msg"></div>
-    </div>
-    <div id="tab-pending" class="hidden">
-      <div class="pending-box"><span class="pi">⏳</span><strong>Cadastro em análise</strong><br/>Seu acesso será liberado pelo administrador em breve.</div>
+    <div class="auth-card">
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tab-btn-login" onclick="showAuthTab('login')">Entrar</button>
+        <button class="auth-tab" id="tab-btn-register" onclick="showAuthTab('register')">Cadastrar</button>
+      </div>
+      <!-- LOGIN -->
+      <div id="tab-login">
+        <div class="field"><label>Email</label><input type="email" id="login-email" placeholder="seu@email.com" autocomplete="email"></div>
+        <div class="field"><label>Senha</label><input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password"></div>
+        <button class="btn-primary" onclick="doLogin()">Entrar</button>
+        <p class="auth-msg" id="login-msg"></p>
+      </div>
+      <!-- REGISTER -->
+      <div id="tab-register" class="hidden">
+        <div class="field"><label>Nome</label><input type="text" id="reg-nome" placeholder="Seu nome completo"></div>
+        <div class="field"><label>Email</label><input type="email" id="reg-email" placeholder="seu@email.com"></div>
+        <div class="field"><label>Senha</label><input type="password" id="reg-pass" placeholder="Mínimo 6 caracteres"></div>
+        <button class="btn-primary" onclick="doRegister()">Criar conta</button>
+        <p class="auth-msg" id="reg-msg"></p>
+      </div>
+      <!-- PENDING -->
+      <div id="tab-pending" class="hidden">
+        <div class="pending-box">
+          <span class="pi">⏳</span>
+          Conta criada! Aguardando aprovação do administrador.<br>Em breve você receberá acesso.
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
 <!-- APP -->
 <div id="app">
+  <!-- HEADER -->
   <header class="app-header">
-    <img class="header-logo" src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Bras%C3%A3o_do_Corpo_de_Bombeiros_Militar_do_Rio_Grande_do_Sul.svg/240px-Bras%C3%A3o_do_Corpo_de_Bombeiros_Militar_do_Rio_Grande_do_Sul.svg.png" alt="CBMRS" onerror="this.style.display='none'"/>
+    <img class="header-logo" src="img/logo.png" onerror="this.style.background='rgba(255,255,255,.3)'" alt="CBMRS">
     <div class="header-titles">
       <div class="header-title">Bombeiro CTSP</div>
       <div class="header-sub">CBMRS · CTSP 2026</div>
     </div>
-    <div class="header-name" id="hdr-nome"></div>
-    <button class="btn-logout" onclick="doLogout()">Sair</button>
+    <div class="header-right">
+      <div class="streak-badge" id="hdr-streak">🔥 0</div>
+      <div class="header-name" id="hdr-nome"></div>
+      <button class="btn-logout" onclick="doLogout()">Sair</button>
+    </div>
   </header>
 
+  <!-- CONTENT -->
   <main class="app-content">
-    <!-- HOME -->
-    <div class="screen active" id="screen-home">
+
+    <!-- INÍCIO -->
+    <div class="screen active" id="screen-inicio">
       <div class="dash-hero">
-        <div class="dash-greeting" id="dash-greeting">Olá,</div>
-        <div class="dash-name" id="dash-name">Bombeiro</div>
+        <div class="dash-top">
+          <div>
+            <div class="dash-greeting">Olá,</div>
+            <div class="dash-name" id="dash-nome">Bombeiro</div>
+          </div>
+          <div class="dash-ring-wrap">
+            <div class="ring-container" style="width:64px;height:64px;">
+              <svg class="ring-svg" width="64" height="64" viewBox="0 0 64 64">
+                <circle class="ring-bg" cx="32" cy="32" r="27"/>
+                <circle class="ring-fg" id="dash-ring" cx="32" cy="32" r="27" stroke-dasharray="169.6" stroke-dashoffset="169.6"/>
+              </svg>
+              <div class="ring-center">
+                <div class="ring-pct" id="dash-ring-pct">0%</div>
+                <div class="ring-lbl">meta</div>
+              </div>
+            </div>
+            <div class="dash-ring-label" id="dash-ring-label">0/10</div>
+          </div>
+        </div>
         <div class="dash-stats">
-          <div class="dash-stat"><div class="dash-stat-v" id="stat-total">0</div><div class="dash-stat-l">Questões</div></div>
-          <div class="dash-stat"><div class="dash-stat-v" id="stat-taxa">0%</div><div class="dash-stat-l">Acertos</div></div>
-          <div class="dash-stat"><div class="dash-stat-v" id="stat-cards">0</div><div class="dash-stat-l">Cards</div></div>
+          <div class="dash-stat"><div class="dash-stat-v" id="dash-total">0</div><div class="dash-stat-l">Questões</div></div>
+          <div class="dash-stat"><div class="dash-stat-v" id="dash-pct">0%</div><div class="dash-stat-l">Acertos</div></div>
+          <div class="dash-stat"><div class="dash-stat-v" id="dash-cards">0</div><div class="dash-stat-l">Cards</div></div>
+        </div>
+        <div class="dash-meta">
+          <div class="dash-meta-info">
+            <div class="dash-meta-title">META DIÁRIA</div>
+            <div class="dash-meta-bar"><div class="dash-meta-fill" id="dash-meta-fill" style="width:0%"></div></div>
+          </div>
+          <div class="dash-meta-count" id="dash-meta-count">0/10</div>
         </div>
       </div>
       <div class="dash-body">
-        <button class="quick-btn" onclick="openQuickModal()">⚡ Estudo Rápido</button>
-        <div class="due-banner hidden" id="due-banner" onclick="navTo('cards')">
-          <div class="due-icon">🃏</div>
-          <div><div class="due-title" id="due-title">Cards para revisar</div><div class="due-sub">Toque para revisar agora</div></div>
-          <svg style="margin-left:auto;flex-shrink:0" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 12l4-4-4-4" stroke="#B8860B" stroke-width="2" stroke-linecap="round"/></svg>
-        </div>
-        <div class="sec-title">📈 Desempenho por área</div>
-        <div class="ring-card">
-          <div class="ring-wrap">
-            <svg width="76" height="76" viewBox="0 0 76 76">
-              <circle cx="38" cy="38" r="30" stroke="#F0F0F0" stroke-width="7" fill="none"/>
-              <circle id="ring-c" cx="38" cy="38" r="30" stroke="#C0392B" stroke-width="7" fill="none" stroke-linecap="round" stroke-dasharray="188" stroke-dashoffset="188"/>
-            </svg>
-            <div class="ring-center"><div class="ring-pct" id="ring-pct">0%</div><div class="ring-lbl">Geral</div></div>
+        <!-- Ponto fraco -->
+        <div id="dash-weak" class="weak-card hidden">
+          <div class="weak-icon">⚠️</div>
+          <div class="weak-info">
+            <div class="weak-title">Ponto mais fraco</div>
+            <div class="weak-area" id="weak-area-name">—</div>
+            <div class="weak-pct" id="weak-area-pct"></div>
           </div>
-          <div class="ring-info">
-            <h3>Progresso Geral</h3>
-            <p id="ring-sub">Comece respondendo questões para ver seu progresso.</p>
+          <button class="btn-weak" onclick="estudarFraco()">Estudar</button>
+        </div>
+        <!-- Quick actions -->
+        <div class="sec-title">Estudar agora</div>
+        <div class="quick-grid">
+          <div class="quick-btn destaque" onclick="iniciarEstudoRapido()">
+            <div class="quick-btn-icon">⚡</div>
+            <div class="quick-btn-title">Estudo Rápido</div>
+            <div class="quick-btn-sub" id="quick-sub">5 questões</div>
+          </div>
+          <div class="quick-btn" onclick="iniciarModoErro()">
+            <div class="quick-btn-icon">🔁</div>
+            <div class="quick-btn-title">Modo Erro</div>
+            <div class="quick-btn-sub" id="erro-sub">Revisar erros</div>
+          </div>
+          <div class="quick-btn" onclick="navTo('trilha')">
+            <div class="quick-btn-icon">🗺️</div>
+            <div class="quick-btn-title">Trilha</div>
+            <div class="quick-btn-sub">Ordem caderno</div>
+          </div>
+          <div class="quick-btn" onclick="iniciarSimuladoInteligente()">
+            <div class="quick-btn-icon">🎯</div>
+            <div class="quick-btn-title">Simulado IA</div>
+            <div class="quick-btn-sub">15 questões</div>
           </div>
         </div>
-        <div class="area-grid" id="area-grid"></div>
+        <!-- Progresso por área -->
+        <div class="sec-title">Desempenho por área</div>
+        <div class="area-grid" id="dash-areas"></div>
+        <!-- Gráfico últimos 7 dias -->
+        <div class="sec-title">Últimos 7 dias</div>
+        <div class="chart-wrap">
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <span style="font-size:12px;color:var(--text2);">Questões respondidas</span>
+            <span style="font-size:12px;font-weight:700;" id="chart-total-week">0 essa semana</span>
+          </div>
+          <div class="chart-bars" id="chart-bars"></div>
+        </div>
       </div>
     </div>
 
-    <!-- QUIZ AREA SELECTOR -->
+    <!-- QUIZ -->
     <div class="screen" id="screen-quiz">
-      <div class="area-sel">
-        <h1>Quiz</h1>
-        <p>Escolha uma área ou pratique todas</p>
-        <button class="area-all" onclick="startQuiz('TODAS')">🎯 Todas as áreas — modo misto</button>
-        <div id="area-list-quiz"></div>
-      </div>
-    </div>
-
-    <!-- QUESTÃO -->
-    <div class="screen" id="screen-questao">
-      <div class="quiz-hdr">
-        <button class="quiz-back" onclick="navTo('quiz')">
-          <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M11 14L6 9l5-5" stroke="white" stroke-width="2.5" stroke-linecap="round"/></svg>
-        </button>
-        <div class="quiz-info">
-          <div class="quiz-area-lbl" id="quiz-area-lbl">Área</div>
-          <div class="quiz-prog-txt" id="quiz-prog-txt">0/0</div>
-          <div class="quiz-prog-bar"><div class="quiz-prog-fill" id="quiz-prog-fill" style="width:0%"></div></div>
+      <div id="quiz-home-view">
+        <div class="quiz-home">
+          <div class="quiz-home-title">Quiz</div>
+          <div class="quiz-home-sub">Escolha uma área ou mode especial</div>
+          <button class="trilha-btn" onclick="navTo('trilha')">🗺️ Trilha de Estudo (Fase 1)</button>
+          <button class="erro-mode-btn" onclick="iniciarModoErro()">🔁 Modo Erro — Revisar questões erradas</button>
+          <div class="area-list" id="area-list"></div>
         </div>
-        <div class="quiz-score"><div class="quiz-score-v" id="quiz-score-v">0/0</div><div class="quiz-score-l">Sessão</div></div>
       </div>
-      <div class="quiz-body" id="quiz-body"></div>
+      <div id="quiz-running-view" class="hidden">
+        <div class="quiz-header">
+          <div class="quiz-meta">
+            <div class="quiz-area-tag" id="quiz-area-tag">Quiz</div>
+            <div class="quiz-score-box"><div class="quiz-score-v" id="quiz-score-v">0/0</div><div class="quiz-score-l">Sessão</div></div>
+          </div>
+          <div class="quiz-prog"><div class="quiz-prog-fill" id="quiz-prog-fill" style="width:0%"></div></div>
+        </div>
+        <div class="quiz-body">
+          <div class="quiz-q-num" id="quiz-q-num"></div>
+          <div class="quiz-q-text" id="quiz-q-text"></div>
+          <div class="quiz-doc" id="quiz-q-doc"></div>
+          <div class="quiz-opts" id="quiz-opts"></div>
+          <div class="quiz-feedback" id="quiz-feedback">
+            <div class="quiz-feedback-title" id="quiz-fb-title"></div>
+            <div class="quiz-feedback-text" id="quiz-fb-text"></div>
+            <div class="quiz-ai-tip" id="quiz-ai-tip" style="display:none">💡 <span id="quiz-ai-tip-text"></span></div>
+          </div>
+          <button class="quiz-next-btn" id="quiz-next-btn" onclick="nextQuiz()">Próxima →</button>
+        </div>
+      </div>
     </div>
 
-    <!-- FLASHCARDS -->
+    <!-- TRILHA -->
+    <div class="screen" id="screen-trilha">
+      <div class="trilha-screen">
+        <div class="trilha-header-card">
+          <div class="trilha-fase" id="trilha-fase-label">FASE 1 — PRIMEIRA PASSAGEM</div>
+          <div class="trilha-titulo" id="trilha-titulo">Trilha de Estudo</div>
+          <div class="trilha-prog-bar"><div class="trilha-prog-fill" id="trilha-prog-fill" style="width:0%"></div></div>
+          <div class="trilha-prog-label" id="trilha-prog-label">0 de 0 tópicos concluídos</div>
+        </div>
+        <div id="trilha-lista"></div>
+      </div>
+    </div>
+
+    <!-- CARDS -->
     <div class="screen" id="screen-cards">
-      <div class="cards-hdr">
-        <h1>Flashcards</h1>
-        <p>Revisão espaçada com algoritmo SM-2</p>
-        <div class="cards-prog">
-          <div class="cp-ring">
-            <svg width="54" height="54" viewBox="0 0 54 54">
-              <circle cx="27" cy="27" r="21" stroke="#F0F0F0" stroke-width="6" fill="none"/>
-              <circle id="cp-ring-c" cx="27" cy="27" r="21" stroke="#C0392B" stroke-width="6" fill="none" stroke-linecap="round" stroke-dasharray="132" stroke-dashoffset="132"/>
-            </svg>
-            <div class="cp-num" id="cp-num">0</div>
-          </div>
-          <div><div class="cp-title" id="cp-title">Carregando...</div><div class="cp-sub">Toque no card para virar</div></div>
+      <div class="cards-header">
+        <div class="cards-h-title">Flashcards</div>
+        <div class="cards-h-sub">Revisão espaçada com algoritmo SM-2</div>
+        <div class="cards-h-stats">
+          <div class="cards-h-stat"><div class="cards-h-stat-v" id="cards-due">0</div><div class="cards-h-stat-l">Para hoje</div></div>
+          <div class="cards-h-stat"><div class="cards-h-stat-v" id="cards-total-n">0</div><div class="cards-h-stat-l">Total</div></div>
+          <div class="cards-h-stat"><div class="cards-h-stat-v" id="cards-streak-n">0</div><div class="cards-h-stat-l">Sequência</div></div>
         </div>
       </div>
-      <div id="cards-content"></div>
+      <div class="cards-body" id="cards-body"></div>
     </div>
 
-    <!-- SIMULADO HOME -->
+    <!-- SIMULADO -->
     <div class="screen" id="screen-simulado">
-      <div class="sim-home">
-        <div class="sim-hero">
-          <h1>⏱ Simulado Completo</h1>
-          <p>60 questões · 3 horas · Proporção real do CTSP 2026</p>
-          <div class="sim-dist">
-            <div class="sim-dist-cell"><div class="sim-dist-v">14</div><div class="sim-dist-l">AT1</div></div>
-            <div class="sim-dist-cell"><div class="sim-dist-v">8</div><div class="sim-dist-l">AT2</div></div>
-            <div class="sim-dist-cell"><div class="sim-dist-v">14</div><div class="sim-dist-l">AT3</div></div>
-            <div class="sim-dist-cell"><div class="sim-dist-v">12</div><div class="sim-dist-l">AT4</div></div>
-            <div class="sim-dist-cell"><div class="sim-dist-v">12</div><div class="sim-dist-l">AT5</div></div>
+      <div id="sim-home-view">
+        <div class="sim-home">
+          <h2>Simulado</h2>
+          <p>Escolha o modo de simulado</p>
+          <div class="sim-cards">
+            <div class="sim-card" onclick="iniciarSimulado('completo')">
+              <div class="sim-card-icon" style="background:#FDECEA;">📝</div>
+              <div class="sim-card-info"><h3>Simulado Completo</h3><p>60 questões · 3 horas · CTSP 2026</p></div>
+            </div>
+            <div class="sim-card" onclick="iniciarSimulado('inteligente')">
+              <div class="sim-card-icon" style="background:#FEF5E7;">🎯</div>
+              <div class="sim-card-info"><h3>Simulado Inteligente</h3><p>15 questões · foco nos seus pontos fracos</p></div>
+            </div>
+          </div>
+          <div class="sim-hist-title">Histórico</div>
+          <div id="sim-hist"></div>
+        </div>
+      </div>
+      <div id="sim-running-view" class="hidden">
+        <div class="sim-running-header">
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div><div class="sim-timer" id="sim-timer">03:00:00</div><div class="sim-timer-sub" id="sim-q-label">Questão 1 de 60</div></div>
+            <button class="sim-end-btn" onclick="encerrarSimulado()">Encerrar</button>
           </div>
         </div>
-        <div class="sim-info-grid">
-          <div class="sim-info-card"><div class="sim-info-v" id="sim-total-n">0</div><div class="sim-info-l">Simulados feitos</div></div>
-          <div class="sim-info-card"><div class="sim-info-v" id="sim-melhor">—</div><div class="sim-info-l">Maior nota</div></div>
+        <div class="sim-q-wrap">
+          <div class="quiz-q-num" id="sim-q-num"></div>
+          <div class="quiz-q-text" id="sim-q-text"></div>
+          <div class="quiz-doc" id="sim-q-doc"></div>
+          <div class="quiz-opts" id="sim-opts"></div>
+          <div style="display:flex;gap:8px;margin-top:14px;">
+            <button onclick="simPrev()" style="flex:1;padding:12px;background:white;border:1.5px solid var(--border);border-radius:12px;font-size:14px;font-weight:700;color:var(--text2);">← Anterior</button>
+            <button onclick="simNext()" style="flex:1;padding:12px;background:var(--red);color:white;border-radius:12px;font-size:14px;font-weight:700;">Próxima →</button>
+          </div>
         </div>
-        <button class="btn-start-sim" onclick="startSimulado()">Iniciar Simulado</button>
-        <div class="sim-hist">
-          <div class="sim-hist-title">Histórico</div>
-          <div id="sim-hist-list"><div class="empty"><div class="empty-i">📊</div><div class="empty-t">Nenhum simulado realizado ainda.</div></div></div>
+      </div>
+      <div id="sim-result-view" class="hidden">
+        <div class="sim-result">
+          <div class="sim-result-ring ring-container" style="width:120px;height:120px;">
+            <svg class="ring-svg" width="120" height="120" viewBox="0 0 120 120">
+              <circle fill="none" stroke="var(--border)" stroke-width="10" cx="60" cy="60" r="50"/>
+              <circle fill="none" stroke="var(--red)" stroke-width="10" stroke-linecap="round" cx="60" cy="60" r="50" id="sim-result-ring" stroke-dasharray="314.16" stroke-dashoffset="314.16"/>
+            </svg>
+            <div class="ring-center"><div class="sim-result-score" id="sim-result-score">0</div></div>
+          </div>
+          <div class="sim-result-label" id="sim-result-label"></div>
+          <div class="sim-result-areas" id="sim-result-areas"></div>
+          <div class="sim-ai-diag" id="sim-ai-diag">🤖 Gerando diagnóstico...</div>
+          <button onclick="voltarSimHome()" style="width:100%;padding:14px;background:var(--red);color:white;border-radius:12px;font-size:15px;font-weight:700;">Voltar ao início</button>
         </div>
       </div>
     </div>
 
-    <!-- SIMULADO RUNNING -->
-    <div class="sim-running" id="sim-running">
-      <div class="sim-topbar">
-        <div><div class="sim-timer" id="sim-timer">03:00:00</div><div class="sim-qn" id="sim-qn">Questão 1 de 60</div></div>
-        <button class="btn-enc" onclick="encerrarSimulado()">Encerrar</button>
+    <!-- RESUMOS -->
+    <div class="screen" id="screen-resumos">
+      <div class="resumos-screen">
+        <div class="resumos-header">
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div>
+              <div style="font-size:18px;font-weight:800;">Resumos</div>
+              <div style="font-size:12px;opacity:.75;">Revisão espaçada por dificuldade</div>
+            </div>
+            <div class="resumos-queue"><span style="font-size:12px;opacity:.75;">Para revisão:</span><span class="resumo-queue-n" id="resumos-fila">0</span></div>
+          </div>
+        </div>
+        <div id="resumos-content"></div>
       </div>
-      <div class="sim-nav" id="sim-nav"></div>
-      <div class="sim-body" id="sim-body"></div>
-    </div>
-
-    <!-- RESULTADO -->
-    <div class="screen" id="screen-resultado">
-      <div class="res-screen" id="res-content"></div>
     </div>
 
     <!-- ÁUDIO -->
     <div class="screen" id="screen-audio">
-      <div class="audio-wrap">
-        <h1>🎧 Áudio e Resumos</h1>
-        <p>Ouça ou leia os pontos mais cobrados em prova</p>
-        <div class="voice-wrap">
-          <div class="voice-lbl">Voz selecionada</div>
-          <select class="voice-select" id="voice-sel"></select>
+      <div class="audio-screen">
+        <div class="audio-header">
+          <h2>🎧 Áudio e Resumos</h2>
+          <p>Ouça os pontos mais cobrados em prova</p>
         </div>
-        <div class="dur-tabs">
-          <button class="dur-tab active" onclick="setDur('curto',this)">⚡ ~5 min</button>
-          <button class="dur-tab" onclick="setDur('medio',this)">📖 ~10 min</button>
-          <button class="dur-tab" onclick="setDur('longo',this)">🎓 ~15 min</button>
+        <div class="voice-sel">
+          <label>Voz selecionada</label>
+          <select id="voice-select"></select>
         </div>
-        <div class="audio-cards" id="audio-cards"></div>
+        <div class="audio-dur-tabs">
+          <button class="audio-dur-tab active" onclick="setDur('curto',this)">⚡ ~5 min</button>
+          <button class="audio-dur-tab" onclick="setDur('medio',this)">📖 ~10 min</button>
+          <button class="audio-dur-tab" onclick="setDur('longo',this)">📚 ~15 min</button>
+        </div>
+        <div id="audio-list"></div>
+      </div>
+    </div>
+
+    <!-- MATERIAL -->
+    <div class="screen" id="screen-material">
+      <div class="material-screen">
+        <div class="material-header">
+          <h2>📚 Material de Estudo</h2>
+          <p>Cadernos, provas e edital — consulte e pesquise</p>
+        </div>
+        <div class="material-tabs">
+          <button class="material-tab active" onclick="setMaterialTab('cadernos',this)">Cadernos</button>
+          <button class="material-tab" onclick="setMaterialTab('provas',this)">Provas</button>
+          <button class="material-tab" onclick="setMaterialTab('edital',this)">Edital</button>
+          <button class="material-tab" onclick="setMaterialTab('consulta',this)">🤖 Consultar IA</button>
+        </div>
+        <div class="material-section active" id="mat-cadernos">
+          <div class="material-upload-card">
+            <h3>Cadernos Temáticos</h3>
+            <p>Adicione os cadernos por área temática (PDF)</p>
+            <div id="cadernos-list" style="margin-bottom:12px;"></div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <select id="caderno-area-sel" style="padding:10px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;background:var(--bg);">
+                <option value="AT1">AT1 — Segurança Contra Incêndios</option>
+                <option value="AT2">AT2 — Combate a Incêndios</option>
+                <option value="AT3">AT3 — Buscas e Salvamentos</option>
+                <option value="AT4">AT4 — Direito Institucional</option>
+                <option value="AT5">AT5 — Normas Administrativas</option>
+              </select>
+              <label class="upload-btn">📎 Selecionar PDF<input type="file" accept=".pdf" style="display:none" onchange="uploadMaterial(this,'caderno')"></label>
+            </div>
+          </div>
+        </div>
+        <div class="material-section" id="mat-provas">
+          <div class="material-upload-card">
+            <h3>Provas Anteriores</h3>
+            <p>CTSP 2024 e 2025 — consulte as questões das provas reais</p>
+            <div id="provas-list" style="margin-bottom:12px;"></div>
+            <label class="upload-btn">📎 Adicionar prova (PDF)<input type="file" accept=".pdf" style="display:none" onchange="uploadMaterial(this,'prova')"></label>
+          </div>
+        </div>
+        <div class="material-section" id="mat-edital">
+          <div class="material-upload-card">
+            <h3>Edital Vigente</h3>
+            <p>Portaria CBMRS nº 078/2024 — regulamento do concurso</p>
+            <div id="edital-list" style="margin-bottom:12px;"></div>
+            <label class="upload-btn">📎 Adicionar edital (PDF)<input type="file" accept=".pdf" style="display:none" onchange="uploadMaterial(this,'edital')"></label>
+          </div>
+        </div>
+        <div class="material-section" id="mat-consulta">
+          <div class="consulta-box">
+            <h3>🤖 Consultar Material com IA</h3>
+            <p>Faça uma pergunta sobre o conteúdo dos cadernos, provas ou edital</p>
+            <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px;">
+              <select id="consulta-fonte-sel" style="padding:10px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;background:var(--bg);">
+                <option value="geral">Todo o material</option>
+                <option value="AT1">AT1 — Segurança Contra Incêndios</option>
+                <option value="AT2">AT2 — Combate a Incêndios</option>
+                <option value="AT3">AT3 — Buscas e Salvamentos</option>
+                <option value="AT4">AT4 — Direito Institucional</option>
+                <option value="AT5">AT5 — Normas Administrativas</option>
+              </select>
+              <textarea id="consulta-pergunta" placeholder="Ex: O que diz a RT 14 sobre extintores? Quais são as penalidades do Decreto 51.803?"></textarea>
+            </div>
+            <button class="btn-primary" onclick="consultarIA()" id="consulta-btn">Perguntar</button>
+            <div style="margin-top:14px;">
+              <div class="consulta-resp" id="consulta-resp" style="display:none;"></div>
+              <div class="consulta-fonte" id="consulta-fonte-label" style="display:none;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PADRÕES -->
+    <div class="screen" id="screen-padroes">
+      <div class="padroes-screen">
+        <div class="padroes-header">
+          <h2>📊 Padrões das Provas</h2>
+          <p>Metodologia e tópicos de alta incidência CTSP 2024/2025</p>
+        </div>
+        <div class="sec-title">Tipos de questão</div>
+        <div id="padroes-lista"></div>
+        <div class="sec-title mt14">Tópicos de alta incidência</div>
+        <div class="incidencia-card" id="incidencia-lista"></div>
       </div>
     </div>
 
     <!-- ADMIN -->
     <div class="screen" id="screen-admin">
-      <div class="admin-wrap">
-        <h1>⚙️ Painel Admin</h1>
-        <div class="sub">Gerencie usuários, questões e flashcards</div>
+      <div class="admin-screen">
+        <h2>⚙️ Painel Admin</h2>
+        <p>Gerencie usuários, questões e flashcards</p>
         <div class="admin-tabs">
           <button class="admin-tab active" onclick="setAdminTab('usuarios',this)">Usuários</button>
           <button class="admin-tab" onclick="setAdminTab('questao',this)">+ Questão</button>
-          <button class="admin-tab" onclick="setAdminTab('card',this)">+ Flashcard</button>
+          <button class="admin-tab" onclick="setAdminTab('flashcard',this)">+ Flashcard</button>
         </div>
-        <div class="admin-panel active" id="admin-usuarios">
-          <div id="admin-users-list"><div class="empty"><div class="empty-i">👥</div><div class="empty-t">Carregando...</div></div></div>
+        <div class="admin-section active" id="admin-usuarios">
+          <div id="admin-users-list"><p style="color:var(--text2);font-size:13px;">Carregando...</p></div>
         </div>
-        <div class="admin-panel" id="admin-questao">
-          <div class="form-card">
-            <div class="field"><label>Área</label><select id="q-area"><option value="AT1">AT1 - Segurança Contra Incêndios</option><option value="AT2">AT2 - Combate a Incêndios</option><option value="AT3">AT3 - Buscas e Salvamentos</option><option value="AT4">AT4 - Direito Institucional</option><option value="AT5">AT5 - Normas Administrativas</option></select></div>
-            <div class="field"><label>Documento base</label><input type="text" id="q-doc" placeholder="Ex: RT CBMRS nº 14/2016"/></div>
-            <div class="field"><label>Enunciado</label><textarea id="q-enunciado" placeholder="Digite o enunciado completo..."></textarea></div>
-            <div class="field"><label>Alternativa A</label><input type="text" id="q-op0"/></div>
-            <div class="field"><label>Alternativa B</label><input type="text" id="q-op1"/></div>
-            <div class="field"><label>Alternativa C</label><input type="text" id="q-op2"/></div>
-            <div class="field"><label>Alternativa D</label><input type="text" id="q-op3"/></div>
-            <div class="field"><label>Alternativa E</label><input type="text" id="q-op4"/></div>
-            <div class="field"><label>Gabarito</label><select id="q-gab"><option value="0">A</option><option value="1">B</option><option value="2">C</option><option value="3">D</option><option value="4">E</option></select></div>
-            <div class="field"><label>Explicação</label><textarea id="q-exp" placeholder="Por que a resposta está correta..."></textarea></div>
-            <button class="btn-primary" onclick="addQuestao()">Salvar Questão</button>
-            <div class="auth-msg" id="add-q-msg"></div>
+        <div class="admin-section" id="admin-questao">
+          <div class="field"><label>Área</label>
+            <select id="q-area"><option value="AT1">AT1</option><option value="AT2">AT2</option><option value="AT3">AT3</option><option value="AT4">AT4</option><option value="AT5">AT5</option></select>
           </div>
+          <div class="field"><label>Documento de referência</label><input type="text" id="q-doc" placeholder="Ex: RT CBMRS nº 14/2016"></div>
+          <div class="field"><label>Enunciado</label><textarea id="q-enun" rows="3"></textarea></div>
+          <div class="field"><label>Opção A</label><input type="text" id="q-a"></div>
+          <div class="field"><label>Opção B</label><input type="text" id="q-b"></div>
+          <div class="field"><label>Opção C</label><input type="text" id="q-c"></div>
+          <div class="field"><label>Opção D</label><input type="text" id="q-d"></div>
+          <div class="field"><label>Opção E</label><input type="text" id="q-e"></div>
+          <div class="field"><label>Gabarito (A-E)</label><select id="q-gab"><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option></select></div>
+          <div class="field"><label>Explicação</label><textarea id="q-exp" rows="2"></textarea></div>
+          <button class="btn-primary" onclick="addQuestao()">Salvar questão</button>
+          <p class="auth-msg" id="q-msg"></p>
         </div>
-        <div class="admin-panel" id="admin-card">
-          <div class="form-card">
-            <div class="field"><label>Área</label><select id="fc-area"><option value="AT1">AT1</option><option value="AT2">AT2</option><option value="AT3">AT3</option><option value="AT4">AT4</option><option value="AT5">AT5</option></select></div>
-            <div class="field"><label>Frente (pergunta)</label><textarea id="fc-frente" placeholder="O que vai aparecer na frente do card?"></textarea></div>
-            <div class="field"><label>Verso (resposta)</label><textarea id="fc-verso" placeholder="Resposta completa que aparece no verso..."></textarea></div>
-            <button class="btn-primary" onclick="addFlashcard()">Salvar Flashcard</button>
-            <div class="auth-msg" id="add-fc-msg"></div>
+        <div class="admin-section" id="admin-flashcard">
+          <div class="field"><label>Área</label>
+            <select id="fc-area"><option value="AT1">AT1</option><option value="AT2">AT2</option><option value="AT3">AT3</option><option value="AT4">AT4</option><option value="AT5">AT5</option></select>
           </div>
+          <div class="field"><label>Frente (pergunta)</label><textarea id="fc-f" rows="2"></textarea></div>
+          <div class="field"><label>Verso (resposta)</label><textarea id="fc-v" rows="2"></textarea></div>
+          <button class="btn-primary" onclick="addFlashcard()">Salvar flashcard</button>
+          <p class="auth-msg" id="fc-msg"></p>
         </div>
       </div>
     </div>
+
   </main>
 
+  <!-- BOTTOM NAV -->
   <nav class="bottom-nav" id="bottom-nav">
-    <div class="nav-item active" id="nav-home" onclick="navTo('home')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>Início
+    <div class="nav-item active" id="nav-inicio" onclick="navTo('inicio')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Início
     </div>
     <div class="nav-item" id="nav-quiz" onclick="navTo('quiz')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Quiz
     </div>
     <div class="nav-item" id="nav-cards" onclick="navTo('cards')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="3"/><line x1="2" y1="10" x2="22" y2="10"/></svg>Cards
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>Cards
+      <span class="nav-badge hidden" id="badge-cards">0</span>
     </div>
     <div class="nav-item" id="nav-simulado" onclick="navTo('simulado')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>Simulado
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Simulado
+    </div>
+    <div class="nav-item" id="nav-resumos" onclick="navTo('resumos')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Resumos
+      <span class="nav-badge hidden" id="badge-resumos">0</span>
     </div>
     <div class="nav-item" id="nav-audio" onclick="navTo('audio')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11,5 6,9 2,9 2,15 6,15 11,19 11,5"/><path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07"/></svg>Áudio
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07"/></svg>Áudio
+    </div>
+    <div class="nav-item" id="nav-material" onclick="navTo('material')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>Material
+    </div>
+    <div class="nav-item" id="nav-padroes" onclick="navTo('padroes')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Padrões
     </div>
   </nav>
 </div>
 
-<!-- QUICK MODAL -->
-<div class="modal-overlay" id="quick-modal">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div class="modal-title">⚡ Estudo Rápido</div>
-    <div class="modal-sub">Quantas questões você quer responder agora?</div>
-    <div class="qty-grid">
-      <button class="qty-btn sel" onclick="selQty(5,this)">5<small>~3 min</small></button>
-      <button class="qty-btn" onclick="selQty(10,this)">10<small>~6 min</small></button>
-      <button class="qty-btn" onclick="selQty(15,this)">15<small>~10 min</small></button>
-    </div>
-    <button class="btn-primary" onclick="startQuickStudy()">Começar agora →</button>
-    <button class="btn-cancel" onclick="closeQuickModal()">Cancelar</button>
-  </div>
-</div>
-
+<div class="toast" id="toast"></div>
 <script>
 // ═══════════════════════════════
-// FIREBASE CONFIG
+// FIREBASE
 // ═══════════════════════════════
 firebase.initializeApp({
   apiKey:"AIzaSyCnwg94KLWwyFB2-bzJOqRotsaSICdFtoM",
@@ -606,37 +893,30 @@ firebase.initializeApp({
   messagingSenderId:"267159679171",
   appId:"1:267159679171:web:1ffb1853f07aff3ae2b276"
 });
-const auth = firebase.auth();
-const db = firebase.database();
-const ADMIN_EMAIL = "jvictor.projetos.ti@gmail.com";
+const auth=firebase.auth();
+const db=firebase.database();
+const ADMIN_EMAIL="jvictor.projetos.ti@gmail.com";
+const ANTHROPIC_MODEL="claude-sonnet-4-20250514";
 
-// ── SANITIZAÇÃO contra XSS ──
-function sanitize(str){
-  if(!str)return'';
-  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
-}
+// ── Sanitize XSS ──
+function sanitize(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');}
 
-// ── RATE LIMIT login (tentativas) ──
+// ── Rate limit login ──
 const loginAttempts={count:0,lastReset:Date.now()};
-function checkRateLimit(){
-  const now=Date.now();
-  if(now-loginAttempts.lastReset>60000){loginAttempts.count=0;loginAttempts.lastReset=now;}
-  if(loginAttempts.count>=5)return false;
-  loginAttempts.count++;
-  return true;
-}
+function checkRateLimit(){const now=Date.now();if(now-loginAttempts.lastReset>60000){loginAttempts.count=0;loginAttempts.lastReset=now;}if(loginAttempts.count>=5)return false;loginAttempts.count++;return true;}
 
 // ═══════════════════════════════
 // STATE
 // ═══════════════════════════════
-let currentUser=null, userProfile=null;
-let userStats={correct:0,wrong:0,byArea:{},seenIds:[],history:[]};
+let currentUser=null,userProfile=null;
+let userStats={correct:0,wrong:0,byArea:{},seenIds:[],history:[],streak:0,lastStudyDate:'',metaDiaria:10,trilhaFase:1,trilhaVistos:[]};
 let userCards={};
-let allQuestoes={}, allFlashcards={};
-let quizQueue=[], quizIdx=0, quizArea='TODAS', quizSessao={c:0,t:0}, quizAnswered=false;
-let simQuestoes=[], simRespostas={}, simIdx=0, simTimer=null, simTempo=10800;
-let currentDur='curto', currentAudioArea=null, speechUtter=null;
-let quickQty=5;
+let allQuestoes={},allFlashcards={};
+let quizQueue=[],quizIdx=0,quizArea='TODAS',quizSessao={c:0,t:0},quizAnswered=false,quizModoErro=false;
+let simQuestoes=[],simRespostas={},simIdx=0,simTimer=null,simTempo=10800,simModo='completo';
+let currentDur='curto',currentAudioArea=null,speechUtter=null;
+let resumosQueue=[],resumoAtualIdx=0;
+let materialFiles={cadernos:[],provas:[],edital:[]};
 
 // ═══════════════════════════════
 // SM-2
@@ -648,27 +928,19 @@ function sm2Update(card,q){
   ef=Math.max(1.3,ef+0.1-(5-q)*(0.08+(5-q)*0.02));
   return{interval,reps,ef,next:Date.now()+interval*86400000};
 }
-
-function shuffle(a){
-  const r=[...a];
-  for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]];}
-  return r;
-}
+function sm2Resumo(card,dif){const q=dif==='dif'?1:dif==='med'?3:5;return sm2Update(card,q);}
+function shuffle(a){const r=[...a];for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]];}return r;}
 
 // ═══════════════════════════════
 // AREA INFO
 // ═══════════════════════════════
 const AI={
-  AT1:{nome:"Segurança Contra Incêndios",icon:"🔥",color:"#E74C3C",n:14},
-  AT2:{nome:"Combate a Incêndios",icon:"🚒",color:"#E67E22",n:8},
-  AT3:{nome:"Buscas e Salvamentos",icon:"🚑",color:"#2980B9",n:14},
-  AT4:{nome:"Direito Institucional",icon:"⚖️",color:"#8E44AD",n:12},
-  AT5:{nome:"Normas Administrativas",icon:"📋",color:"#27AE60",n:12}
+  AT1:{nome:"Segurança Contra Incêndios",icon:"🔥",color:"#E74C3C",bg:"#FDECEA",n:14},
+  AT2:{nome:"Combate a Incêndios",icon:"🚒",color:"#E67E22",bg:"#FEF5E7",n:8},
+  AT3:{nome:"Buscas e Salvamentos",icon:"🚑",color:"#2980B9",bg:"#EBF5FB",n:14},
+  AT4:{nome:"Direito Institucional",icon:"⚖️",color:"#8E44AD",bg:"#F4ECF7",n:12},
+  AT5:{nome:"Normas Administrativas",icon:"📋",color:"#27AE60",bg:"#E8F8F0",n:12}
 };
-
-// ═══════════════════════════════
-// BANCO INICIAL DE QUESTÕES
-// ═══════════════════════════════
 const QI={
 AT1:[
 {id:"a1_01",e:"Segundo a RT CBMRS nº 14/2016, a alça do extintor portátil deve estar no máximo a ___ m do piso, o fundo no mínimo a ___ m, e deve haver extintor a no máximo ___ m da porta de acesso principal.",ops:["1,80 / 0,30 / 3","1,80 / 0,10 / 5","1,60 / 0,30 / 5","1,60 / 0,10 / 3","1,60 / 0,10 / 5"],g:4,doc:"RT CBMRS nº 14/2016",exp:"Alça ≤ 1,60 m | Fundo ≥ 0,10 m | Distância da porta ≤ 5 m."},
@@ -769,9 +1041,6 @@ const FCI=[
 {id:"fc24",a:"AT5",f:"É permitido opinião pessoal na Parte Disciplinar?",v:"NÃO — expressamente proibido. A parte deve ser objetiva e impessoal."}
 ];
 
-// ═══════════════════════════════
-// ROTEIROS DE ÁUDIO
-// ═══════════════════════════════
 const ROT={
 AT1:{
 curto:`Segurança Contra Incêndios. Cinco pontos mais cobrados em prova.
@@ -967,89 +1236,358 @@ Sobre a Documentação Técnica: as valências para elaborar um documento oficia
 };
 
 // ═══════════════════════════════
+// RESUMOS — banco inicial
+// ═══════════════════════════════
+const RESUMOS_BANCO=[
+{id:"r_at1_01",area:"AT1",titulo:"Extintores — RT CBMRS nº 14/2016",prob:"alta",
+texto:`RT CBMRS nº 14/2016 — Extintores portáteis:
+• Alça: máximo 1,60 m do piso
+• Fundo: mínimo 0,10 m do piso
+• Distância da porta principal: máximo 5 m
+Atenção: extintores sobre rodas têm regras específicas diferentes dos portáteis.`},
+{id:"r_at1_02",area:"AT1",titulo:"Mezanino — LC 14.376/2013 art. 6º",prob:"alta",
+texto:`Mezanino é considerado OUTRO PAVIMENTO quando:
+• Excede 250 m², OU
+• Excede 1/3 (terça parte) da área do piso do pavimento
+→ O limite é por UNIDADE AUTÔNOMA (não do edifício inteiro)
+Definição: plataforma elevada circulável que subdivide parcialmente um andar em dois.`},
+{id:"r_at1_03",area:"AT1",titulo:"Penalidades — Decreto 51.803/2014",prob:"alta",
+texto:`Art. 10 do Decreto 51.803/2014 prevê 4 penalidades:
+1. Advertência
+2. Multa
+3. Multa diária
+4. Interdição
+EMBARGO não está previsto — essa é a pegadinha clássica da prova!
+
+Interdição SANÇÃO: irregularidade persistindo após 120 dias da multa.
+Interdição PRÉVIA: iminente risco à vida (poder de polícia).`},
+{id:"r_at1_04",area:"AT1",titulo:"PPCI e PSPCI — LC 14.376/2013",prob:"alta",
+texto:`PPCI = projeto técnico completo com medidas para:
+• Prevenir e evitar o incêndio
+• Permitir abandono seguro
+• Dificultar propagação
+• Proporcionar meios de controle/extinção
+• Permitir acesso do CBM
+
+PSPCI = procedimento simplificado para edificações menores.
+F-11 e F-12 com área entre 750 e 1.500 m² podem usar PSPCI.`},
+{id:"r_at1_05",area:"AT1",titulo:"SOL-CBMRS — Prazos de recurso",prob:"media",
+texto:`SOL-CBMRS (4ª Edição 2022):
+• Recurso 1ª instância: 30 dias CORRIDOS após ciência da CIA/CIV
+  ⚠️ Atenção: são dias CORRIDOS, não úteis!
+• Recurso 2ª instância: 15 dias ÚTEIS após ciência da decisão em 1ª instância
+• Renovação do APPCI: protocolar com mínimo de 30 dias de antecedência`},
+{id:"r_at2_01",area:"AT2",titulo:"Mangueiras — Pressões (CBMMG 2020)",prob:"alta",
+texto:`Mangueiras de combate a incêndio:
+• Diâmetros: 1½" (38mm) e 2½" (63mm)
+• Pressão mínima de PROVA: 42 kgf/cm² (para ambos)
+• NÃO confundir com pressão de trabalho
+
+Cuidados:
+→ Desenrolar periodicamente (evitar ressecamento)
+→ Não expor ao sol / não arrastar em superfícies cortantes
+→ Lavar com água e sabão neutro após uso`},
+{id:"r_at2_02",area:"AT2",titulo:"Fogo — Concentração de O₂",prob:"alta",
+texto:`Fases de combustão pelo O₂:
+• 21% → concentração normal do ar
+• Entre 21% e 14% → QUEIMA VIVA (chama visível)
+• Entre 14% e 7% → queima sem chama
+• Abaixo de 7% → combustão não se sustenta
+
+Incêndio = combustão FORA DE CONTROLE
+Chama = manifestação visual da combustão
+Calor = energia térmica em trânsito
+Temperatura = medida da agitação molecular`},
+{id:"r_at2_03",area:"AT2",titulo:"Técnicas de Ataque a Incêndio",prob:"media",
+texto:`4 técnicas principais:
+• Direto: água na base do foco
+• Indireto/Tridimensional: água nas camadas quentes de fumaça (quando não é possível atacar diretamente)
+• Combinado: mistura direto + indireto
+• Transicional (envolvente): de fora para dentro antes de entrar
+
+Arrombamento — 4 ferramentas padrão:
+Pé de Cabra + Malho 10 kg + Alavanca Halligan + Corta-vergalhão`},
+{id:"r_at3_01",area:"AT3",titulo:"XABCDE — Protocolo completo",prob:"alta",
+texto:`Avaliação primária:
+X = eXsanguinação (controle de hemorragias EXTERNAS graves)
+A = Airway (vias aéreas)
+B = Breathing (respiração)
+C = Circulation (circulação)
+D = Disability (disfunção neurológica) → usa Escala de Coma de Glasgow
+  ⚠️ ECG ≤ 8 → inserir COF (Cânula Orofaríngea)
+E = Exposure (exposição)
+
+Tríade TCE: Sinal de Guaxinim + Sinal de Battle + Anisocoria`},
+{id:"r_at3_02",area:"AT3",titulo:"RCP — Proporções por vítima",prob:"alta",
+texto:`Proporções de RCP:
+• Adulto (1 ou 2 socorristas): 30:2
+  → 100-120 compressões/min | profundidade 5-6 cm
+• Criança (1 socorrista): 30:2
+• Criança (2 socorristas): 15:2
+• Lactente (1 socorrista): 30:2
+• Lactente (2 socorristas): 15:2 ← pegadinha clássica!
+
+DEA: ao "analisar o ritmo" → TODOS se afastam e PARAM a RCP`},
+{id:"r_at3_03",area:"AT3",titulo:"POP Salvamento Veicular — 12 passos",prob:"alta",
+texto:`Rotina completa (12 passos):
+1. Acionamento
+2. Dimensionamento
+3. Gerenciamento
+4. Estabilização
+5. Acesso
+6. Avaliação Inicial
+7. Reunião Tripartida (Chefe GU + Resgatista + Operador)
+8. Desencarceramento
+9. Extração
+10. Avaliação Sistematizada
+11. Transporte
+12. Encerramento
+
+Ordem de acesso: Portas ND → Janelas ND → Janelas D → Portas D`},
+{id:"r_at4_01",area:"AT4",titulo:"CF art. 144 — Segurança Pública",prob:"alta",
+texto:`Art. 144 CF/1988 — Órgãos de segurança pública:
+• Polícia Federal (PF)
+• Polícia Rodoviária Federal (PRF) — patrulhamento ostensivo de rodovias federais
+• Polícia Ferroviária Federal
+• Polícias Civis — polícia judiciária (exceto militares)
+• Polícias Militares — polícia ostensiva
+• Corpos de Bombeiros — defesa civil + atribuições legais
+• Polícias Penais
+
+⚠️ Tráfico, contrabando e descaminho = POLÍCIA FEDERAL (não polícias civis!)
+⚠️ Segurança pública = dever do Estado E responsabilidade de TODOS`},
+{id:"r_at4_02",area:"AT4",titulo:"CF art. 37 — LIMPE e concursos",prob:"alta",
+texto:`Princípios: Legalidade, Impessoalidade, Moralidade, Publicidade, EFICIÊNCIA
+⚠️ É EFICIÊNCIA, não "eficácia"!
+
+Concurso público:
+• Prazo de validade: até 2 anos
+• Prorrogação: UMA vez por igual período (não duas vezes!)
+• Aprovado tem direito subjetivo à nomeação dentro do prazo
+
+Lei reservará % de cargos para pessoas com deficiência (correto).`},
+{id:"r_at4_03",area:"AT4",titulo:"IPM e Sindicância — Prazos CBMRS",prob:"alta",
+texto:`IPM (IR 008/Corregedoria-Geral CBMRS):
+• Prazo: 40 dias + 20 dias de prorrogação
+• Quem pode instaurar: Cmt-Geral, Corregedor-Geral, Chefes OBM, Diretores
+• Subcomandantes NÃO podem instaurar IPM!
+
+Sindicância (IR 006/Corregedoria-Geral):
+• Prazo: 30 dias + 20 dias de prorrogação
+• Pedido: feito pelo SINDICANTE (não pelo sindicado)
+• Com 2 dias úteis de antecedência`},
+{id:"r_at5_01",area:"AT5",titulo:"Atos de movimentação — Dec. 57.390/2023",prob:"alta",
+texto:`5 atos administrativos de movimentação:
+• INCLUSÃO: integra o militar no OPM (fica "não apresentado" até chegar)
+• EXCLUSÃO: deixa de integrar o OPM
+• ADIÇÃO: vincula sem integrar (situação provisória)
+• EFETIVAÇÃO: atribui efetivo no mesmo OPM
+• DESLIGAMENTO: desvincula do OPM
+
+Trânsito: até 100 km = 2 dias | acima de 100 km = 5 dias
+Instalação: concedida pelo Cmt do OPM de DESTINO (não de origem!)`},
+{id:"r_at5_02",area:"AT5",titulo:"IPO e COBOM — IT 03/AODC-GCG",prob:"alta",
+texto:`IPO (Informação Preliminar de Ocorrência):
+→ Enviar via WhatsApp ou Telegram ao CCOB/COBOM
+→ Conteúdo obrigatório: tipo + prefixo + síntese + endereço + horário
+→ Envio: IMEDIATAMENTE (ocorrências de vulto)
+
+COBOM: ao receber chamado → atende, cadastra e empenha guarnições no Ebombeiro WEB
+
+FR² (IT 04.3): Cmt de BBM solicita apoio ao COBOM
+Certificação Logística das Células da FR²: definida pela AODC`},
+{id:"r_at5_03",area:"AT5",titulo:"Parte Disciplinar e Documentos",prob:"media",
+texto:`Parte Disciplinar:
+• É o relato de uma transgressão cometida por militar estadual
+• Prazo: até 2 dias úteis da constatação
+• Deve ser clara, precisa, com: identificação + local + data + hora + circunstâncias
+• É PROIBIDO tecer comentários ou opiniões pessoais!
+
+Tipos de documentos:
+• PARTE: comunicação interna, subordinado → superior, rotina do serviço
+• MEMORANDO: comunicação interna entre setores de mesma hierarquia
+• OFÍCIO: comunicação externa ou formal com outras instituições`}
+];
+
+// ═══════════════════════════════
+// TRILHA DE ESTUDO
+// ═══════════════════════════════
+const TRILHA=[
+{id:"t_at1_01",area:"AT1",titulo:"Extintores portáteis — RT 14/2016",prob:"alta",doc:"RT CBMRS nº 14/2016",
+conteudo:"Alça ≤ 1,60 m | Fundo ≥ 0,10 m | Distância porta ≤ 5 m. Cobrado nas provas 2024 e 2025."},
+{id:"t_at1_02",area:"AT1",titulo:"Mezanino — LC 14.376/2013",prob:"alta",doc:"LC 14.376/2013 art.6º",
+conteudo:"Mezanino > 250 m² ou > 1/3 da área do piso = outro pavimento. Limite por unidade autônoma."},
+{id:"t_at1_03",area:"AT1",titulo:"Penalidades — Decreto 51.803/2014",prob:"alta",doc:"Decreto 51.803/2014 art.10",
+conteudo:"4 penalidades: advertência, multa, multa diária, interdição. EMBARGO não existe! Cobrado nas 2 provas."},
+{id:"t_at1_04",area:"AT1",titulo:"Interdição: sanção × prévia",prob:"alta",doc:"Decreto 51.803/2014 cap.III",
+conteudo:"Sanção = 120 dias sem sanar + prazo esgotado. Prévia = iminente risco à vida (poder de polícia)."},
+{id:"t_at1_05",area:"AT1",titulo:"PPCI e PSPCI",prob:"alta",doc:"LC 14.376/2013",
+conteudo:"PPCI = projeto completo de prevenção. PSPCI = simplificado para F-11/F-12 entre 750-1.500m²."},
+{id:"t_at1_06",area:"AT1",titulo:"SOL-CBMRS — Prazos de recurso",prob:"media",doc:"SOL-CBMRS 4ª Ed. 2022",
+conteudo:"1ª instância: 30 dias CORRIDOS. 2ª instância: 15 dias ÚTEIS. Renovação: 30 dias antecedência."},
+{id:"t_at1_07",area:"AT1",titulo:"Inviabilidade técnica — RT 05 Parte 7.2",prob:"media",doc:"RT CBMRS nº 05 Parte 7.2",
+conteudo:"Prédios tombados pelo Patrimônio Histórico = inviabilidade técnica. Medidas compensatórias permitidas."},
+{id:"t_at2_01",area:"AT2",titulo:"Mangueiras — pressões",prob:"alta",doc:"Manual CBMMG 2020 Cap.2",
+conteudo:"Pressão PROVA mínima = 42 kgf/cm² para 1½\" e 2½\". Não confundir com pressão de trabalho."},
+{id:"t_at2_02",area:"AT2",titulo:"O₂ e fases da combustão",prob:"alta",doc:"Manual CBMMG 2020 Cap.1",
+conteudo:"21-14%: queima viva. 14-7%: sem chama. <7%: sem combustão. Queima viva = 21% a 14%."},
+{id:"t_at2_03",area:"AT2",titulo:"Técnicas de ataque",prob:"alta",doc:"Manual CBMMG 2020 Cap.5",
+conteudo:"Direto=base do foco. Indireto=camadas quentes fumaça. Combinado=mistura. Transicional=de fora para dentro."},
+{id:"t_at2_04",area:"AT2",titulo:"Arrombamento — ferramentas",prob:"media",doc:"Manual CBMMG 2020 Cap.3",
+conteudo:"4 ferramentas: Pé de Cabra + Malho 10kg + Alavanca Halligan + Corta-vergalhão."},
+{id:"t_at3_01",area:"AT3",titulo:"XABCDE — sequência",prob:"alta",doc:"ITO 23 CBMMG 3ª Ed. 2021",
+conteudo:"X=eXsanguinação, A=Airway, B=Breathing, C=Circulation, D=Disability, E=Exposure. ECG≤8 → COF."},
+{id:"t_at3_02",area:"AT3",titulo:"RCP — proporções",prob:"alta",doc:"ITO 23 CBMMG 3ª Ed. 2021",
+conteudo:"Lactente 2 socorristas=15:2. Todos outros adulto/criança/1 socorrista=30:2."},
+{id:"t_at3_03",area:"AT3",titulo:"DEA — procedimento",prob:"alta",doc:"ITO 23 CBMMG 3ª Ed. 2021",
+conteudo:"Ao 'analisar ritmo' → TODOS param e se afastam. <8 anos ou <25kg = pás pediátricas."},
+{id:"t_at3_04",area:"AT3",titulo:"POP Salvamento Veicular — 12 passos",prob:"alta",doc:"POP CBMRS",
+conteudo:"Acionamento→Dimensionamento→Gerenciamento→Estabilização→Acesso→Av.Inicial→Tripartida→Desencarceramento→Extração→Av.Sistematizada→Transporte→Encerramento"},
+{id:"t_at3_05",area:"AT3",titulo:"TCE — sinais clínicos",prob:"alta",doc:"ITO 23 CBMMG",
+conteudo:"Tríade: Sinal de Guaxinim + Sinal de Battle + Anisocoria. TCE grave: monitorar PIC e ajustar colar."},
+{id:"t_at4_01",area:"AT4",titulo:"CF art. 144 — Segurança Pública",prob:"alta",doc:"CF/1988 art.144",
+conteudo:"Tráfico/contrabando/descaminho=Polícia Federal. Segurança pública=dever do Estado E de todos."},
+{id:"t_at4_02",area:"AT4",titulo:"CF art. 37 — LIMPE",prob:"alta",doc:"CF/1988 art.37",
+conteudo:"EFICIÊNCIA (não eficácia). Concurso: até 2 anos, prorrogável UMA vez. % para PcD: correto."},
+{id:"t_at4_03",area:"AT4",titulo:"IPM — prazos e competências",prob:"alta",doc:"IR 008 CBMRS",
+conteudo:"40 dias + 20 dias prorrogação. Subcomandantes NÃO instaurar IPM. Competentes: Cmt-Geral, Corregedor, Chefes OBM, Diretores."},
+{id:"t_at4_04",area:"AT4",titulo:"Sindicância Militar — prazos",prob:"alta",doc:"IR 006 CBMRS",
+conteudo:"30 dias + 20 dias. Pedido do SINDICANTE (não sindicado), 2 dias úteis de antecedência."},
+{id:"t_at4_05",area:"AT4",titulo:"LC 14.920/2016 — Organização CBMRS",prob:"media",doc:"LC 14.920/2016",
+conteudo:"Cmt Pelotão=Oficiais Intermediários ativa QOEM. Cmt Regional=último e penúltimo posto QOEM."},
+{id:"t_at5_01",area:"AT5",titulo:"Atos de movimentação — Dec. 57.390/2023",prob:"alta",doc:"Decreto 57.390/2023",
+conteudo:"Inclusão=integra. Exclusão=deixa de integrar. Adição=vincula sem integrar. Efetivação=atribui efetivo. Desligamento=desvincula."},
+{id:"t_at5_02",area:"AT5",titulo:"Trânsito e Instalação",prob:"alta",doc:"Decreto 57.390/2023",
+conteudo:"≤100km=2 dias. >100km=5 dias. Instalação: Cmt OPM de DESTINO (não origem!)."},
+{id:"t_at5_03",area:"AT5",titulo:"IPO e COBOM — IT 03",prob:"alta",doc:"IT 03/AODC-GCG",
+conteudo:"IPO via WhatsApp/Telegram ao CCOB. Conteúdo: tipo+prefixo+síntese+endereço+horário. COBOM: Ebombeiro WEB."},
+{id:"t_at5_04",area:"AT5",titulo:"FR² e AODC — IT 04.3",prob:"media",doc:"IT 04.3/AODC-GCG",
+conteudo:"Cmt BBM solicita FR² ao COBOM. Certificação Logística das Células: definida pela AODC."},
+{id:"t_at5_05",area:"AT5",titulo:"Parte Disciplinar e documentos",prob:"media",doc:"Caderno Temático ABM 2023",
+conteudo:"Parte=subordinado→superior, rotina. PROIBIDO opinião pessoal. Prazo: 2 dias úteis da constatação."}
+];
+
+// ═══════════════════════════════
+// PADRÕES DAS PROVAS
+// ═══════════════════════════════
+const PADROES=[
+{tipo:"INCORRETA / EXCETO",pct:38,cor:"#FDECEA",corT:"#C0392B",
+dica:"Procure a alternativa que TROCA um número, palavra ou conceito. Geralmente a pegadinha é sutil — 'ÚTEIS' vs 'CORRIDOS', 'STJ' vs 'STM', 'VEDADO' vs 'FACULTADO'.",
+estrategia:"Leia cada alternativa assumindo que está errada. Identifique o elemento incorreto antes de marcar. Cuidado com sinônimos falsos.",
+exemplo:"a1_07"},
+{tipo:"Apenas I, II, III...",pct:22,cor:"#FEF5E7",corT:"#E67E22",
+dica:"Analise CADA item individualmente, não o conjunto. Um único item errado elimina a alternativa.",
+estrategia:"Avalie item por item. Se encontrar um errado, riscando mentalmente, já elimina todas as alternativas que o incluem.",
+exemplo:"a1_13"},
+{tipo:"V/F Sequencial",pct:18,cor:"#EBF5FB",corT:"#2980B9",
+dica:"Um único item errado na sequência invalida várias alternativas de uma vez. Comece pelos que você tem certeza.",
+estrategia:"Identifique os itens mais fáceis primeiro. Use eliminação progressiva. Um F certo ou V certo já reduz as opções.",
+exemplo:"a3_09"},
+{tipo:"Correspondência Ordenada",pct:12,cor:"#F4ECF7",corT:"#8E44AD",
+dica:"Decoreba pura de sequências e conceitos. Foco nos atos de movimentação, rotinas e protocolos em ordem.",
+estrategia:"Monte um mnemônico para a sequência. Ex: POP Salvamento = 'Ação-Dim-Ger-Esta-Ace-Av-Tri-Des-Ext-AvS-Trans-Enc'",
+exemplo:"a3_14"},
+{tipo:"Alternativa Direta",pct:10,cor:"#E8F8F0",corT:"#27AE60",
+dica:"Questão objetiva, sem armadilha. Confia no conhecimento básico. Não complique.",
+estrategia:"Responda pelo que sabe. Se duas alternativas parecem certas, a mais específica e literal geralmente é a correta.",
+exemplo:"a1_01"}
+];
+
+const INCIDENCIA=[
+{assunto:"Decreto 51.803 — penalidades e interdição",area:"AT1",prob:"alta",provas:"2024 e 2025"},
+{assunto:"RT CBMRS nº 14/2016 — medidas extintores",area:"AT1",prob:"alta",provas:"2024 e 2025"},
+{assunto:"Prazos IPM (40+20) e Sindicância (30+20)",area:"AT4",prob:"alta",provas:"2024 e 2025"},
+{assunto:"XABCDE — sequência correta",area:"AT3",prob:"alta",provas:"2024 e 2025"},
+{assunto:"RCP — proporções lactente com 2 socorristas",area:"AT3",prob:"alta",provas:"2024 e 2025"},
+{assunto:"Atos de movimentação Dec. 57.390/2023",area:"AT5",prob:"alta",provas:"2024 e 2025"},
+{assunto:"Art. 37 CF — princípios LIMPE",area:"AT4",prob:"alta",provas:"2024 e 2025"},
+{assunto:"Art. 144 CF — atribuições dos órgãos",area:"AT4",prob:"alta",provas:"2024 e 2025"},
+{assunto:"POP Salvamento Veicular — 12 passos",area:"AT3",prob:"alta",provas:"2024 e 2025"},
+{assunto:"Concentração O₂ por fase de combustão",area:"AT2",prob:"alta",provas:"2024 e 2025"},
+{assunto:"IPO via WhatsApp/Telegram ao CCOB",area:"AT5",prob:"media",provas:"2025"},
+{assunto:"LC 14.920/2016 — funções e cargos CBMRS",area:"AT4",prob:"media",provas:"2025"},
+{assunto:"SOL-CBMRS — prazos de recurso",area:"AT1",prob:"media",provas:"2025"},
+{assunto:"FR² — solicitação ao COBOM",area:"AT5",prob:"media",provas:"2025"}
+];
+
+// ═══════════════════════════════
 // AUTH
 // ═══════════════════════════════
-function setAuthTab(t){
-  document.querySelectorAll('.auth-tab').forEach(b=>b.classList.remove('active'));
-  ['login','register','pending'].forEach(id=>document.getElementById('tab-'+id).classList.add('hidden'));
-  document.getElementById('tab-'+t).classList.remove('hidden');
-  if(t==='login')document.querySelectorAll('.auth-tab')[0].classList.add('active');
-  else if(t==='register')document.querySelectorAll('.auth-tab')[1].classList.add('active');
+function showAuthTab(t){
+  ['login','register','pending'].forEach(x=>{
+    document.getElementById('tab-'+x).classList.toggle('hidden',x!==t);
+    const btn=document.getElementById('tab-btn-'+x);
+    if(btn)btn.classList.toggle('active',x===t);
+  });
 }
 
 async function doLogin(){
-  const email=document.getElementById('login-email').value.trim();
-  const pass=document.getElementById('login-pass').value;
-  const msg=document.getElementById('login-msg');
-  if(!email||!pass){msg.textContent='Preencha todos os campos.';return;}
-  if(!checkRateLimit()){msg.textContent='Muitas tentativas. Aguarde 1 minuto.';return;}
-  msg.textContent='Entrando...';msg.className='auth-msg';
-  try{await auth.signInWithEmailAndPassword(email,pass);}
-  catch(e){msg.textContent=e.code==='auth/user-not-found'||e.code==='auth/wrong-password'?'Email ou senha incorretos.':'Erro ao entrar. Tente novamente.';}
+  if(!checkRateLimit()){showMsg('login-msg','Muitas tentativas. Aguarde 1 minuto.');return;}
+  const e=document.getElementById('login-email').value.trim();
+  const p=document.getElementById('login-pass').value;
+  if(!e||!p){showMsg('login-msg','Preencha email e senha.');return;}
+  const btn=document.querySelector('#tab-login .btn-primary');
+  btn.disabled=true;btn.textContent='Entrando...';
+  try{await auth.signInWithEmailAndPassword(e,p);}
+  catch(err){showMsg('login-msg',err.code==='auth/wrong-password'||err.code==='auth/user-not-found'?'Email ou senha incorretos.':'Erro ao entrar.');}
+  finally{btn.disabled=false;btn.textContent='Entrar';}
 }
 
 async function doRegister(){
-  const name=document.getElementById('reg-name').value.trim();
-  const email=document.getElementById('reg-email').value.trim();
-  const pass=document.getElementById('reg-pass').value;
-  const msg=document.getElementById('reg-msg');
-  if(!name||!email||!pass){msg.textContent='Preencha todos os campos.';return;}
-  if(pass.length<6){msg.textContent='Senha deve ter no mínimo 6 caracteres.';return;}
-  msg.textContent='Criando conta...';msg.className='auth-msg';
+  const nome=document.getElementById('reg-nome').value.trim();
+  const e=document.getElementById('reg-email').value.trim();
+  const p=document.getElementById('reg-pass').value;
+  if(!nome||!e||!p){showMsg('reg-msg','Preencha todos os campos.');return;}
+  if(p.length<6){showMsg('reg-msg','Senha mínimo 6 caracteres.');return;}
+  const btn=document.querySelector('#tab-register .btn-primary');
+  btn.disabled=true;btn.textContent='Criando...';
   try{
-    const cred=await auth.createUserWithEmailAndPassword(email,pass);
-    await db.ref('usuarios/'+cred.user.uid).set({nome:name,email,admin:false,aprovado:false,criadoEm:Date.now()});
-    msg.textContent='Cadastro realizado! Aguarde aprovação do administrador.';msg.className='auth-msg ok';
-    setTimeout(()=>setAuthTab('login'),2500);
-  }catch(e){msg.textContent=e.code==='auth/email-already-in-use'?'Este email já está cadastrado.':'Erro ao criar conta. Tente novamente.';}
+    const cred=await auth.createUserWithEmailAndPassword(e,p);
+    const isAdm=e===ADMIN_EMAIL;
+    await db.ref('usuarios/'+cred.user.uid).set({nome,email:e,admin:isAdm,aprovado:isAdm,criadoEm:Date.now()});
+    if(!isAdm)showAuthTab('pending');
+  }catch(err){showMsg('reg-msg',err.code==='auth/email-already-in-use'?'Email já cadastrado.':'Erro ao criar conta.');}
+  finally{btn.disabled=false;btn.textContent='Criar conta';}
 }
 
-function doLogout(){
-  if(simTimer)clearInterval(simTimer);
-  if(speechSynthesis)speechSynthesis.cancel();
-  auth.signOut();
-}
+function doLogout(){if(speechUtter)speechSynthesis.cancel();auth.signOut();}
 
 // ═══════════════════════════════
 // AUTH STATE
 // ═══════════════════════════════
 auth.onAuthStateChanged(async user=>{
   document.getElementById('loading').style.display='none';
-  if(!user){showAuth();return;}
+  if(!user){currentUser=null;userProfile=null;showAuth();return;}
   currentUser=user;
+  const isAdmEmail=user.email===ADMIN_EMAIL;
   const snap=await db.ref('usuarios/'+user.uid).get();
-  const isAdminEmail = user.email===ADMIN_EMAIL;
   if(!snap.exists()){
-    await db.ref('usuarios/'+user.uid).set({nome:user.email,email:user.email,admin:isAdminEmail,aprovado:isAdminEmail,criadoEm:Date.now()});
-  } else if(isAdminEmail && !snap.val().admin){
+    await db.ref('usuarios/'+user.uid).set({nome:user.email,email:user.email,admin:isAdmEmail,aprovado:isAdmEmail,criadoEm:Date.now()});
+  } else if(isAdmEmail&&!snap.val().admin){
     await db.ref('usuarios/'+user.uid).update({admin:true,aprovado:true});
   }
   const freshSnap=await db.ref('usuarios/'+user.uid).get();
-  userProfile={nome:user.email,email:user.email,admin:isAdminEmail,aprovado:isAdminEmail,...(freshSnap.val()||{})};
-  if(user.email===ADMIN_EMAIL)userProfile.aprovado=true;
-  if(!userProfile.aprovado){
-    document.getElementById('auth-screen').classList.add('active');
-    document.getElementById('app').classList.remove('active');
-    ['login','register'].forEach(id=>document.getElementById('tab-'+id).classList.add('hidden'));
-    document.getElementById('tab-pending').classList.remove('hidden');
-    document.querySelectorAll('.auth-tab').forEach(t=>t.classList.remove('active'));
-    return;
-  }
-  showApp();
+  userProfile={nome:user.email,email:user.email,admin:isAdmEmail,aprovado:isAdmEmail,...(freshSnap.val()||{})};
+  if(!userProfile.aprovado&&!isAdmEmail){showAuth('pending');return;}
+  await initApp();
 });
 
-function showAuth(){
+function showAuth(tab='login'){
   document.getElementById('auth-screen').classList.add('active');
   document.getElementById('app').classList.remove('active');
+  showAuthTab(tab);
 }
 
-async function showApp(){
+// ═══════════════════════════════
+// INIT APP
+// ═══════════════════════════════
+async function initApp(){
   document.getElementById('auth-screen').classList.remove('active');
   document.getElementById('app').classList.add('active');
-  document.getElementById('hdr-nome').textContent=(userProfile.nome||'').split(' ')[0]||'';
+  document.getElementById('hdr-nome').textContent=userProfile.nome||currentUser.email;
   if(userProfile.admin||currentUser.email===ADMIN_EMAIL){
+    const nav=document.getElementById('bottom-nav');
     if(!document.getElementById('nav-admin')){
-      const nav=document.getElementById('bottom-nav');
       const btn=document.createElement('div');
       btn.className='nav-item';btn.id='nav-admin';
       btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>Admin';
@@ -1060,25 +1598,32 @@ async function showApp(){
   await loadUserData();
   await loadQuestoes();
   await loadFlashcards();
+  updateStreak();
   renderDashboard();
   renderAreaList();
   renderCards();
   renderSimHome();
   renderAudio();
-  loadVoices();
+  renderResumos();
+  renderTrilha();
+  renderPadroes();
   if(userProfile.admin||currentUser.email===ADMIN_EMAIL)loadAdminUsers();
+  loadVoices();
 }
 
 // ═══════════════════════════════
-// DATA
+// DATA LOAD
 // ═══════════════════════════════
 async function loadUserData(){
   const snap=await db.ref('progresso/'+currentUser.uid).get();
-  if(snap.exists())userStats={correct:0,wrong:0,byArea:{},seenIds:[],history:[],...snap.val()};
+  if(snap.exists())userStats={correct:0,wrong:0,byArea:{},seenIds:[],history:[],streak:0,lastStudyDate:'',metaDiaria:10,trilhaFase:1,trilhaVistos:[],...snap.val()};
   const cs=await db.ref('cards/'+currentUser.uid).get();
   if(cs.exists())userCards=cs.val();
-  db.ref('progresso/'+currentUser.uid).on('value',s=>{if(s.exists()){userStats={correct:0,wrong:0,byArea:{},seenIds:[],history:[],...s.val()};renderDashboard();}});
-  db.ref('cards/'+currentUser.uid).on('value',s=>{if(s.exists()){userCards=s.val();renderCards();}});
+  db.ref('progresso/'+currentUser.uid).on('value',s=>{
+    if(s.exists()){userStats={correct:0,wrong:0,byArea:{},seenIds:[],history:[],streak:0,lastStudyDate:'',metaDiaria:10,trilhaFase:1,trilhaVistos:[],...s.val()};
+    renderDashboard();updateBadges();}
+  });
+  db.ref('cards/'+currentUser.uid).on('value',s=>{if(s.exists()){userCards=s.val();renderCards();updateBadges();}});
 }
 
 async function saveProg(){await db.ref('progresso/'+currentUser.uid).set(userStats);}
@@ -1091,7 +1636,7 @@ async function loadQuestoes(){
     else{
       const toSave={};
       Object.entries(QI).forEach(([area,qs])=>qs.forEach(q=>{toSave[q.id]={...q,area};}));
-      try{await db.ref('questoes').set(toSave);}catch(e){console.warn('Seed questoes sem permissao:',e.code);}
+      try{await db.ref('questoes').set(toSave);}catch(e){console.warn('Seed questoes sem permissão:',e.code);}
       allQuestoes=toSave;
     }
   }catch(e){
@@ -1108,7 +1653,7 @@ async function loadFlashcards(){
     if(snap.exists()){allFlashcards=snap.val();}
     else{
       const toSave={};FCI.forEach(fc=>{toSave[fc.id]=fc;});
-      try{await db.ref('flashcards').set(toSave);}catch(e){console.warn('Seed flashcards sem permissao:',e.code);}
+      try{await db.ref('flashcards').set(toSave);}catch(e){console.warn('Seed flashcards sem permissão:',e.code);}
       allFlashcards=toSave;
     }
   }catch(e){
@@ -1118,465 +1663,1002 @@ async function loadFlashcards(){
   }
 }
 
-function getQsByArea(area){return Object.values(allQuestoes).filter(q=>area==='TODAS'||q.area===area);}
+// ═══════════════════════════════
+// STREAK
+// ═══════════════════════════════
+function updateStreak(){
+  const today=new Date().toISOString().slice(0,10);
+  const last=userStats.lastStudyDate||'';
+  const yesterday=new Date(Date.now()-86400000).toISOString().slice(0,10);
+  if(last===today){/* já contou hoje */}
+  else if(last===yesterday){userStats.streak=(userStats.streak||0)+1;userStats.lastStudyDate=today;saveProg();}
+  else if(last!==today){userStats.streak=1;userStats.lastStudyDate=today;saveProg();}
+  document.getElementById('hdr-streak').textContent='🔥 '+(userStats.streak||0);
+}
 
-function buildQueue(area){
-  const qs=getQsByArea(area);
-  const seen=new Set(userStats.seenIds||[]);
-  const erradas=new Set();
-  Object.values(userStats.byArea||{}).forEach(a=>{(a.errors||[]).forEach(id=>erradas.add(id));});
-  const novas=shuffle(qs.filter(q=>!seen.has(q.id)));
-  const errs=shuffle(qs.filter(q=>seen.has(q.id)&&erradas.has(q.id)));
-  const vistas=shuffle(qs.filter(q=>seen.has(q.id)&&!erradas.has(q.id)));
-  return[...novas,...errs,...vistas];
+function registrarAtividade(){
+  const today=new Date().toISOString().slice(0,10);
+  if(userStats.lastStudyDate!==today){userStats.lastStudyDate=today;userStats.streak=(userStats.streak||0)+1;}
+  const hist=userStats.history||[];
+  const todayEntry=hist.find(h=>h.date===today);
+  if(todayEntry)todayEntry.n=(todayEntry.n||0)+1;
+  else hist.push({date:today,n:1});
+  userStats.history=hist.slice(-60);
+  document.getElementById('hdr-streak').textContent='🔥 '+(userStats.streak||0);
 }
 
 // ═══════════════════════════════
 // NAV
 // ═══════════════════════════════
-function navTo(screen){
-  if(speechSynthesis)speechSynthesis.cancel();
-  currentAudioArea=null;
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-  document.getElementById('sim-running').classList.remove('active');
-  const s=document.getElementById('screen-'+screen);
-  if(s)s.classList.add('active');
-  const n=document.getElementById('nav-'+screen);
-  if(n)n.classList.add('active');
-  if(screen==='cards')renderCards();
-  if(screen==='simulado')renderSimHome();
-  if(screen==='audio')renderAudio();
+function navTo(s){
+  document.querySelectorAll('.screen').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active'));
+  const sc=document.getElementById('screen-'+s);
+  if(sc)sc.classList.add('active');
+  const nav=document.getElementById('nav-'+s);
+  if(nav)nav.classList.add('active');
+  window.scrollTo(0,0);
 }
 
 // ═══════════════════════════════
 // DASHBOARD
 // ═══════════════════════════════
 function renderDashboard(){
-  const h=new Date().getHours();
-  document.getElementById('dash-greeting').textContent=h<12?'Bom dia,':h<18?'Boa tarde,':'Boa noite,';
-  document.getElementById('dash-name').textContent=(userProfile?.nome||'').split(' ')[0]||'Bombeiro';
-  const total=userStats.correct+userStats.wrong;
-  const taxa=total>0?Math.round(userStats.correct/total*100):0;
-  document.getElementById('stat-total').textContent=total;
-  document.getElementById('stat-taxa').textContent=taxa+'%';
-  const due=getDue();
-  document.getElementById('stat-cards').textContent=due.length;
-  const circ=188,offset=circ-(circ*taxa/100);
-  document.getElementById('ring-c').style.strokeDashoffset=offset;
-  document.getElementById('ring-pct').textContent=taxa+'%';
-  document.getElementById('ring-sub').textContent=total>0?userStats.correct+' acertos de '+total+' questões respondidas.':'Comece respondendo questões para ver seu progresso.';
-  const banner=document.getElementById('due-banner');
-  if(due.length>0){banner.classList.remove('hidden');document.getElementById('due-title').textContent=due.length+' card'+(due.length>1?'s':'')+' para revisar hoje';}
-  else banner.classList.add('hidden');
-  const grid=document.getElementById('area-grid');
+  const total=(userStats.correct||0)+(userStats.wrong||0);
+  const pct=total>0?Math.round((userStats.correct||0)/total*100):0;
+  const meta=userStats.metaDiaria||10;
+  const today=new Date().toISOString().slice(0,10);
+  const todayN=(userStats.history||[]).find(h=>h.date===today)?.n||0;
+  const metaPct=Math.min(100,Math.round(todayN/meta*100));
+
+  document.getElementById('dash-nome').textContent=(userProfile.nome||'Bombeiro').split(' ')[0];
+  document.getElementById('dash-total').textContent=total;
+  document.getElementById('dash-pct').textContent=pct+'%';
+  document.getElementById('dash-cards').textContent=Object.keys(userCards).length;
+  document.getElementById('dash-meta-fill').style.width=metaPct+'%';
+  document.getElementById('dash-meta-count').textContent=todayN+'/'+meta;
+  document.getElementById('dash-ring-label').textContent=todayN+'/'+meta;
+  document.getElementById('quick-sub').textContent='Foco nos fracos';
+
+  // Ring
+  const circ=169.6;
+  const offset=circ-(circ*metaPct/100);
+  document.getElementById('dash-ring').style.strokeDashoffset=offset;
+  document.getElementById('dash-ring-pct').textContent=metaPct+'%';
+
+  // Ponto fraco
+  renderPontoFraco();
+
+  // Áreas
+  const grid=document.getElementById('dash-areas');
   grid.innerHTML='';
-  Object.entries(AI).forEach(([key,info])=>{
-    const d=userStats.byArea?.[key]||{c:0,w:0};
-    const t=d.c+d.w,p=t>0?Math.round(d.c/t*100):0;
-    const col=p>=70?'#27AE60':p>=50?'#E67E22':'#C0392B';
-    grid.innerHTML+=`<div class="area-card" onclick="startQuiz('${key}')">
-      <div class="area-icon">${info.icon}</div>
-      <div class="area-name">${info.nome}</div>
-      <div class="area-bar"><div class="area-bar-fill" style="width:${p}%;background:${col}"></div></div>
-      <div class="area-pct" style="color:${col}">${t>0?p+'%':'—'}</div>
+  Object.entries(AI).forEach(([k,a])=>{
+    const ba=userStats.byArea||{};
+    const c=(ba[k]?.correct||0),w=(ba[k]?.wrong||0),t=c+w;
+    const p=t>0?Math.round(c/t*100):0;
+    grid.innerHTML+=`<div class="area-card">
+      <div class="area-card-top">
+        <div class="area-icon" style="background:${a.bg}">${a.icon}</div>
+        <div><div class="area-card-name">${a.nome.split('—')[1]?.trim()||a.nome}</div><div class="area-card-code">${k}</div></div>
+      </div>
+      <div class="area-prog-bar"><div class="area-prog-fill" style="width:${p}%;background:${a.color}"></div></div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:11px;color:var(--text2)">${t} questões</span>
+        <span class="area-prog-pct" style="color:${a.color}">${p}%</span>
+      </div>
     </div>`;
   });
+
+  // Gráfico 7 dias
+  renderChart();
+
+  // Erros count
+  const erros=Object.values(allQuestoes).filter(q=>userStats.seenIds?.includes(q.id+'_E')).length;
+  document.getElementById('erro-sub').textContent=erros>0?erros+' para revisar':'Sem erros ainda';
+  updateBadges();
 }
 
-// ═══════════════════════════════
-// QUICK STUDY
-// ═══════════════════════════════
-function openQuickModal(){document.getElementById('quick-modal').classList.add('active');}
-function closeQuickModal(){document.getElementById('quick-modal').classList.remove('active');}
-function selQty(n,btn){quickQty=n;document.querySelectorAll('.qty-btn').forEach(b=>b.classList.remove('sel'));btn.classList.add('sel');}
-function startQuickStudy(){closeQuickModal();startQuiz('TODAS',quickQty);}
+function renderPontoFraco(){
+  const ba=userStats.byArea||{};
+  let worstArea=null,worstPct=101;
+  Object.entries(AI).forEach(([k])=>{
+    const c=(ba[k]?.correct||0),w=(ba[k]?.wrong||0),t=c+w;
+    if(t>=3){const p=Math.round(c/t*100);if(p<worstPct){worstPct=p;worstArea=k;}}
+  });
+  const card=document.getElementById('dash-weak');
+  if(worstArea&&worstPct<80){
+    card.classList.remove('hidden');
+    document.getElementById('weak-area-name').textContent=AI[worstArea].icon+' '+AI[worstArea].nome;
+    document.getElementById('weak-area-pct').textContent=worstPct+'% de acertos';
+  } else {card.classList.add('hidden');}
+}
+
+function estudarFraco(){
+  const ba=userStats.byArea||{};
+  let worstArea=null,worstPct=101;
+  Object.entries(AI).forEach(([k])=>{
+    const c=(ba[k]?.correct||0),w=(ba[k]?.wrong||0),t=c+w;
+    if(t>=3){const p=Math.round(c/t*100);if(p<worstPct){worstPct=p;worstArea=k;}}
+  });
+  if(worstArea)iniciarQuiz(worstArea);
+}
+
+function renderChart(){
+  const bars=document.getElementById('chart-bars');
+  const hoje=new Date();
+  let totalSemana=0;
+  let html='';
+  for(let i=6;i>=0;i--){
+    const d=new Date(hoje-i*86400000);
+    const key=d.toISOString().slice(0,10);
+    const n=(userStats.history||[]).find(h=>h.date===key)?.n||0;
+    totalSemana+=n;
+    const dias=['D','S','T','Q','Q','S','S'];
+    const dia=dias[d.getDay()];
+    const isHoje=i===0;
+    const h=n>0?Math.max(8,Math.min(60,n*4)):4;
+    html+=`<div class="chart-bar-col"><div class="chart-bar${isHoje?' hoje':''}" style="height:${h}px" title="${n} questões"></div><div class="chart-bar-label">${dia}</div></div>`;
+  }
+  bars.innerHTML=html;
+  document.getElementById('chart-total-week').textContent=totalSemana+' essa semana';
+}
+
+function updateBadges(){
+  // Cards vencidos
+  const now=Date.now();
+  const due=Object.values(allFlashcards).filter(fc=>{
+    const uc=userCards[fc.id];
+    return !uc||!uc.next||uc.next<=now;
+  }).length;
+  const bc=document.getElementById('badge-cards');
+  if(due>0){bc.classList.remove('hidden');bc.textContent=due;}else bc.classList.add('hidden');
+  document.getElementById('cards-due').textContent=due;
+  document.getElementById('cards-total-n').textContent=Object.keys(allFlashcards).length;
+
+  // Resumos vencidos
+  const dueR=RESUMOS_BANCO.filter(r=>{
+    const ur=userStats['resumo_'+r.id];
+    return !ur||!ur.next||ur.next<=now;
+  }).length;
+  const br=document.getElementById('badge-resumos');
+  if(dueR>0){br.classList.remove('hidden');br.textContent=dueR;}else br.classList.add('hidden');
+  document.getElementById('resumos-fila').textContent=dueR;
+}
 
 // ═══════════════════════════════
 // QUIZ
 // ═══════════════════════════════
 function renderAreaList(){
-  const list=document.getElementById('area-list-quiz');
+  const list=document.getElementById('area-list');
   list.innerHTML='';
-  Object.entries(AI).forEach(([key,info])=>{
-    const qs=getQsByArea(key);
-    const d=userStats.byArea?.[key]||{c:0,w:0};
-    const t=d.c+d.w,p=t>0?Math.round(d.c/t*100):0;
-    list.innerHTML+=`<div class="area-li" onclick="startQuiz('${key}')">
-      <div class="area-li-icon" style="background:${info.color}18">${info.icon}</div>
-      <div><div class="area-li-name">${info.nome}</div><div class="area-li-count">${qs.length} questões · ${info.n} na prova</div></div>
-      <div class="area-li-pct" style="color:${p>=70?'#27AE60':p>=50?'#E67E22':'#C0392B'}">${t>0?p+'%':'—'}</div>
+  Object.entries(AI).forEach(([k,a])=>{
+    const ba=userStats.byArea||{};
+    const c=(ba[k]?.correct||0),w=(ba[k]?.wrong||0),t=c+w;
+    const p=t>0?Math.round(c/t*100):0;
+    const n=Object.values(allQuestoes).filter(q=>q.area===k).length;
+    list.innerHTML+=`<div class="area-row" onclick="iniciarQuiz('${k}')">
+      <div class="area-row-icon" style="background:${a.bg}">${a.icon}</div>
+      <div class="area-row-info">
+        <div class="area-row-name">${a.nome}</div>
+        <div class="area-row-meta">${n} questões · ${t} respondidas</div>
+      </div>
+      <div class="area-row-pct" style="color:${a.color}">${p}%</div>
     </div>`;
   });
 }
 
-function startQuiz(area,limit){
-  quizArea=area;
-  quizQueue=buildQueue(area);
-  if(limit)quizQueue=quizQueue.slice(0,limit);
-  if(quizQueue.length===0){quizQueue=shuffle(getQsByArea(area));}
-  quizIdx=0;quizSessao={c:0,t:0};quizAnswered=false;
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  document.getElementById('screen-questao').classList.add('active');
-  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-  document.getElementById('nav-quiz').classList.add('active');
-  renderQ();
+function iniciarQuiz(area){
+  quizArea=area;quizModoErro=false;
+  const qs=Object.values(allQuestoes).filter(q=>area==='TODAS'||q.area===area);
+  quizQueue=shuffle(qs).slice(0,20);
+  quizIdx=0;quizSessao={c:0,t:0};
+  document.getElementById('quiz-home-view').classList.add('hidden');
+  document.getElementById('quiz-running-view').classList.remove('hidden');
+  document.getElementById('quiz-area-tag').textContent=area==='TODAS'?'Quiz Geral':AI[area]?.nome||area;
+  navTo('quiz');
+  renderQuizQ();
 }
 
-function renderQ(){
-  if(quizIdx>=quizQueue.length){
-    quizQueue=shuffle(getQsByArea(quizArea));quizIdx=0;
-  }
+function iniciarEstudoRapido(){
+  // Peso nos pontos fracos
+  const ba=userStats.byArea||{};
+  let pool=[];
+  Object.entries(AI).forEach(([k])=>{
+    const c=(ba[k]?.correct||0),w=(ba[k]?.wrong||0),t=c+w;
+    const p=t>0?c/t:0.5;
+    const peso=p<0.5?3:p<0.7?2:1;
+    const qs=Object.values(allQuestoes).filter(q=>q.area===k);
+    for(let i=0;i<peso;i++)pool.push(...qs);
+  });
+  quizQueue=shuffle(pool).slice(0,10);
+  quizArea='RAPIDO';quizModoErro=false;quizIdx=0;quizSessao={c:0,t:0};
+  document.getElementById('quiz-home-view').classList.add('hidden');
+  document.getElementById('quiz-running-view').classList.remove('hidden');
+  document.getElementById('quiz-area-tag').textContent='⚡ Estudo Rápido';
+  navTo('quiz');renderQuizQ();
+}
+
+function iniciarModoErro(){
+  const erradas=Object.values(allQuestoes).filter(q=>(userStats.seenIds||[]).includes(q.id+'_E'));
+  if(!erradas.length){showToast('Sem erros para revisar!');return;}
+  quizQueue=shuffle(erradas);quizArea='ERRO';quizModoErro=true;quizIdx=0;quizSessao={c:0,t:0};
+  document.getElementById('quiz-home-view').classList.add('hidden');
+  document.getElementById('quiz-running-view').classList.remove('hidden');
+  document.getElementById('quiz-area-tag').textContent='🔁 Modo Erro';
+  navTo('quiz');renderQuizQ();
+}
+
+function iniciarSimuladoInteligente(){
+  const ba=userStats.byArea||{};
+  let pool=[];
+  Object.entries(AI).forEach(([k])=>{
+    const c=(ba[k]?.correct||0),w=(ba[k]?.wrong||0),t=c+w;
+    const p=t>0?c/t:0.5;
+    const peso=p<0.5?4:p<0.7?2:1;
+    const qs=Object.values(allQuestoes).filter(q=>q.area===k);
+    for(let i=0;i<peso;i++)pool.push(...qs);
+  });
+  quizQueue=shuffle(pool).slice(0,15);quizArea='INTELIGENTE';quizModoErro=false;quizIdx=0;quizSessao={c:0,t:0};
+  document.getElementById('quiz-home-view').classList.add('hidden');
+  document.getElementById('quiz-running-view').classList.remove('hidden');
+  document.getElementById('quiz-area-tag').textContent='🎯 Simulado IA';
+  navTo('quiz');renderQuizQ();
+}
+
+function renderQuizQ(){
+  if(quizIdx>=quizQueue.length){finishQuiz();return;}
   const q=quizQueue[quizIdx];
-  const info=AI[q.area]||AI['AT1'];
-  document.getElementById('quiz-area-lbl').textContent=info.icon+' '+info.nome;
-  document.getElementById('quiz-prog-txt').textContent=(quizIdx+1)+' / '+quizQueue.length;
-  document.getElementById('quiz-prog-fill').style.width=((quizIdx+1)/quizQueue.length*100)+'%';
-  document.getElementById('quiz-score-v').textContent=quizSessao.c+'/'+quizSessao.t;
   quizAnswered=false;
-  const body=document.getElementById('quiz-body');
-  body.innerHTML=(q.doc?`<div class="q-doc">📚 ${sanitize(q.doc)}</div>`:'')+
-    `<div class="q-text">${sanitize(q.e)}</div>`+
-    q.ops.map((op,i)=>`<button class="opt-btn" id="opt-${i}" onclick="answerQ(${i})">
-      <div class="opt-letter">${['A','B','C','D','E'][i]}</div><span>${sanitize(op)}</span>
-    </button>`).join('');
+  const tot=quizQueue.length;
+  document.getElementById('quiz-q-num').textContent=`Questão ${quizIdx+1} de ${tot}`;
+  document.getElementById('quiz-q-text').textContent=q.e;
+  document.getElementById('quiz-q-doc').textContent=q.doc||'';
+  document.getElementById('quiz-prog-fill').style.width=(quizIdx/tot*100)+'%';
+  document.getElementById('quiz-score-v').textContent=quizSessao.c+'/'+quizSessao.t;
+  const opts=document.getElementById('quiz-opts');
+  const letras=['A','B','C','D','E'];
+  opts.innerHTML=(q.ops||[]).map((op,i)=>`<button class="quiz-opt" onclick="responderQuiz(${i})">
+    <span class="quiz-opt-letter">${letras[i]}</span><span>${sanitize(op)}</span>
+  </button>`).join('');
+  document.getElementById('quiz-feedback').classList.remove('show');
+  document.getElementById('quiz-next-btn').classList.remove('show');
+  document.getElementById('quiz-ai-tip').style.display='none';
 }
 
-async function answerQ(sel){
+async function responderQuiz(idx){
   if(quizAnswered)return;
   quizAnswered=true;
   const q=quizQueue[quizIdx];
-  const ok=sel===q.g;
-  quizSessao.t++;if(ok)quizSessao.c++;
-  if(!userStats.byArea[q.area])userStats.byArea[q.area]={c:0,w:0,errors:[]};
-  userStats.byArea[q.area].c+=ok?1:0;
-  userStats.byArea[q.area].w+=ok?0:1;
-  if(!ok){
-    if(!userStats.byArea[q.area].errors)userStats.byArea[q.area].errors=[];
-    if(!userStats.byArea[q.area].errors.includes(q.id))userStats.byArea[q.area].errors.push(q.id);
-  }else{
-    if(userStats.byArea[q.area].errors)userStats.byArea[q.area].errors=userStats.byArea[q.area].errors.filter(id=>id!==q.id);
-  }
-  userStats.correct+=ok?1:0;userStats.wrong+=ok?0:1;
+  const correta=q.g;
+  const acertou=idx===correta;
+  const opts=document.querySelectorAll('.quiz-opt');
+  opts.forEach((o,i)=>{
+    o.style.pointerEvents='none';
+    if(i===correta)o.classList.add('correta');
+    if(i===idx&&!acertou)o.classList.add('errada');
+  });
+  quizSessao.t++;
+  if(acertou){quizSessao.c++;userStats.correct=(userStats.correct||0)+1;}
+  else userStats.wrong=(userStats.wrong||0)+1;
+
+  const area=q.area||quizArea;
+  if(!userStats.byArea)userStats.byArea={};
+  if(!userStats.byArea[area])userStats.byArea[area]={correct:0,wrong:0};
+  if(acertou)userStats.byArea[area].correct++;
+  else userStats.byArea[area].wrong++;
+
+  // Marcar visto
+  const seenKey=q.id+(acertou?'_C':'_E');
+  const erroKey=q.id+'_E';
   if(!userStats.seenIds)userStats.seenIds=[];
-  if(!userStats.seenIds.includes(q.id))userStats.seenIds.push(q.id);
-  await saveProg();
-  for(let i=0;i<q.ops.length;i++){
-    const btn=document.getElementById('opt-'+i);
-    btn.disabled=true;
-    if(i===q.g)btn.classList.add('correct');
-    else if(i===sel)btn.classList.add('wrong');
+  if(!userStats.seenIds.includes(seenKey))userStats.seenIds.push(seenKey);
+  if(acertou){const idx2=userStats.seenIds.indexOf(erroKey);if(idx2>-1)userStats.seenIds.splice(idx2,1);}
+
+  registrarAtividade();
+  saveProg();
+
+  // Feedback
+  const fb=document.getElementById('quiz-feedback');
+  fb.classList.add('show');
+  document.getElementById('quiz-fb-title').textContent=acertou?'✅ Correto!':'❌ Incorreto';
+  document.getElementById('quiz-fb-title').style.color=acertou?'var(--green)':'var(--red)';
+  document.getElementById('quiz-fb-text').textContent=sanitize(q.exp||'');
+
+  // Dica IA para erros
+  if(!acertou){
+    buscarDicaIA(q);
   }
+
+  document.getElementById('quiz-next-btn').classList.add('show');
   document.getElementById('quiz-score-v').textContent=quizSessao.c+'/'+quizSessao.t;
-  const body=document.getElementById('quiz-body');
-  body.innerHTML+=`<div class="feedback ${ok?'ok':'err'}"><strong>${ok?'✅ Correto!':'❌ Errado!'}</strong>${sanitize(q.exp)}</div>
-    <button class="btn-next" onclick="nextQ()">Próxima →</button>`;
-  body.scrollTo(0,body.scrollHeight);
 }
 
-function nextQ(){quizIdx++;renderQ();document.getElementById('quiz-body').scrollTop=0;}
+async function buscarDicaIA(q){
+  try{
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01','x-api-key':''},
+      body:JSON.stringify({
+        model:ANTHROPIC_MODEL,max_tokens:150,
+        system:'Você é um instrutor do CTSP 2026 CBMRS. Dê uma dica curta (máximo 2 linhas) para memorizar o conceito correto da questão. Seja objetivo e prático.',
+        messages:[{role:'user',content:`Questão: ${q.e}\nGabarito: ${q.ops[q.g]}\nExplicação: ${q.exp}\n\nDê uma dica curta para memorizar.`}]
+      })
+    });
+    const data=await resp.json();
+    const tip=data.content?.[0]?.text||'';
+    if(tip){
+      const el=document.getElementById('quiz-ai-tip');
+      document.getElementById('quiz-ai-tip-text').textContent=tip;
+      el.style.display='block';
+    }
+  }catch(e){console.warn('IA tip error:',e);}
+}
+
+function nextQuiz(){
+  quizIdx++;
+  if(quizIdx>=quizQueue.length)finishQuiz();
+  else renderQuizQ();
+}
+
+function finishQuiz(){
+  document.getElementById('quiz-running-view').classList.add('hidden');
+  document.getElementById('quiz-home-view').classList.remove('hidden');
+  renderAreaList();
+  renderDashboard();
+  showToast(`Sessão encerrada: ${quizSessao.c}/${quizSessao.t} acertos`);
+}
+
+// ═══════════════════════════════
+// TRILHA
+// ═══════════════════════════════
+function renderTrilha(){
+  const vistos=userStats.trilhaVistos||[];
+  const total=TRILHA.length;
+  const done=vistos.length;
+  const pct=Math.round(done/total*100);
+  const fase=done>=total?2:1;
+
+  document.getElementById('trilha-fase-label').textContent=fase===1?'FASE 1 — PRIMEIRA PASSAGEM':'FASE 2 — QUESTÕES ALEATÓRIAS';
+  document.getElementById('trilha-titulo').textContent=fase===1?'Siga a ordem dos cadernos':'Parabéns! Trilha completa';
+  document.getElementById('trilha-prog-fill').style.width=pct+'%';
+  document.getElementById('trilha-prog-label').textContent=`${done} de ${total} tópicos concluídos`;
+
+  const lista=document.getElementById('trilha-lista');
+  lista.innerHTML='';
+  TRILHA.forEach(t=>{
+    const visto=vistos.includes(t.id);
+    const probLabel=t.prob==='alta'?'🔴 Alta':'🟡 Média';
+    const probClass=t.prob==='alta'?'prob-alta':'prob-media';
+    lista.innerHTML+=`<div class="topico-card${visto?' visto':''}" id="top-${t.id}" onclick="toggleTopico('${t.id}')">
+      <div class="topico-top">
+        <span class="topico-prob ${probClass}">${probLabel}</span>
+        <span class="topico-titulo">${sanitize(t.titulo)}</span>
+        <div class="topico-check${visto?' ok':''}">${visto?'✓':''}</div>
+      </div>
+      <div class="topico-doc">${sanitize(t.doc)}</div>
+      <div class="topico-content">${sanitize(t.conteudo)}
+        <button class="topico-questoes-btn" onclick="event.stopPropagation();marcarVisto('${t.id}');iniciarQuiz('${t.area}')">
+          ${visto?'Praticar questões →':'✅ Marcar como visto e praticar →'}
+        </button>
+      </div>
+    </div>`;
+  });
+}
+
+function toggleTopico(id){
+  const el=document.getElementById('top-'+id);
+  el.classList.toggle('open');
+}
+
+function marcarVisto(id){
+  if(!userStats.trilhaVistos)userStats.trilhaVistos=[];
+  if(!userStats.trilhaVistos.includes(id)){
+    userStats.trilhaVistos.push(id);
+    saveProg();
+    renderTrilha();
+  }
+}
 
 // ═══════════════════════════════
 // FLASHCARDS
 // ═══════════════════════════════
-function getDue(){
-  return Object.values(allFlashcards).filter(fc=>{
-    const c=userCards[fc.id]||{};
-    return !c.next||c.next<=Date.now();
-  });
-}
-
+let cardQueue=[],cardIdx=0;
 function renderCards(){
-  const due=getDue();
-  const total=Object.keys(allFlashcards).length;
-  const done=total-due.length;
-  const pct=total>0?Math.round(done/total*100):0;
-  const circ=132,offset=circ-(circ*pct/100);
-  const rc=document.getElementById('cp-ring-c');
-  if(rc)rc.style.strokeDashoffset=offset;
-  const cn=document.getElementById('cp-num');if(cn)cn.textContent=done;
-  const ct=document.getElementById('cp-title');if(ct)ct.textContent=due.length>0?due.length+' card'+(due.length>1?'s':'')+' para revisar hoje':'Tudo em dia! 🎉';
-  const content=document.getElementById('cards-content');if(!content)return;
-  if(due.length===0){
-    const future=Object.values(allFlashcards).filter(fc=>{const c=userCards[fc.id]||{};return c.next&&c.next>Date.now();}).sort((a,b)=>(userCards[a.id]?.next||0)-(userCards[b.id]?.next||0));
-    content.innerHTML=`<div class="cards-done"><div class="done-icon">🎉</div><div class="done-title">Revisão concluída!</div><div class="done-sub">Todos os cards revisados. Continue praticando no Quiz para reforçar o conteúdo.</div>
-      ${future.length>0?`<div class="next-list"><div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);margin-bottom:8px;">Próximas revisões</div>${future.slice(0,5).map(fc=>{const d=Math.ceil(((userCards[fc.id]?.next||0)-Date.now())/86400000);return`<div class="next-item"><strong>${fc.f.slice(0,48)}${fc.f.length>48?'...':''}</strong><span>Em ${d} dia${d!==1?'s':''}</span></div>`;}).join('')}</div>`:''}
-    </div>`;return;
+  const now=Date.now();
+  cardQueue=Object.values(allFlashcards).filter(fc=>{
+    const uc=userCards[fc.id];
+    return !uc||!uc.next||uc.next<=now;
+  });
+  const body=document.getElementById('cards-body');
+  const streak=userStats.cardStreak||0;
+  document.getElementById('cards-streak-n').textContent=streak;
+  if(!cardQueue.length){
+    body.innerHTML=`<div class="cards-done">
+      <div class="cards-done-icon">🎉</div>
+      <div class="cards-done-title">Revisão concluída!</div>
+      <div class="cards-done-sub">Todos os cards revisados. Continue praticando no Quiz.</div>
+    </div>`;
+    return;
   }
-  const queue=shuffle(due);
-  renderCardAt(queue,0,content);
+  cardIdx=0;
+  renderCard();
 }
 
-function renderCardAt(queue,idx,content){
-  if(idx>=queue.length){renderCards();return;}
-  const fc=queue[idx];
-  content.innerHTML=`<div class="card-counter"><span>${idx+1} / ${queue.length}</span><span>${queue.length-idx-1} restante${queue.length-idx-1!==1?'s':''}</span></div>
-    <div class="card-flip" onclick="flipCard()">
-      <div class="card-inner" id="ci">
-        <div class="card-face card-front"><div class="card-lbl">Pergunta · toque para virar</div><div class="card-txt">${sanitize(fc.f)}</div><div class="card-hint">Tap para ver a resposta</div></div>
-        <div class="card-face card-back"><div class="card-lbl">Resposta</div><div class="card-txt">${sanitize(fc.v)}</div></div>
+function renderCard(){
+  if(cardIdx>=cardQueue.length){renderCards();return;}
+  const fc=cardQueue[cardIdx];
+  const area=fc.a||fc.area||'';
+  const aInfo=AI[area]||{};
+  const body=document.getElementById('cards-body');
+  const remaining=cardQueue.length-cardIdx;
+  body.innerHTML=`
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <span style="font-size:13px;color:var(--text2)">${remaining} card${remaining!==1?'s':''} restante${remaining!==1?'s':''}</span>
+      <span style="font-size:11px;font-weight:700;color:var(--text3)">Toque para virar</span>
+    </div>
+    <div class="card-flip-wrap">
+      <div class="card-flip" id="card-flip-el" onclick="flipCard()">
+        <div class="card-face card-front">
+          <div class="card-label">Frente — Pergunta</div>
+          <div class="card-area-tag" style="background:${aInfo.bg||'#f5f5f5'};color:${aInfo.color||'#666'}">${aInfo.icon||''} ${area}</div>
+          <div class="card-text">${sanitize(fc.f)}</div>
+          <div class="card-hint">👆 Toque para ver a resposta</div>
+        </div>
+        <div class="card-face card-back">
+          <div class="card-label" style="opacity:.6">Verso — Resposta</div>
+          <div class="card-text">${sanitize(fc.v)}</div>
+        </div>
       </div>
     </div>
-    <div class="card-actions" id="ca" style="display:none">
-      <button class="ca-btn er" onclick="rateCard('${fc.id}',1,queue,${idx},content)"><span>😓</span>Errei</button>
-      <button class="ca-btn le" onclick="rateCard('${fc.id}',3,queue,${idx},content)"><span>🤔</span>Lembrei</button>
-      <button class="ca-btn fa" onclick="rateCard('${fc.id}',5,queue,${idx},content)"><span>😊</span>Fácil</button>
+    <div class="card-btns" id="card-btns" style="display:none;">
+      <button class="card-btn dif" onclick="avaliarCard('dif')">😓 Difícil</button>
+      <button class="card-btn med" onclick="avaliarCard('med')">🤔 Médio</button>
+      <button class="card-btn fac" onclick="avaliarCard('fac')">😊 Fácil</button>
     </div>`;
-  content._queue=queue;content._idx=idx;
 }
 
 function flipCard(){
-  const ci=document.getElementById('ci'),ca=document.getElementById('ca');
-  if(ci)ci.classList.toggle('flipped');
-  if(ca)ca.style.display=ci.classList.contains('flipped')?'grid':'none';
+  const el=document.getElementById('card-flip-el');
+  el.classList.toggle('flipped');
+  document.getElementById('card-btns').style.display=el.classList.contains('flipped')?'grid':'none';
 }
 
-async function rateCard(id,quality){
-  const content=document.getElementById('cards-content');
-  const queue=content._queue,idx=content._idx;
-  const updated=sm2Update(userCards[id]||{},quality);
-  await saveCard(id,updated);
-  renderCardAt(queue,idx+1,content);
+async function avaliarCard(dif){
+  const fc=cardQueue[cardIdx];
+  const existing=userCards[fc.id]||{};
+  const updated=sm2Resumo(existing,dif);
+  await saveCard(fc.id,updated);
+  if(dif==='fac'){userStats.cardStreak=(userStats.cardStreak||0)+1;}
+  else userStats.cardStreak=0;
+  saveProg();
+  cardIdx++;
+  renderCard();
+}
+
+// ═══════════════════════════════
+// RESUMOS
+// ═══════════════════════════════
+let resumoAtualId=null;
+function renderResumos(){
+  const now=Date.now();
+  const fila=RESUMOS_BANCO.filter(r=>{
+    const ur=userStats['resumo_'+r.id];
+    return !ur||!ur.next||ur.next<=now;
+  });
+  document.getElementById('resumos-fila').textContent=fila.length;
+  const content=document.getElementById('resumos-content');
+  if(!fila.length){
+    // Mostrar todos como lista
+    content.innerHTML=`<div style="text-align:center;padding:24px;color:var(--text2);font-size:14px;margin-bottom:16px;">🎉 Todos em dia! Próximas revisões agendadas.</div>`
+    +renderResumoLista();
+    return;
+  }
+  const r=fila[0];
+  resumoAtualId=r.id;
+  const aInfo=AI[r.area]||{};
+  const probLabel=r.prob==='alta'?'🔴 Alta probabilidade':r.prob==='media'?'🟡 Média':'🟢 Baixa';
+  content.innerHTML=`
+    <div class="resumo-card">
+      <div class="resumo-card-top">
+        <span class="resumo-area-tag" style="background:${aInfo.bg};color:${aInfo.color}">${aInfo.icon} ${r.area}</span>
+        <span class="resumo-dif-tag" style="background:#FEF5E7;color:#E67E22">${probLabel}</span>
+      </div>
+      <div class="resumo-titulo">${sanitize(r.titulo)}</div>
+      <div class="resumo-texto">${sanitize(r.texto).replace(/\n/g,'<br>')}</div>
+      <button class="resumo-audio-btn" id="resumo-audio-btn" onclick="ouvirResumo('${r.id}')">▶ Ouvir este resumo</button>
+      <div class="resumo-avaliar">
+        <div class="resumo-avaliar-title">Como foi? (agenda próxima revisão)</div>
+        <div class="resumo-btns">
+          <button class="resumo-btn dif" onclick="avaliarResumo('dif')">😓 Difícil<br><small>Em breve</small></button>
+          <button class="resumo-btn med" onclick="avaliarResumo('med')">🤔 Médio<br><small>Em 3 dias</small></button>
+          <button class="resumo-btn fac" onclick="avaliarResumo('fac')">😊 Fácil<br><small>Em 7+ dias</small></button>
+        </div>
+      </div>
+    </div>
+    ${fila.length>1?`<div style="text-align:center;color:var(--text2);font-size:13px;margin-bottom:12px;">+${fila.length-1} resumo${fila.length-1>1?'s':''} pendente${fila.length-1>1?'s':''}</div>`:''}
+    ${renderResumoLista()}`;
+}
+
+function renderResumoLista(){
+  const now=Date.now();
+  let html='<div class="sec-title mt14">Todos os resumos</div><div class="resumos-list">';
+  RESUMOS_BANCO.forEach(r=>{
+    const aInfo=AI[r.area]||{};
+    const ur=userStats['resumo_'+r.id];
+    const vence=ur?.next?new Date(ur.next).toLocaleDateString('pt-BR'):'Hoje';
+    html+=`<div class="resumo-list-item" onclick="mostrarResumoDirecto('${r.id}')">
+      <div style="width:32px;height:32px;border-radius:8px;background:${aInfo.bg};display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">${aInfo.icon}</div>
+      <div style="flex:1"><div style="font-size:13px;font-weight:700">${sanitize(r.titulo)}</div><div class="resumo-list-vence">${aInfo.nome} · Revisão: ${vence}</div></div>
+    </div>`;
+  });
+  return html+'</div>';
+}
+
+function mostrarResumoDirecto(id){
+  const r=RESUMOS_BANCO.find(x=>x.id===id);
+  if(!r)return;
+  const aInfo=AI[r.area]||{};
+  const probLabel=r.prob==='alta'?'🔴 Alta':'🟡 Média';
+  resumoAtualId=id;
+  document.getElementById('resumos-content').innerHTML=`
+    <div class="resumo-card">
+      <div class="resumo-card-top">
+        <span class="resumo-area-tag" style="background:${aInfo.bg};color:${aInfo.color}">${aInfo.icon} ${r.area}</span>
+        <span class="resumo-dif-tag" style="background:#FEF5E7;color:#E67E22">${probLabel}</span>
+      </div>
+      <div class="resumo-titulo">${sanitize(r.titulo)}</div>
+      <div class="resumo-texto">${sanitize(r.texto).replace(/\n/g,'<br>')}</div>
+      <button class="resumo-audio-btn" id="resumo-audio-btn" onclick="ouvirResumo('${r.id}')">▶ Ouvir este resumo</button>
+      <div class="resumo-avaliar">
+        <div class="resumo-avaliar-title">Como foi?</div>
+        <div class="resumo-btns">
+          <button class="resumo-btn dif" onclick="avaliarResumo('dif')">😓 Difícil</button>
+          <button class="resumo-btn med" onclick="avaliarResumo('med')">🤔 Médio</button>
+          <button class="resumo-btn fac" onclick="avaliarResumo('fac')">😊 Fácil</button>
+        </div>
+      </div>
+      <button onclick="renderResumos()" style="width:100%;margin-top:12px;padding:10px;background:var(--bg);border-radius:10px;font-size:13px;font-weight:600;color:var(--text2);">← Voltar à fila</button>
+    </div>`;
+}
+
+async function avaliarResumo(dif){
+  if(!resumoAtualId)return;
+  const r=RESUMOS_BANCO.find(x=>x.id===resumoAtualId);
+  if(!r)return;
+  const key='resumo_'+resumoAtualId;
+  const existing=userStats[key]||{};
+  const updated=sm2Resumo(existing,dif);
+  userStats[key]=updated;
+  saveProg();
+  renderResumos();
+  updateBadges();
+  showToast(dif==='dif'?'Revisão em breve':dif==='med'?'Revisão em 3 dias':'Revisão em '+updated.interval+' dias');
+}
+
+function ouvirResumo(id){
+  const r=RESUMOS_BANCO.find(x=>x.id===id);
+  if(!r)return;
+  if(speechSynthesis.speaking){speechSynthesis.cancel();
+    const btn=document.getElementById('resumo-audio-btn');
+    if(btn){btn.textContent='▶ Ouvir este resumo';btn.classList.remove('playing');}
+    return;
+  }
+  const u=new SpeechSynthesisUtterance(r.texto.replace(/[•→×≤≥]/g,' '));
+  u.lang='pt-BR';u.rate=0.95;
+  const sel=document.getElementById('voice-select');
+  if(sel?.value){const voz=speechSynthesis.getVoices().find(v=>v.name===sel.value);if(voz)u.voice=voz;}
+  const btn=document.getElementById('resumo-audio-btn');
+  if(btn){btn.textContent='⏹ Parar';btn.classList.add('playing');}
+  u.onend=()=>{if(btn){btn.textContent='▶ Ouvir este resumo';btn.classList.remove('playing');}};
+  speechSynthesis.speak(u);
 }
 
 // ═══════════════════════════════
 // SIMULADO
 // ═══════════════════════════════
 function renderSimHome(){
-  const hist=(userStats.history||[]).filter(h=>h.tipo==='simulado');
-  document.getElementById('sim-total-n').textContent=hist.length;
-  document.getElementById('sim-melhor').textContent=hist.length>0?Math.max(...hist.map(s=>s.pct||0))+'%':'—';
-  const list=document.getElementById('sim-hist-list');
-  if(hist.length===0){list.innerHTML='<div class="empty"><div class="empty-i">📊</div><div class="empty-t">Nenhum simulado realizado ainda.</div></div>';return;}
-  list.innerHTML=hist.slice(0,5).map(s=>`<div class="sim-hi"><div><div style="font-size:13px;font-weight:700;">${s.data||'—'}</div><div class="sim-hi-d">${s.respondidas||0} respondidas</div></div><div class="sim-hi-s" style="color:${(s.pct||0)>=60?'#27AE60':'#C0392B'}">${s.pct||0}%</div></div>`).join('');
+  const hist=(userStats.simHistorico||[]).slice(-5).reverse();
+  const el=document.getElementById('sim-hist');
+  if(!hist.length){el.innerHTML='<p style="font-size:13px;color:var(--text2)">Nenhum simulado realizado.</p>';return;}
+  el.innerHTML=hist.map(h=>`<div class="sim-hist-item">
+    <div>
+      <div class="sim-hist-date">${new Date(h.data).toLocaleDateString('pt-BR')} · ${h.modo||'Completo'}</div>
+      <div style="font-size:11px;color:var(--text3)">${h.total} questões</div>
+    </div>
+    <div class="sim-hist-score" style="color:${h.pct>=60?'var(--green)':'var(--red)'}">${h.pct}%</div>
+  </div>`).join('');
 }
 
-function startSimulado(){
-  const todas=Object.values(allQuestoes);
-  const ga=(area,n)=>shuffle(todas.filter(q=>q.area===area)).slice(0,n);
-  simQuestoes=shuffle([...ga('AT1',14),...ga('AT2',8),...ga('AT3',14),...ga('AT4',12),...ga('AT5',12)]);
-  simRespostas={};simIdx=0;simTempo=10800;
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  document.getElementById('sim-running').classList.add('active');
-  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-  document.getElementById('nav-simulado').classList.add('active');
-  updateSimTimer();renderSimNav();renderSimQ();
-  simTimer=setInterval(()=>{simTempo--;updateSimTimer();if(simTempo<=0)encerrarSimulado();},1000);
+function iniciarSimulado(modo){
+  simModo=modo;simRespostas={};simIdx=0;
+  const qs=Object.values(allQuestoes);
+  simQuestoes=shuffle(qs).slice(0,modo==='inteligente'?15:60);
+  simTempo=modo==='inteligente'?2700:10800;
+  document.getElementById('sim-home-view').classList.add('hidden');
+  document.getElementById('sim-running-view').classList.remove('hidden');
+  document.getElementById('sim-result-view').classList.add('hidden');
+  if(simTimer)clearInterval(simTimer);
+  simTimer=setInterval(()=>{
+    simTempo--;
+    const h=Math.floor(simTempo/3600),m=Math.floor((simTempo%3600)/60),s=simTempo%60;
+    document.getElementById('sim-timer').textContent=`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    if(simTempo<=0)encerrarSimulado();
+  },1000);
+  renderSimQ();
 }
-
-function updateSimTimer(){
-  const h=Math.floor(simTempo/3600).toString().padStart(2,'0');
-  const m=Math.floor((simTempo%3600)/60).toString().padStart(2,'0');
-  const s=(simTempo%60).toString().padStart(2,'0');
-  const el=document.getElementById('sim-timer');
-  if(el){el.textContent=h+':'+m+':'+s;el.classList.toggle('warn',simTempo<600);}
-  const qn=document.getElementById('sim-qn');if(qn)qn.textContent='Questão '+(simIdx+1)+' de '+simQuestoes.length;
-}
-
-function renderSimNav(){
-  const nav=document.getElementById('sim-nav');
-  nav.innerHTML=simQuestoes.map((q,i)=>`<button class="qd ${simRespostas[q.id]!==undefined?'ans':''} ${i===simIdx?'cur':''}" onclick="goSimQ(${i})">${i+1}</button>`).join('');
-}
-
-function goSimQ(i){simIdx=i;renderSimNav();renderSimQ();}
 
 function renderSimQ(){
   const q=simQuestoes[simIdx];
-  const body=document.getElementById('sim-body');
-  body.innerHTML=(q.doc?`<div class="q-doc">📚 ${sanitize(q.doc)}</div>`:'')+
-    `<div class="q-text">${sanitize(q.e)}</div>`+
-    q.ops.map((op,i)=>`<button class="opt-btn ${simRespostas[q.id]===i?'selected':''}" style="${simRespostas[q.id]===i?'border-color:var(--red);background:var(--red-light);color:var(--red);':''}" onclick="selSimOp(${i})">
-      <div class="opt-letter">${['A','B','C','D','E'][i]}</div><span>${sanitize(op)}</span>
-    </button>`).join('')+
-    `<div class="sim-nav-btns">
-      <button class="btn-prev-sim" ${simIdx===0?'disabled':''} onclick="goSimQ(${simIdx-1})">← Anterior</button>
-      ${simIdx<simQuestoes.length-1?`<button class="btn-nxt-sim" onclick="goSimQ(${simIdx+1})">Próxima →</button>`:`<button class="btn-nxt-sim" style="background:var(--green)" onclick="encerrarSimulado()">✅ Finalizar</button>`}
-    </div>`;
+  const tot=simQuestoes.length;
+  document.getElementById('sim-q-label').textContent=`Questão ${simIdx+1} de ${tot}`;
+  document.getElementById('sim-q-num').textContent=`Questão ${simIdx+1}`;
+  document.getElementById('sim-q-text').textContent=q.e;
+  document.getElementById('sim-q-doc').textContent=q.doc||'';
+  const letras=['A','B','C','D','E'];
+  const opts=document.getElementById('sim-opts');
+  opts.innerHTML=(q.ops||[]).map((op,i)=>`<button class="quiz-opt${simRespostas[simIdx]===i?' selected':''}" onclick="marcarSim(${i})" style="margin-bottom:0">
+    <span class="quiz-opt-letter">${letras[i]}</span><span>${sanitize(op)}</span>
+  </button>`).join('');
 }
 
-function selSimOp(i){simRespostas[simQuestoes[simIdx].id]=i;renderSimNav();renderSimQ();}
+function marcarSim(i){
+  simRespostas[simIdx]=i;
+  renderSimQ();
+}
+function simNext(){if(simIdx<simQuestoes.length-1){simIdx++;renderSimQ();}}
+function simPrev(){if(simIdx>0){simIdx--;renderSimQ();}}
 
 async function encerrarSimulado(){
-  clearInterval(simTimer);
-  let acertos=0,total=0;
-  const byArea={};
-  simQuestoes.forEach(q=>{
-    const r=simRespostas[q.id];
-    if(r!==undefined){
-      total++;
-      if(!byArea[q.area])byArea[q.area]={c:0,t:0};
-      byArea[q.area].t++;
-      if(r===q.g){acertos++;byArea[q.area].c++;}
-    }
+  if(simTimer)clearInterval(simTimer);
+  let correct=0;const byArea={};
+  simQuestoes.forEach((q,i)=>{
+    const area=q.area||'';
+    if(!byArea[area])byArea[area]={c:0,t:0};
+    byArea[area].t++;
+    if(simRespostas[i]===q.g){correct++;byArea[area].c++;}
   });
-  const pct=total>0?Math.round(acertos/total*100):0;
-  const data=new Date().toLocaleDateString('pt-BR');
-  if(!userStats.history)userStats.history=[];
-  userStats.history.unshift({tipo:'simulado',pct,acertos,respondidas:total,data,ts:Date.now()});
-  await saveProg();
-  document.getElementById('sim-running').classList.remove('active');
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  document.getElementById('screen-resultado').classList.add('active');
-  document.getElementById('res-content').innerHTML=`
-    <div class="res-hero ${pct>=60?'pass':'fail'}">
-      <div class="res-pct">${pct}%</div>
-      <div class="res-lbl">${acertos} de ${total} corretas</div>
-      <div class="res-tag">${pct>=60?'✅ Aprovado':'❌ Abaixo da média'}</div>
-    </div>
-    <div class="res-areas">
-      <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;">Por área</div>
-      ${Object.entries(byArea).map(([a,d])=>`<div class="res-area-row">
-        <div class="res-area-n">${AI[a]?.icon||''} ${AI[a]?.nome||a}</div>
-        <div class="res-area-s" style="color:${d.t>0&&d.c/d.t>=.6?'#27AE60':'#C0392B'}">${d.c}/${d.t} (${d.t>0?Math.round(d.c/d.t*100):0}%)</div>
-      </div>`).join('')}
-    </div>
-    <button onclick="navTo('simulado')" style="width:100%;background:var(--red);color:white;border:none;border-radius:13px;padding:14px;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 3px 14px rgba(192,57,43,.2);">Novo Simulado</button>`;
+  const pct=Math.round(correct/simQuestoes.length*100);
+  document.getElementById('sim-home-view').classList.add('hidden');
+  document.getElementById('sim-running-view').classList.add('hidden');
+  document.getElementById('sim-result-view').classList.remove('hidden');
+  document.getElementById('sim-result-score').textContent=pct+'%';
+  document.getElementById('sim-result-label').textContent=`${correct} de ${simQuestoes.length} corretas`;
+
+  // Ring
+  const circ=314.16;
+  document.getElementById('sim-result-ring').style.strokeDashoffset=circ-(circ*pct/100);
+
+  // Áreas
+  const areasEl=document.getElementById('sim-result-areas');
+  areasEl.innerHTML='<div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px">DESEMPENHO POR ÁREA</div>';
+  Object.entries(byArea).forEach(([k,v])=>{
+    const p=Math.round(v.c/v.t*100);
+    const aInfo=AI[k]||{};
+    areasEl.innerHTML+=`<div class="sim-result-area-row">
+      <span style="font-size:13px">${aInfo.icon||''} ${k}</span>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:11px;color:var(--text2)">${v.c}/${v.t}</span>
+        <span style="font-size:13px;font-weight:700;color:${p>=60?'var(--green)':'var(--red)'}">${p}%</span>
+      </div>
+    </div>`;
+  });
+
+  // Salvar histórico
+  if(!userStats.simHistorico)userStats.simHistorico=[];
+  userStats.simHistorico.push({data:Date.now(),pct,total:simQuestoes.length,modo:simModo});
+  userStats.simHistorico=userStats.simHistorico.slice(-20);
+  saveProg();
+
+  // Diagnóstico IA
+  gerarDiagnosticoIA(pct,byArea);
+}
+
+async function gerarDiagnosticoIA(pct,byArea){
+  const el=document.getElementById('sim-ai-diag');
+  try{
+    const areas=Object.entries(byArea).map(([k,v])=>`${k}: ${Math.round(v.c/v.t*100)}%`).join(', ');
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01','x-api-key':''},
+      body:JSON.stringify({
+        model:ANTHROPIC_MODEL,max_tokens:200,
+        system:'Você é um instrutor do CTSP 2026 CBMRS. Dê um diagnóstico curto do simulado e 2 recomendações práticas. Seja objetivo.',
+        messages:[{role:'user',content:`Resultado: ${pct}%. Por área: ${areas}. O que devo focar?`}]
+      })
+    });
+    const data=await resp.json();
+    el.textContent='🤖 '+( data.content?.[0]?.text||'Diagnóstico não disponível.');
+  }catch(e){el.textContent='🤖 Diagnóstico: foque nas áreas abaixo de 60% e revise os resumos pendentes.';}
+}
+
+function voltarSimHome(){
+  document.getElementById('sim-home-view').classList.remove('hidden');
+  document.getElementById('sim-running-view').classList.add('hidden');
+  document.getElementById('sim-result-view').classList.add('hidden');
+  renderSimHome();
 }
 
 // ═══════════════════════════════
 // ÁUDIO
 // ═══════════════════════════════
-function loadVoices(){
-  function set(){
-    const vs=speechSynthesis.getVoices().filter(v=>v.lang.startsWith('pt'));
-    const sel=document.getElementById('voice-sel');if(!sel)return;
-    sel.innerHTML=vs.length>0?vs.map(v=>`<option value="${v.name}">${v.name}</option>`):'<option value="">Voz padrão</option>';
-    const pref=vs.find(v=>v.name.includes('Luciana')||v.name.includes('Fernanda')||v.localService);
-    if(pref)sel.value=pref.name;
-  }
-  set();speechSynthesis.onvoiceschanged=set;
-}
+const AREAS_AUDIO=[
+  {key:'AT1',nome:'Segurança Contra Incêndios',icon:'🔥'},
+  {key:'AT2',nome:'Combate a Incêndios',icon:'🚒'},
+  {key:'AT3',nome:'Buscas e Salvamentos',icon:'🚑'},
+  {key:'AT4',nome:'Direito Institucional',icon:'⚖️'},
+  {key:'AT5',nome:'Normas Administrativas',icon:'📋'}
+];
 
 function setDur(d,btn){
   currentDur=d;
-  document.querySelectorAll('.dur-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.audio-dur-tab').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   renderAudio();
 }
 
 function renderAudio(){
-  const list=document.getElementById('audio-cards');if(!list)return;
-  const durLabel={curto:'~5 min',medio:'~10 min',longo:'~15 min'};
-  list.innerHTML=Object.entries(AI).map(([key,info])=>{
-    const roteiro=ROT[key]?.[currentDur]||'';
-    const paras=roteiro.split('\n\n').filter(p=>p.trim());
-    return`<div class="audio-card">
-      <div class="audio-card-hdr">
-        <div class="audio-card-icon">${info.icon}</div>
-        <div><div class="audio-card-name">${info.nome}</div><div class="audio-card-dur">${durLabel[currentDur]}</div></div>
-      </div>
-      <div class="audio-text" id="txt-${key}">${paras.map((p,i)=>`<p id="p-${key}-${i}">${p}</p>`).join('')}</div>
-      <div class="audio-ctls">
-        <button class="audio-play" id="btn-${key}" onclick="toggleAudio('${key}')">▶ Ouvir</button>
-        <button class="audio-stop" onclick="stopAudio()">■ Parar</button>
-      </div>
-    </div>`;
-  }).join('');
+  const list=document.getElementById('audio-list');
+  const durs={curto:'~5 min',medio:'~10 min',longo:'~15 min'};
+  list.innerHTML=AREAS_AUDIO.map(a=>`<div class="audio-card">
+    <div class="audio-card-top">
+      <div class="audio-card-icon" style="background:${AI[a.key]?.bg||'#f5f5f5'}">${a.icon}</div>
+      <div><div class="audio-card-name">${a.nome}</div><div class="audio-card-dur">${durs[currentDur]}</div></div>
+    </div>
+    <div class="audio-text-preview">${sanitize((ROT[a.key]?.[currentDur]||'').substring(0,150))}...</div>
+    <div class="audio-btns">
+      <button class="btn-ouvir" onclick="ouvir('${a.key}')">▶ Ouvir</button>
+      <button class="btn-parar" onclick="pararAudio()">■ Parar</button>
+    </div>
+  </div>`).join('');
 }
 
-function toggleAudio(area){
-  if(currentAudioArea===area){stopAudio();return;}
-  stopAudio();currentAudioArea=area;
-  const roteiro=ROT[area]?.[currentDur]||'';
-  const paras=roteiro.split('\n\n').filter(p=>p.trim());
-  let pi=0;
-  function speak(){
-    if(pi>=paras.length){stopAudio();return;}
-    document.querySelectorAll(`[id^="p-${area}-"]`).forEach(el=>el.classList.remove('hl'));
-    const el=document.getElementById('p-'+area+'-'+pi);
-    if(el){el.classList.add('hl');el.scrollIntoView({behavior:'smooth',block:'nearest'});}
-    const u=new SpeechSynthesisUtterance(paras[pi]);
-    u.lang='pt-BR';u.rate=0.88;
-    const sel=document.getElementById('voice-sel');
-    if(sel?.value){const v=speechSynthesis.getVoices().find(v=>v.name===sel.value);if(v)u.voice=v;}
-    u.onend=()=>{pi++;speak();};
-    u.onerror=()=>stopAudio();
-    speechUtter=u;speechSynthesis.speak(u);
-  }
-  const btn=document.getElementById('btn-'+area);if(btn)btn.textContent='⏸ Pausar';
-  speak();
+function ouvir(areaKey){
+  if(speechSynthesis.speaking)speechSynthesis.cancel();
+  const texto=ROT[areaKey]?.[currentDur]||'';
+  if(!texto){showToast('Roteiro não disponível.');return;}
+  speechUtter=new SpeechSynthesisUtterance(texto);
+  speechUtter.lang='pt-BR';speechUtter.rate=0.95;
+  const sel=document.getElementById('voice-select');
+  if(sel?.value){const v=speechSynthesis.getVoices().find(x=>x.name===sel.value);if(v)speechUtter.voice=v;}
+  speechSynthesis.speak(speechUtter);
 }
 
-function stopAudio(){
-  speechSynthesis.cancel();
-  if(currentAudioArea){
-    const btn=document.getElementById('btn-'+currentAudioArea);if(btn)btn.textContent='▶ Ouvir';
-    document.querySelectorAll(`[id^="p-${currentAudioArea}-"]`).forEach(el=>el.classList.remove('hl'));
+function pararAudio(){speechSynthesis.cancel();}
+
+function loadVoices(){
+  const sel=document.getElementById('voice-select');
+  const populate=()=>{
+    const vozes=speechSynthesis.getVoices().filter(v=>v.lang.startsWith('pt'));
+    sel.innerHTML=vozes.length?vozes.map(v=>`<option value="${v.name}">${v.name}</option>`).join(''):'<option>Sem vozes PT disponíveis</option>';
+  };
+  populate();
+  if(speechSynthesis.onvoiceschanged!==undefined)speechSynthesis.onvoiceschanged=populate;
+}
+
+// ═══════════════════════════════
+// MATERIAL
+// ═══════════════════════════════
+function setMaterialTab(tab,btn){
+  document.querySelectorAll('.material-tab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.material-section').forEach(s=>s.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('mat-'+tab).classList.add('active');
+}
+
+function uploadMaterial(input,tipo){
+  const file=input.files[0];if(!file)return;
+  const area=tipo==='caderno'?document.getElementById('caderno-area-sel').value:'';
+  const item={nome:file.name,tipo,area,tamanho:(file.size/1024/1024).toFixed(1)+' MB',data:Date.now(),url:URL.createObjectURL(file),fileObj:file};
+  materialFiles[tipo==='caderno'?'cadernos':tipo==='prova'?'provas':'edital'].push(item);
+  renderMaterialLists();
+  showToast(file.name+' adicionado!');
+  input.value='';
+}
+
+function renderMaterialLists(){
+  // Cadernos
+  const cl=document.getElementById('cadernos-list');
+  cl.innerHTML=materialFiles.cadernos.map((f,i)=>`<div class="material-file-item">
+    <div class="material-file-icon">📄</div>
+    <div style="flex:1"><div class="material-file-name">${sanitize(f.nome)}</div><div class="material-file-size">${f.area} · ${f.tamanho}</div></div>
+    <a href="${f.url}" target="_blank" class="btn-ver-pdf">Ver</a>
+  </div>`).join('');
+  // Provas
+  const pl=document.getElementById('provas-list');
+  pl.innerHTML=materialFiles.provas.map(f=>`<div class="material-file-item">
+    <div class="material-file-icon">📝</div>
+    <div style="flex:1"><div class="material-file-name">${sanitize(f.nome)}</div><div class="material-file-size">${f.tamanho}</div></div>
+    <a href="${f.url}" target="_blank" class="btn-ver-pdf">Ver</a>
+  </div>`).join('');
+  // Edital
+  const el=document.getElementById('edital-list');
+  el.innerHTML=materialFiles.edital.map(f=>`<div class="material-file-item">
+    <div class="material-file-icon">📋</div>
+    <div style="flex:1"><div class="material-file-name">${sanitize(f.nome)}</div><div class="material-file-size">${f.tamanho}</div></div>
+    <a href="${f.url}" target="_blank" class="btn-ver-pdf">Ver</a>
+  </div>`).join('');
+}
+
+async function consultarIA(){
+  const pergunta=document.getElementById('consulta-pergunta').value.trim();
+  if(!pergunta){showToast('Digite uma pergunta.');return;}
+  const fonte=document.getElementById('consulta-fonte-sel').value;
+  const btn=document.getElementById('consulta-btn');
+  btn.disabled=true;btn.textContent='Consultando...';
+  const respEl=document.getElementById('consulta-resp');
+  const fonteEl=document.getElementById('consulta-fonte-label');
+  respEl.style.display='block';respEl.textContent='🤖 Buscando no material...';
+  fonteEl.style.display='none';
+
+  // Construir contexto com o banco interno
+  let ctx='';
+  if(fonte==='geral'||['AT1','AT2','AT3','AT4','AT5'].includes(fonte)){
+    const filtro=fonte==='geral'?null:fonte;
+    const qs=Object.values(allQuestoes).filter(q=>!filtro||q.area===filtro).slice(0,30);
+    ctx+=qs.map(q=>`Q: ${q.e}\nR: ${q.ops[q.g]} — ${q.exp}`).join('\n\n');
+    const rs=RESUMOS_BANCO.filter(r=>!filtro||r.area===filtro);
+    ctx+='\n\n'+rs.map(r=>`${r.titulo}:\n${r.texto}`).join('\n\n');
   }
-  currentAudioArea=null;
+
+  try{
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01','x-api-key':''},
+      body:JSON.stringify({
+        model:ANTHROPIC_MODEL,max_tokens:400,
+        system:`Você é um assistente especializado no CTSP 2026 CBMRS. Responda perguntas sobre o conteúdo da prova com base no material a seguir. Seja objetivo e didático.\n\nMATERIAL:\n${ctx}`,
+        messages:[{role:'user',content:pergunta}]
+      })
+    });
+    const data=await resp.json();
+    const txt=data.content?.[0]?.text||'Não foi possível obter resposta.';
+    respEl.textContent=txt;
+    fonteEl.textContent='Fonte: banco CTSP 2026'+(fonte!=='geral'?' — '+fonte:'');
+    fonteEl.style.display='block';
+  }catch(e){respEl.textContent='Erro ao consultar. Verifique sua conexão.';}
+  finally{btn.disabled=false;btn.textContent='Perguntar';}
+}
+
+// ═══════════════════════════════
+// PADRÕES
+// ═══════════════════════════════
+function renderPadroes(){
+  const lista=document.getElementById('padroes-lista');
+  lista.innerHTML=PADROES.map((p,i)=>`<div class="padrao-card" id="pad-${i}" onclick="togglePadrao(${i})">
+    <div class="padrao-top">
+      <div class="padrao-pct-badge" style="background:${p.cor};color:${p.corT}">${p.pct}%</div>
+      <div class="padrao-info"><h3>${sanitize(p.tipo)}</h3><p>das questões da prova</p></div>
+    </div>
+    <div class="padrao-detail">
+      <div class="padrao-dica">💡 <strong>Dica:</strong> ${sanitize(p.dica)}</div>
+      <div class="padrao-estrategia"><strong>Estratégia:</strong> ${sanitize(p.estrategia)}</div>
+      <button class="padrao-exemplo-btn" onclick="event.stopPropagation();mostrarExemplo('${p.exemplo}')">Ver exemplo real →</button>
+    </div>
+  </div>`).join('');
+
+  const inc=document.getElementById('incidencia-lista');
+  inc.innerHTML=INCIDENCIA.map(i=>`<div class="incidencia-row">
+    <div>
+      <div class="incidencia-assunto">${sanitize(i.assunto)}</div>
+      <div style="font-size:11px;color:var(--text2)">Área: ${i.area} · Provas: ${i.provas}</div>
+    </div>
+    <span class="incidencia-prob" style="background:${i.prob==='alta'?'#FDECEA':'#FEF5E7'};color:${i.prob==='alta'?'#C0392B':'#E67E22'}">${i.prob==='alta'?'🔴 Alta':'🟡 Média'}</span>
+  </div>`).join('');
+}
+
+function togglePadrao(i){document.getElementById('pad-'+i).classList.toggle('open');}
+
+function mostrarExemplo(qid){
+  const q=allQuestoes[qid];
+  if(!q){showToast('Questão não encontrada.');return;}
+  navTo('quiz');
+  quizQueue=[q];quizIdx=0;quizSessao={c:0,t:0};quizAnswered=false;quizArea=q.area;
+  document.getElementById('quiz-home-view').classList.add('hidden');
+  document.getElementById('quiz-running-view').classList.remove('hidden');
+  document.getElementById('quiz-area-tag').textContent='Exemplo — '+q.area;
+  renderQuizQ();
 }
 
 // ═══════════════════════════════
 // ADMIN
 // ═══════════════════════════════
-function setAdminTab(tab,btn){
-  document.querySelectorAll('.admin-panel').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.admin-tab').forEach(t=>t.classList.remove('active'));
-  document.getElementById('admin-'+tab).classList.add('active');
+function isAdmin(){return currentUser&&(currentUser.email===ADMIN_EMAIL||(userProfile&&userProfile.admin===true));}
+
+function setAdminTab(t,btn){
+  document.querySelectorAll('.admin-tab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.admin-section').forEach(s=>s.classList.remove('active'));
   btn.classList.add('active');
+  document.getElementById('admin-'+t).classList.add('active');
 }
 
 async function loadAdminUsers(){
-  const snap=await db.ref('usuarios').get();if(!snap.exists())return;
+  if(!isAdmin())return;
+  const snap=await db.ref('usuarios').get();
+  if(!snap.exists()){document.getElementById('admin-users-list').innerHTML='<p style="color:var(--text2);font-size:13px">Nenhum usuário.</p>';return;}
   const users=snap.val();
-  const list=document.getElementById('admin-users-list');
-  list.innerHTML='';
+  let html='';
   Object.entries(users).forEach(([uid,u])=>{
-    list.innerHTML+=`<div class="user-card">
-      <div class="uc-email">${sanitize(u.nome||u.email)}</div>
-      <div class="uc-info">${sanitize(u.email)} · ${u.admin?'Admin':'Usuário'} · ${u.aprovado?'Aprovado':'Pendente'}</div>
-      <div class="uc-actions">
-        ${!u.aprovado?`<button class="btn-ap" onclick="approveUser('${uid}')">✅ Aprovar</button>`:''}
-        ${u.aprovado&&!u.admin?`<button class="btn-adm" onclick="makeAdmin('${uid}')">⭐ Admin</button>`:''}
-        ${u.aprovado?`<button class="btn-rj" onclick="revokeUser('${uid}')">❌ Revogar</button>`:''}
+    html+=`<div class="user-item">
+      <div class="user-item-info">
+        <div class="user-item-name">${sanitize(u.nome||'')}</div>
+        <div class="user-item-email">${sanitize(u.email||'')}</div>
+        <div class="user-badges">
+          ${u.admin?'<span class="badge badge-admin">Admin</span>':''}
+          <span class="badge ${u.aprovado?'badge-ok':'badge-pend'}">${u.aprovado?'Aprovado':'Pendente'}</span>
+        </div>
+      </div>
+      <div class="user-actions">
+        ${!u.aprovado?`<button class="btn-sm btn-approve" onclick="approveUser('${uid}')">Aprovar</button>`:''}
+        ${u.aprovado&&!u.admin?`<button class="btn-sm btn-revoke" onclick="revokeUser('${uid}')">Revogar</button>`:''}
+        ${!u.admin?`<button class="btn-sm btn-mkadmin" onclick="makeAdmin('${uid}')">Admin</button>`:''}
       </div>
     </div>`;
   });
+  document.getElementById('admin-users-list').innerHTML=html;
 }
 
-function isAdmin(){return currentUser&&(currentUser.email===ADMIN_EMAIL||(userProfile&&userProfile.admin===true));}
-async function approveUser(uid){if(!isAdmin())return;await db.ref('usuarios/'+uid).update({aprovado:true});loadAdminUsers();}
-async function revokeUser(uid){if(!isAdmin())return;await db.ref('usuarios/'+uid).update({aprovado:false});loadAdminUsers();}
-async function makeAdmin(uid){if(currentUser.email!==ADMIN_EMAIL)return;await db.ref('usuarios/'+uid).update({admin:true});loadAdminUsers();}
+async function approveUser(uid){if(!isAdmin())return;await db.ref('usuarios/'+uid).update({aprovado:true});loadAdminUsers();showToast('Usuário aprovado!');}
+async function revokeUser(uid){if(!isAdmin())return;await db.ref('usuarios/'+uid).update({aprovado:false});loadAdminUsers();showToast('Acesso revogado.');}
+async function makeAdmin(uid){if(!isAdmin())return;await db.ref('usuarios/'+uid).update({admin:true,aprovado:true});loadAdminUsers();showToast('Admin concedido!');}
 
 async function addQuestao(){
-  if(!isAdmin()){alert('Acesso negado.');return;}
+  if(!isAdmin())return;
   const area=document.getElementById('q-area').value;
-  const doc=document.getElementById('q-doc').value.trim();
-  const e=document.getElementById('q-enunciado').value.trim();
-  const ops=[0,1,2,3,4].map(i=>document.getElementById('q-op'+i).value.trim());
-  const g=parseInt(document.getElementById('q-gab').value);
+  const doc2=document.getElementById('q-doc').value.trim();
+  const e=document.getElementById('q-enun').value.trim();
+  const ops=[document.getElementById('q-a'),document.getElementById('q-b'),document.getElementById('q-c'),document.getElementById('q-d'),document.getElementById('q-e')].map(x=>x.value.trim());
+  const g='ABCDE'.indexOf(document.getElementById('q-gab').value);
   const exp=document.getElementById('q-exp').value.trim();
-  const msg=document.getElementById('add-q-msg');
-  if(!e||ops.some(o=>!o)||!exp){msg.textContent='Preencha todos os campos.';return;}
-  const id='q_'+Date.now();
-  await db.ref('questoes/'+id).set({id,area,doc,e,ops,g,exp});
-  allQuestoes[id]={id,area,doc,e,ops,g,exp};
-  msg.textContent='✅ Questão salva com sucesso!';msg.className='auth-msg ok';
-  document.getElementById('q-enunciado').value='';
-  document.getElementById('q-doc').value='';
-  [0,1,2,3,4].forEach(i=>{document.getElementById('q-op'+i).value='';});
-  document.getElementById('q-exp').value='';
-  setTimeout(()=>{msg.textContent='';msg.className='auth-msg';},3000);
+  if(!e||ops.some(o=>!o)||!exp){showMsg('q-msg','Preencha todos os campos.');return;}
+  const id=area.toLowerCase()+'_'+Date.now();
+  try{
+    await db.ref('questoes/'+id).set({id,area,e,ops,g,doc:doc2,exp});
+    allQuestoes[id]={id,area,e,ops,g,doc:doc2,exp};
+    showMsg('q-msg','✅ Questão salva!','ok');
+    ['q-doc','q-enun','q-a','q-b','q-c','q-d','q-e','q-exp'].forEach(x=>document.getElementById(x).value='');
+  }catch(err){showMsg('q-msg','Erro ao salvar: '+err.message);}
 }
 
 async function addFlashcard(){
-  if(!isAdmin()){alert('Acesso negado.');return;}
+  if(!isAdmin())return;
   const area=document.getElementById('fc-area').value;
-  const f=document.getElementById('fc-frente').value.trim();
-  const v=document.getElementById('fc-verso').value.trim();
-  const msg=document.getElementById('add-fc-msg');
-  if(!f||!v){msg.textContent='Preencha frente e verso.';return;}
+  const f=document.getElementById('fc-f').value.trim();
+  const v=document.getElementById('fc-v').value.trim();
+  if(!f||!v){showMsg('fc-msg','Preencha frente e verso.');return;}
   const id='fc_'+Date.now();
-  await db.ref('flashcards/'+id).set({id,a:area,f,v});
-  allFlashcards[id]={id,a:area,f,v};
-  document.getElementById('fc-frente').value='';
-  document.getElementById('fc-verso').value='';
-  msg.textContent='✅ Flashcard salvo!';msg.className='auth-msg ok';
-  setTimeout(()=>{msg.textContent='';msg.className='auth-msg';},3000);
-  renderCards();
+  try{
+    await db.ref('flashcards/'+id).set({id,a:area,f,v});
+    allFlashcards[id]={id,a:area,f,v};
+    showMsg('fc-msg','✅ Flashcard salvo!','ok');
+    document.getElementById('fc-f').value='';
+    document.getElementById('fc-v').value='';
+  }catch(err){showMsg('fc-msg','Erro: '+err.message);}
 }
 
+// ═══════════════════════════════
+// UTILS
+// ═══════════════════════════════
+function showMsg(id,txt,tipo){
+  const el=document.getElementById(id);
+  if(!el)return;
+  el.textContent=txt;
+  el.className='auth-msg'+(tipo==='ok'?' ok':'');
+  setTimeout(()=>{if(el)el.textContent='';},4000);
+}
+
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+// Teclado Enter no login
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter'){
+    const tl=document.getElementById('tab-login');
+    if(tl&&!tl.classList.contains('hidden'))doLogin();
+  }
+});
 </script>
 </body>
 </html>
