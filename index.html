@@ -1018,10 +1018,14 @@ auth.onAuthStateChanged(async user=>{
   if(!user){showAuth();return;}
   currentUser=user;
   const snap=await db.ref('usuarios/'+user.uid).get();
+  const isAdminEmail = user.email===ADMIN_EMAIL;
   if(!snap.exists()){
-    await db.ref('usuarios/'+user.uid).set({nome:user.email,email:user.email,admin:false,aprovado:user.email===ADMIN_EMAIL,criadoEm:Date.now()});
+    await db.ref('usuarios/'+user.uid).set({nome:user.email,email:user.email,admin:isAdminEmail,aprovado:isAdminEmail,criadoEm:Date.now()});
+  } else if(isAdminEmail && !snap.val().admin){
+    await db.ref('usuarios/'+user.uid).update({admin:true,aprovado:true});
   }
-  userProfile={nome:user.email,email:user.email,admin:false,aprovado:user.email===ADMIN_EMAIL,...(snap.val()||{})};
+  const freshSnap=await db.ref('usuarios/'+user.uid).get();
+  userProfile={nome:user.email,email:user.email,admin:isAdminEmail,aprovado:isAdminEmail,...(freshSnap.val()||{})};
   if(user.email===ADMIN_EMAIL)userProfile.aprovado=true;
   if(!userProfile.aprovado){
     document.getElementById('auth-screen').classList.add('active');
@@ -1081,22 +1085,35 @@ async function saveProg(){await db.ref('progresso/'+currentUser.uid).set(userSta
 async function saveCard(id,data){userCards[id]=data;await db.ref('cards/'+currentUser.uid+'/'+id).set(data);}
 
 async function loadQuestoes(){
-  const snap=await db.ref('questoes').get();
-  if(snap.exists()){allQuestoes=snap.val();}
-  else{
+  try{
+    const snap=await db.ref('questoes').get();
+    if(snap.exists()){allQuestoes=snap.val();}
+    else{
+      const toSave={};
+      Object.entries(QI).forEach(([area,qs])=>qs.forEach(q=>{toSave[q.id]={...q,area};}));
+      try{await db.ref('questoes').set(toSave);}catch(e){console.warn('Seed questoes sem permissao:',e.code);}
+      allQuestoes=toSave;
+    }
+  }catch(e){
+    console.warn('loadQuestoes usando banco local:',e);
     const toSave={};
     Object.entries(QI).forEach(([area,qs])=>qs.forEach(q=>{toSave[q.id]={...q,area};}));
-    await db.ref('questoes').set(toSave);
     allQuestoes=toSave;
   }
 }
 
 async function loadFlashcards(){
-  const snap=await db.ref('flashcards').get();
-  if(snap.exists()){allFlashcards=snap.val();}
-  else{
+  try{
+    const snap=await db.ref('flashcards').get();
+    if(snap.exists()){allFlashcards=snap.val();}
+    else{
+      const toSave={};FCI.forEach(fc=>{toSave[fc.id]=fc;});
+      try{await db.ref('flashcards').set(toSave);}catch(e){console.warn('Seed flashcards sem permissao:',e.code);}
+      allFlashcards=toSave;
+    }
+  }catch(e){
+    console.warn('loadFlashcards usando banco local:',e);
     const toSave={};FCI.forEach(fc=>{toSave[fc.id]=fc;});
-    await db.ref('flashcards').set(toSave);
     allFlashcards=toSave;
   }
 }
