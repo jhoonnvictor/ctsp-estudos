@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="theme-color" content="#C0392B"/>
 <title>Bombeiro CTSP</title>
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' https://*.googleapis.com https://*.gstatic.com https://*.firebase.com https://*.firebaseio.com https://*.firebaseapp.com https://api.anthropic.com https://www.recaptcha.net https://recaptcha.net https://www.google.com https://www.gstatic.com wss://*.firebaseio.com data: blob:;">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' https://*.googleapis.com https://*.gstatic.com https://*.firebase.com https://*.firebaseio.com https://*.firebaseapp.com https://ctsp-anthropic-proxy.jvictor-projetos-ti.workers.dev https://www.recaptcha.net https://recaptcha.net https://www.google.com https://www.gstatic.com wss://*.firebaseio.com data: blob:;">
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-check-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
@@ -168,7 +168,7 @@ input,select,textarea{font-family:inherit;outline:none;}
 .quiz-score-l{font-size:9px;opacity:.8;font-weight:600;}
 .quiz-prog{height:4px;background:rgba(255,255,255,.25);border-radius:2px;overflow:hidden;}
 .quiz-prog-fill{height:100%;background:white;border-radius:2px;transition:width .3s;}
-.quiz-body{padding:14px;}
+.quiz-body{padding:14px;background:white;border-radius:0 0 16px 16px;}
 .quiz-q-num{font-size:11px;font-weight:700;color:var(--text2);margin-bottom:8px;}
 .quiz-q-text{font-size:15px;font-weight:600;color:var(--text);line-height:1.5;margin-bottom:16px;}
 .quiz-doc{font-size:11px;color:var(--text3);margin-bottom:16px;font-style:italic;}
@@ -1983,9 +1983,9 @@ async function responderQuiz(idx){
 
 async function buscarDicaIA(q){
   try{
-    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+    const resp=await fetch('https://ctsp-anthropic-proxy.jvictor-projetos-ti.workers.dev',{
       method:'POST',
-      headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01','x-api-key':''},
+      headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
         model:ANTHROPIC_MODEL,max_tokens:150,
         system:'Você é um instrutor do CTSP 2026 CBMRS. Dê uma dica curta (máximo 2 linhas) para memorizar o conceito correto da questão. Seja objetivo e prático.',
@@ -2365,9 +2365,9 @@ async function gerarDiagnosticoIA(pct,byArea){
   const el=document.getElementById('sim-ai-diag');
   try{
     const areas=Object.entries(byArea).map(([k,v])=>`${k}: ${Math.round(v.c/v.t*100)}%`).join(', ');
-    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+    const resp=await fetch('https://ctsp-anthropic-proxy.jvictor-projetos-ti.workers.dev',{
       method:'POST',
-      headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01','x-api-key':''},
+      headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
         model:ANTHROPIC_MODEL,max_tokens:200,
         system:'Você é um instrutor do CTSP 2026 CBMRS. Dê um diagnóstico curto do simulado e 2 recomendações práticas. Seja objetivo.',
@@ -2509,9 +2509,9 @@ async function consultarIA(){
   }
 
   try{
-    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+    const resp=await fetch('https://ctsp-anthropic-proxy.jvictor-projetos-ti.workers.dev',{
       method:'POST',
-      headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01','x-api-key':''},
+      headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
         model:ANTHROPIC_MODEL,max_tokens:400,
         system:`Você é um assistente especializado no CTSP 2026 CBMRS. Responda perguntas sobre o conteúdo da prova com base no material a seguir. Seja objetivo e didático.\n\nMATERIAL:\n${ctx}`,
