@@ -207,31 +207,13 @@ input,select,textarea{font-family:inherit;outline:none;}
 .area-row-meta{font-size:11px;color:var(--text2);margin-top:2px;}
 .area-row-pct{font-size:13px;font-weight:800;}
 .erro-mode-btn{width:100%;padding:14px;background:white;border:2px solid var(--red);color:var(--red);border-radius:14px;font-size:14px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;justify-content:center;gap:8px;}
-.trilha-btn{width:100%;padding:14px;background:linear-gradient(135deg,var(--red-dark),var(--red));color:white;border-radius:14px;font-size:14px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 16px rgba(192,57,43,.3);}
 
-/* ═══ TRILHA ═══ */
-.trilha-screen{padding:16px;background:transparent;}
-.trilha-header-card{background:linear-gradient(135deg,var(--red-dark),var(--red));border-radius:16px;padding:16px;color:white;margin-bottom:16px;}
-.trilha-fase{font-size:11px;font-weight:700;opacity:.7;margin-bottom:4px;}
-.trilha-titulo{font-size:17px;font-weight:800;margin-bottom:8px;}
-.trilha-prog-bar{height:6px;background:rgba(255,255,255,.25);border-radius:3px;overflow:hidden;}
-.trilha-prog-fill{height:100%;background:white;border-radius:3px;transition:width .4s;}
-.trilha-prog-label{font-size:10px;opacity:.75;margin-top:4px;}
-.topico-card{background:white;border-radius:14px;padding:14px;box-shadow:var(--shadow);margin-bottom:10px;cursor:pointer;transition:transform .15s;}
-.topico-card:active{transform:scale(.98);}
-.topico-card.visto{opacity:.6;}
-.topico-top{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
-.topico-prob{border-radius:6px;padding:3px 8px;font-size:10px;font-weight:800;}
+
+
 .prob-alta{background:#FDECEA;color:#C0392B;}
 .prob-media{background:#FEF5E7;color:#E67E22;}
 .prob-baixa{background:#E8F8F0;color:#27AE60;}
-.topico-titulo{font-size:14px;font-weight:700;flex:1;}
-.topico-check{width:22px;height:22px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.topico-check.ok{background:var(--green);border-color:var(--green);color:white;}
-.topico-doc{font-size:11px;color:var(--text3);}
-.topico-content{background:var(--bg);border-radius:10px;padding:12px;font-size:13px;color:var(--text2);line-height:1.6;margin-top:10px;display:none;}
-.topico-card.open .topico-content{display:block;}
-.topico-questoes-btn{margin-top:10px;width:100%;padding:10px;background:var(--red);color:white;border-radius:10px;font-size:13px;font-weight:700;}
+
 
 /* ═══ CARDS ═══ */
 .cards-header{background:linear-gradient(135deg,var(--red-dark),var(--red));padding:16px;color:white;}
@@ -553,11 +535,7 @@ input,select,textarea{font-family:inherit;outline:none;}
             <div class="quick-btn-title">Modo Erro</div>
             <div class="quick-btn-sub" id="erro-sub">Revisar erros</div>
           </div>
-          <div class="quick-btn" onclick="navTo('trilha')">
-            <div class="quick-btn-icon">🗺️</div>
-            <div class="quick-btn-title">Trilha</div>
-            <div class="quick-btn-sub">Ordem caderno</div>
-          </div>
+
           <div class="quick-btn" onclick="iniciarSimuladoInteligente()">
             <div class="quick-btn-icon">🎯</div>
             <div class="quick-btn-title">Simulado IA</div>
@@ -595,7 +573,6 @@ input,select,textarea{font-family:inherit;outline:none;}
         <div class="quiz-home">
           <div class="quiz-home-title">Quiz</div>
           <div class="quiz-home-sub">Escolha uma área ou mode especial</div>
-          <button class="trilha-btn" onclick="navTo('trilha')">🗺️ Trilha de Estudo (Fase 1)</button>
           <button class="erro-mode-btn" onclick="iniciarModoErro()">🔁 Modo Erro — Revisar questões erradas</button>
           <div class="area-list" id="area-list"></div>
         </div>
@@ -623,18 +600,6 @@ input,select,textarea{font-family:inherit;outline:none;}
       </div>
     </div>
 
-    <!-- TRILHA -->
-    <div class="screen" id="screen-trilha">
-      <div class="trilha-screen">
-        <div class="trilha-header-card">
-          <div class="trilha-fase" id="trilha-fase-label">FASE 1 — PRIMEIRA PASSAGEM</div>
-          <div class="trilha-titulo" id="trilha-titulo">Trilha de Estudo</div>
-          <div class="trilha-prog-bar"><div class="trilha-prog-fill" id="trilha-prog-fill" style="width:0%"></div></div>
-          <div class="trilha-prog-label" id="trilha-prog-label">0 de 0 tópicos concluídos</div>
-        </div>
-        <div id="trilha-lista"></div>
-      </div>
-    </div>
 
     <!-- CARDS -->
     <div class="screen" id="screen-cards">
@@ -934,7 +899,7 @@ function checkRateLimit(){const now=Date.now();if(now-loginAttempts.lastReset>60
 // STATE
 // ═══════════════════════════════
 let currentUser=null,userProfile=null;
-let userStats={correct:0,wrong:0,byArea:{},seenIds:[],history:[],streak:0,lastStudyDate:'',metaDiaria:10,trilhaFase:1,trilhaVistos:[]};
+let userStats={correct:0,wrong:0,byArea:{},seenIds:[],history:[],streak:0,lastStudyDate:'',metaDiaria:10};
 let userCards={};
 let allQuestoes={},allFlashcards={};
 let quizQueue=[],quizIdx=0,quizArea='TODAS',quizSessao={c:0,t:0},quizAnswered=false,quizModoErro=false;
@@ -1051,7 +1016,9 @@ AT1B:[
 {id:"b1_11",e:"O FAL (Formulário de Alteração de Layout), conforme o SOL-CBMRS, é utilizado quando:",ops:["Ocorre ampliação da área construída.","Há mudança de uso/ocupação da edificação.","Há alteração interna sem supressão de medidas de segurança e sem mudança de uso.","O APPCI está vencido e precisa ser renovado.","São instaladas novas medidas de segurança não previstas no PPCI original."],g:2,doc:"SOL-CBMRS 4ª Ed. 2022 - FAL",exp:"FAL aplica-se a alterações internas sem supressão de medidas e sem mudança de uso/ocupação."},
 {id:"b1_12",e:"Segundo a LC 14.376/2013, são objetivos do PPCI, EXCETO:",ops:["Prevenir o início do incêndio.","Permitir o abandono seguro da edificação.","Garantir a incolumidade dos bens materiais e patrimoniais.","Dificultar a propagação do incêndio.","Possibilitar o acesso dos bombeiros para combate ao incêndio."],g:2,doc:"LC 14.376/2013",exp:"Garantir incolumidade de BENS MATERIAIS não é objetivo listado no PPCI. Os objetivos são vida, abandono seguro, dificultar propagação, controlar/extinguir e acesso dos bombeiros."},
 {id:"b1_13",e:"Quanto ao tipo de extintor adequado para incêndio em equipamentos elétricos energizados (Classe C), deve-se usar:",ops:["Água pressurizada (AP).","Espuma mecânica.","Pó Químico Seco ABC.","CO₂ (Dióxido de Carbono).","Pó BC e água juntos."],g:3,doc:"RT CBMRS nº 14/2016 - Classes de incêndio",exp:"Incêndio Classe C (equipamentos elétricos energizados): CO₂ ou pó BC/ABC. CO₂ é o mais adequado por não deixar resíduos."},
-{id:"b1_14",e:"A edificação que possui APPCI válido e realiza obras internas sem supressão de medidas deve protocolar:",ops:["Novo PPCI completo.","PSPCI simplificado.","FAL — Formulário de Alteração de Layout.","Apenas ART do responsável técnico.","Nada — obras internas não necessitam comunicação ao CBMRS."],g:2,doc:"SOL-CBMRS 4ª Ed. 2022",exp:"Obras internas sem supressão de medidas e sem mudança de uso: FAL."}
+{id:"b1_14",e:"A edificação que possui APPCI válido e realiza obras internas sem supressão de medidas deve protocolar:",ops:["Novo PPCI completo.","PSPCI simplificado.","FAL — Formulário de Alteração de Layout.","Apenas ART do responsável técnico.","Nada — obras internas não necessitam comunicação ao CBMRS."],g:2,doc:"SOL-CBMRS 4ª Ed. 2022",exp:"Obras internas sem supressão de medidas e sem mudança de uso: FAL."},
+{id:"a1_15",e:"Conforme a LC 14.376/2013, a obrigação de dotar edificações de medidas de segurança contra incêndio recai sobre:",ops:["Apenas o proprietário do imóvel.","Apenas o responsável técnico pelo projeto.","O proprietário e o responsável pelas atividades desenvolvidas, solidariamente.","Exclusivamente o poder público municipal.","O Corpo de Bombeiros, ao emitir o APPCI."],g:2,doc:"LC 14.376/2013 art.3º",exp:"A lei impõe responsabilidade solidária ao proprietário e ao responsável pelas atividades — ambos respondem pelo cumprimento das medidas."},
+{id:"b1_15",e:"Qual das alternativas descreve CORRETAMENTE o conceito de 'risco' para fins de classificação de edificações na LC 14.376/2013?",ops:["Probabilidade de ocorrência de incêndio multiplicada pelo valor do patrimônio.","Combinação da probabilidade de início de incêndio com a potencial gravidade das consequências.","Apenas a carga de incêndio específica em MJ/m².","Somente a altura da edificação e o número de pavimentos.","A área total construída dividida pela capacidade do sistema de hidrantes."],g:1,doc:"LC 14.376/2013 — conceitos",exp:"Risco = probabilidade de início do incêndio × gravidade das consequências. Essa combinação fundamenta a classificação e as exigências de medidas de segurança."}
 ],
 AT2B:[
 {id:"b2_01",e:"O fenômeno denominado FLASHOVER em incêndios estruturais representa:",ops:["Explosão do reservatório de água pressurizada.","Combustão súbita de todos os materiais combustíveis do ambiente quando atingem temperatura crítica simultaneamente.","Propagação do incêndio pelo sistema de dutos de ar condicionado.","Ignição de gases na parte superior do ambiente antes do colapso estrutural.","Retrocesso da frente de chamas quando a porta é aberta."],g:1,doc:"Manual Combate a Incêndio Urbano CBMMG Cap.1",exp:"Flashover é a ignição simultânea de todos os materiais combustíveis do ambiente, geralmente quando atingem ~600°C."},
@@ -1081,7 +1048,9 @@ AT3B:[
 {id:"b3_11",e:"Quantos passos compõem a rotina do POP de Salvamento Veicular do CBMRS?",ops:["8 passos.","10 passos.","12 passos.","14 passos.","16 passos."],g:2,doc:"POP Salvamento Veicular CBMRS",exp:"O POP de Salvamento Veicular do CBMRS é composto por 12 passos."},
 {id:"b3_12",e:"Na avaliação pediátrica, a Sequência de Sobrevivência para crianças prioriza:",ops:["Desfibrilação precoce como primeira prioridade.","Prevenção, pois a maioria das PCRs pediátricas é por causa respiratória.","Acesso venoso imediato antes da RCP.","Administração de epinefrina antes das compressões.","Intubação orotraqueal antes das ventilações."],g:1,doc:"ITO 23 CBMMG 3ª Ed. 2021 - Pediatria",exp:"Nas crianças, a PCR geralmente é por hipóxia (causa respiratória), por isso a PREVENÇÃO e a via aérea têm prioridade."},
 {id:"b3_13",e:"Quanto às zonas de trabalho no salvamento veicular (ITO 34), a Zona Quente é:",ops:["Área de 20 m ao redor do veículo.","Área imediata do acidente, onde está o veículo e as vítimas — acesso restrito à equipe operacional.","Área de apoio logístico e posicionamento de viaturas.","Local de triagem de vítimas liberadas do veículo.","Área de comando da operação."],g:1,doc:"ITO 34 CBMMG - Zonas de trabalho",exp:"Zona Quente = área imediata do sinistro (veículo + vítimas). Acesso restrito à equipe operacional com EPIs completos."},
-{id:"b3_14",e:"Sobre hemorragia externa grave no protocolo X do XABCDE, a conduta CORRETA é:",ops:["Aguardar acesso venoso antes de qualquer intervenção.","Aplicar torniquete imediatamente em qualquer hemorragia de membro.","Controle por pressão direta, curativo compressivo ou torniquete em hemorragias de membros com risco de morte.","Aplicar gelo para vasoconstrição antes do curativo.","Elevar o membro e aguardar hemostasia espontânea."],g:2,doc:"ITO 23 CBMMG - X do XABCDE",exp:"X = controle de hemorragia exsanguinante: pressão direta → curativo compressivo → torniquete (em membros, quando necessário)."}
+{id:"b3_14",e:"Sobre hemorragia externa grave no protocolo X do XABCDE, a conduta CORRETA é:",ops:["Aguardar acesso venoso antes de qualquer intervenção.","Aplicar torniquete imediatamente em qualquer hemorragia de membro.","Controle por pressão direta, curativo compressivo ou torniquete em hemorragias de membros com risco de morte.","Aplicar gelo para vasoconstrição antes do curativo.","Elevar o membro e aguardar hemostasia espontânea."],g:2,doc:"ITO 23 CBMMG - X do XABCDE",exp:"X = controle de hemorragia exsanguinante: pressão direta → curativo compressivo → torniquete (em membros, quando necessário)."},
+{id:"a3_15",e:"No atendimento pré-hospitalar a paciente inconsciente com suspeita de TCE, qual ação é INCORRETA?",ops:["Imobilizar a coluna cervical com colar cervical adequado.","Monitorar continuamente o nível de consciência pela Escala de Coma de Glasgow.","Realizar hiperventilação agressiva de rotina para reduzir a PIC.","Manter vias aéreas pérvias com cânula orofaríngea se Glasgow ≤ 8.","Posicionar em decúbito dorsal com plano rígido na suspeita de lesão espinhal."],g:2,doc:"ITO 23 CBMMG — TCE",exp:"Hiperventilação agressiva de rotina está CONTRAINDICADA no TCE pré-hospitalar — causa vasoconstrição cerebral e piora a isquemia. Só utilizada em herniação iminente."},
+{id:"b3_15",e:"Segundo o ITO 23, a indicação CORRETA de desfibrilação com DEA em lactente é:",ops:["Nunca utilizar DEA em lactentes — apenas RCP.","Utilizar DEA com pás adultas posicionadas na posição anteroposterior.","Utilizar DEA com pás pediátricas (ou atenuador de dose) para menores de 8 anos ou menos de 25 kg.","Aplicar choque apenas se a frequência cardíaca for confirmada como zero.","Aguardar UTI para desfibrilação em pacientes pediátricos."],g:2,doc:"ITO 23 CBMMG — DEA",exp:"Para menores de 8 anos ou menos de 25 kg: usar pás pediátricas ou atenuador de dose. Na ausência, pás adultas em posição anteroposterior são segunda opção. Nunca negar desfibrilação."}
 ],
 AT4B:[
 {id:"b4_01",e:"Segundo a LC 14.920/2016, a função de Comandante de Companhia é privativa de:",ops:["Oficiais do último posto do QOEM.","Oficiais Superiores da ativa do QOEM.","Oficiais Intermediários da ativa do QOEM.","Oficiais Subalternos da ativa do QOEM.","Praças do QPBM com mais de 10 anos de serviço."],g:2,doc:"LC 14.920/2016 - Funções",exp:"Comandante de Companhia: privativo de Oficiais Intermediários (Capitão) da ativa do QOEM."},
@@ -1117,7 +1086,9 @@ AT5B:[
 {id:"b5_09",e:"Sobre o RDBM (Regulamento Disciplinar da Brigada Militar), qual conceito está CORRETO?",ops:["Transgressão disciplinar é qualquer ação contrária às normas de trânsito.","Pena disciplinar mais grave é a suspensão de 30 dias.","Transgressão disciplinar é toda ação ou omissão contrária à ética, à disciplina e aos deveres do servidor militar.","O RDBM aplica-se apenas a Praças, não a Oficiais.","A prisão disciplinar pode ser aplicada sem formalidade de processo."],g:2,doc:"RDBM - Conceitos Básicos",exp:"Transgressão disciplinar = toda ação ou omissão contrária à ética, disciplina e deveres do servidor militar estadual."},
 {id:"b5_10",e:"Na elaboração de documento oficial, o grau de SIGILOSIDADE deve ser definido conforme:",ops:["Preferência pessoal do signatário.","O conteúdo do documento e as normas legais vigentes.","Sempre classificado como ostensivo, salvo ordem expressa.","A patente do signatário: Oficiais = reservado; Praças = ostensivo.","Apenas documentos do Comando-Geral recebem classificação."],g:1,doc:"Caderno Temático ABM 2023 - Sigilosidade",exp:"O grau de sigilosidade é definido conforme o CONTEÚDO do documento e as normas legais."},
 {id:"b5_11",e:"Sobre a IPO (Informação Preliminar de Ocorrência — IT 03), qual informação NÃO é obrigatória?",ops:["Tipo de ocorrência.","Prefixo da viatura.","Nome completo de todas as vítimas.","Síntese da ocorrência.","Endereço."],g:2,doc:"IT 03/AODC-GCG - IPO",exp:"A IPO exige: tipo, prefixo, síntese, endereço e horário. O nome das vítimas não é campo obrigatório da IPO."},
-{id:"b5_12",e:"Segundo o Dec. 40.986/2001, o serviço extraordinário (horas extras) para militares estaduais tem gratificação de:",ops:["100% sobre a hora normal de trabalho.","75% sobre a hora normal de trabalho.","50% sobre a hora normal de trabalho.","25% sobre a hora normal de trabalho.","Compensação exclusiva em folga, sem pagamento em espécie."],g:2,doc:"Decreto 40.986/2001 - Serviço Extraordinário",exp:"Gratificação por serviço extraordinário = 50% sobre o valor da hora normal de trabalho."}
+{id:"b5_12",e:"Segundo o Dec. 40.986/2001, o serviço extraordinário (horas extras) para militares estaduais tem gratificação de:",ops:["100% sobre a hora normal de trabalho.","75% sobre a hora normal de trabalho.","50% sobre a hora normal de trabalho.","25% sobre a hora normal de trabalho.","Compensação exclusiva em folga, sem pagamento em espécie."],g:2,doc:"Decreto 40.986/2001 - Serviço Extraordinário",exp:"Gratificação por serviço extraordinário = 50% sobre o valor da hora normal de trabalho."},
+{id:"a5_13",e:"Conforme o Dec. 57.390/2023, o ato de movimentação que VINCULA o militar a uma organização sem que ele passe a integrar seu efetivo é:",ops:["Inclusão.","Adição.","Efetivação.","Instalação.","Transferência."],g:1,doc:"Decreto 57.390/2023 — Atos de Movimentação",exp:"Adição = vincula sem integrar o efetivo. Diferente de Inclusão (integra o efetivo) e Efetivação (atribui efetivo numericamente)."},
+{id:"b5_13",e:"A IT 03/AODC-GCG estabelece que o IPO deve ser transmitido ao CCOB. Qual é o canal CORRETO previsto na instrução?",ops:["E-mail institucional com cópia para o Cmt OBM.","Rádio operacional em frequência VHF.","WhatsApp ou Telegram — mensagem de texto ao CCOB.","Ligação telefônica gravada para o número 193.","Sistema Ebombeiro WEB exclusivamente."],g:2,doc:"IT 03/AODC-GCG — IPO",exp:"A IT 03 prevê o envio do IPO via WhatsApp ou Telegram em mensagem de texto ao CCOB. O Ebombeiro WEB é usado para o COBOM, não para o IPO."}
 ]
 };
 
@@ -1583,6 +1554,23 @@ texto:`Tabela 2 da RTCBMRS nº 01/2024 — normas por sistema:
 • Segurança Estrutural em Incêndio: IT nº 08 do CBPMESP
 ⚠️ Hidrante = NBR 13714 (não confundir com NBR 13744 nem 13437!)`},
 
+{id:"r_at1_12",area:"AT1",titulo:"Responsabilidades na Lei — LC 14.376/2013",prob:"alta",
+texto:`Quem é responsável pelas medidas de segurança?
+• PROPRIETÁRIO e RESPONSÁVEL PELAS ATIVIDADES = responsabilidade SOLIDÁRIA (art.3º)
+• Ambos respondem perante o CBMRS — não apenas um deles!
+
+Conceito de RISCO (base para classificação):
+• Probabilidade de início de incêndio × gravidade das consequências
+• Fundamenta toda a tabela de exigências de medidas
+
+Processo de regularização resumido:
+1. PPCI (projeto) → aprovado pelo CBM → execução → APPCI emitido → válido por prazo determinado
+2. Renovação: protocolar 30 dias ANTES do vencimento
+3. Alteração de layout sem supressão de medidas: FAL (não precisa novo PPCI)
+
+⚠️ EMBARGO não existe como penalidade! As 4 penalidades são:
+Advertência → Multa → Multa diária → Interdição`},
+
 // ── AT2 novos ──
 {id:"r_at2_04",area:"AT2",titulo:"Fenômenos em Incêndios",prob:"alta",
 texto:`Fenômenos especiais:
@@ -1672,6 +1660,28 @@ texto:`FEAs (Ferramentas de Extração Assistida):
 • EXTENSOR: aumenta o alcance do alargador
 • MOTOBOMBA: motor + bomba hidráulica (alimenta as ferramentas)
 • BOMBA MANUAL: backup para falha da motobomba`},
+
+{id:"r_at3_09",area:"AT3",titulo:"TCE — Avaliação e Conduta APH",prob:"alta",
+texto:`Traumatismo Cranioencefálico (ITO 23 CBMMG):
+
+Tríade clássica de fratura de base de crânio:
+• Sinal de Guaxinim (equimose periorbital bilateral)
+• Sinal de Battle (equimose retroauricular)
+• Anisocoria (pupilas assimétricas)
+
+Escala de Coma de Glasgow (ECG):
+• ≤ 8 → TCE GRAVE → intubação / COF (Controle de Via Aérea Definitiva)
+• 9–12 → TCE MODERADO
+• 13–15 → TCE LEVE
+
+Condutas APH no TCE grave:
+✅ Imobilizar coluna cervical com colar adequado
+✅ Manter via aérea pérvia (cânula orofaríngea se Glasgow ≤ 8)
+✅ Monitorar ECG continuamente
+❌ Hiperventilação agressiva de ROTINA = CONTRAINDICADA
+   (só usar em herniação iminente — causa vasoconstrição e piora isquemia)
+
+⚠️ Fixar: Glasgow ≤ 8 → COF. Hiperventilação de rotina → ERRADO!`},
 
 // ── AT4 novos ──
 {id:"r_at4_04",area:"AT4",titulo:"LC 14.920/2016 — Estrutura do CBMRS",prob:"alta",
@@ -1824,72 +1834,32 @@ texto:`Serviço extraordinário (horas extras):
 
 Diferença importante:
 • Horas AUTORIZADAS → pagas com 50% de adicional
-• Horas NÃO AUTORIZADAS → compensadas em folga, sem pagamento`}
+• Horas NÃO AUTORIZADAS → compensadas em folga, sem pagamento`},
+
+{id:"r_at5_06",area:"AT5",titulo:"IPO e COBOM — IT 03/AODC-GCG",prob:"alta",
+texto:`IPO — Informe de Prontidão Operacional (IT 03):
+
+Canal de envio: WhatsApp ou Telegram → CCOB (Centro de Comunicações Operacionais do BBM)
+⚠️ NÃO é e-mail, NÃO é rádio, NÃO é ligação telefônica
+
+Conteúdo obrigatório do IPO:
+1. Tipo de ocorrência
+2. Prefixo da viatura
+3. Síntese da ocorrência
+4. Endereço completo
+5. Horário
+
+COBOM — Central de Operações do Bombeiro Militar:
+• Sistema: Ebombeiro WEB (não confundir com o canal do IPO!)
+• Gerencia os recursos operacionais em nível estadual
+
+Diferença-chave:
+• IPO → WhatsApp/Telegram ao CCOB (nível BBM)
+• COBOM → Ebombeiro WEB (nível estadual)
+
+⚠️ Questão recorrente: o canal do IPO é sempre texto via app de mensagem!`}
 ];
 
-// ═══════════════════════════════
-// TRILHA DE ESTUDO
-// ═══════════════════════════════
-const TRILHA=[
-{id:"t_at1_01",area:"AT1",titulo:"Extintores portáteis — RT 14/2016",prob:"alta",doc:"RT CBMRS nº 14/2016",
-conteudo:"Alça ≤ 1,60 m | Fundo ≥ 0,10 m | Distância porta ≤ 5 m. Cobrado nas provas 2024 e 2025."},
-{id:"t_at1_02",area:"AT1",titulo:"Mezanino — LC 14.376/2013",prob:"alta",doc:"LC 14.376/2013 art.6º",
-conteudo:"Mezanino > 250 m² ou > 1/3 da área do piso = outro pavimento. Limite por unidade autônoma."},
-{id:"t_at1_03",area:"AT1",titulo:"Penalidades — Decreto 51.803/2014",prob:"alta",doc:"Decreto 51.803/2014 art.10",
-conteudo:"4 penalidades: advertência, multa, multa diária, interdição. EMBARGO não existe! Cobrado nas 2 provas."},
-{id:"t_at1_04",area:"AT1",titulo:"Interdição: sanção × prévia",prob:"alta",doc:"Decreto 51.803/2014 cap.III",
-conteudo:"Sanção = 120 dias sem sanar + prazo esgotado. Prévia = iminente risco à vida (poder de polícia)."},
-{id:"t_at1_05",area:"AT1",titulo:"PPCI e PSPCI",prob:"alta",doc:"LC 14.376/2013",
-conteudo:"PPCI = projeto completo de prevenção. PSPCI = simplificado para F-11/F-12 entre 750-1.500m²."},
-{id:"t_at1_06",area:"AT1",titulo:"SOL-CBMRS — Prazos de recurso",prob:"media",doc:"SOL-CBMRS 4ª Ed. 2022",
-conteudo:"1ª instância: 30 dias CORRIDOS. 2ª instância: 15 dias ÚTEIS. Renovação: 30 dias antecedência."},
-{id:"t_at1_07",area:"AT1",titulo:"Inviabilidade técnica — RT 05 Parte 07/2025",prob:"media",doc:"RT CBMRS nº 05 Parte 07/2025",
-conteudo:"Prédios tombados pelo Patrimônio Histórico = inviabilidade técnica. Medidas compensatórias permitidas."},
-{id:"t_at2_01",area:"AT2",titulo:"Mangueiras — pressões",prob:"alta",doc:"Manual CBMMG 2020 Cap.2",
-conteudo:"Pressão PROVA mínima = 42 kgf/cm² para 1½\" e 2½\". Não confundir com pressão de trabalho."},
-{id:"t_at2_02",area:"AT2",titulo:"O₂ e fases da combustão",prob:"alta",doc:"Manual CBMMG 2020 Cap.1",
-conteudo:"21-14%: queima viva. 14-7%: sem chama. <7%: sem combustão. Queima viva = 21% a 14%."},
-{id:"t_at2_03",area:"AT2",titulo:"Técnicas de ataque",prob:"alta",doc:"Manual CBMMG 2020 Cap.5",
-conteudo:"Direto=base do foco. Indireto=camadas quentes fumaça. Combinado=mistura. Transicional=de fora para dentro."},
-{id:"t_at2_04",area:"AT2",titulo:"Arrombamento — ferramentas",prob:"media",doc:"Manual CBMMG 2020 Cap.3",
-conteudo:"4 ferramentas: Pé de Cabra + Malho 10kg + Alavanca Halligan + Corta-vergalhão."},
-{id:"t_at3_01",area:"AT3",titulo:"XABCDE — sequência",prob:"alta",doc:"ITO 23 CBMMG 3ª Ed. 2021",
-conteudo:"X=eXsanguinação, A=Airway, B=Breathing, C=Circulation, D=Disability, E=Exposure. ECG≤8 → COF."},
-{id:"t_at3_02",area:"AT3",titulo:"RCP — proporções",prob:"alta",doc:"ITO 23 CBMMG 3ª Ed. 2021",
-conteudo:"Lactente 2 socorristas=15:2. Todos outros adulto/criança/1 socorrista=30:2."},
-{id:"t_at3_03",area:"AT3",titulo:"DEA — procedimento",prob:"alta",doc:"ITO 23 CBMMG 3ª Ed. 2021",
-conteudo:"Ao 'analisar ritmo' → TODOS param e se afastam. <8 anos ou <25kg = pás pediátricas."},
-{id:"t_at3_04",area:"AT3",titulo:"POP Salvamento Veicular — 12 passos",prob:"alta",doc:"POP CBMRS",
-conteudo:"Acionamento→Dimensionamento→Gerenciamento→Estabilização→Acesso→Av.Inicial→Tripartida→Desencarceramento→Extração→Av.Sistematizada→Transporte→Encerramento"},
-{id:"t_at3_05",area:"AT3",titulo:"TCE — sinais clínicos",prob:"alta",doc:"ITO 23 CBMMG",
-conteudo:"Tríade: Sinal de Guaxinim + Sinal de Battle + Anisocoria. TCE grave: monitorar PIC e ajustar colar."},
-{id:"t_at4_01",area:"AT4",titulo:"CF art. 144 — Segurança Pública",prob:"alta",doc:"CF/1988 art.144",
-conteudo:"Tráfico/contrabando/descaminho=Polícia Federal. Segurança pública=dever do Estado E de todos."},
-{id:"t_at4_02",area:"AT4",titulo:"CF art. 37 — LIMPE",prob:"alta",doc:"CF/1988 art.37",
-conteudo:"EFICIÊNCIA (não eficácia). Concurso: até 2 anos, prorrogável UMA vez. % para PcD: correto."},
-{id:"t_at4_03",area:"AT4",titulo:"IPM — prazos e competências",prob:"alta",doc:"IR 008 CBMRS",
-conteudo:"40 dias + 20 dias prorrogação. Subcomandantes NÃO instaurar IPM. Competentes: Cmt-Geral, Corregedor, Chefes OBM, Diretores."},
-{id:"t_at4_04",area:"AT4",titulo:"Sindicância Militar — prazos",prob:"alta",doc:"IR 006 CBMRS",
-conteudo:"30 dias + 20 dias. Pedido do SINDICANTE (não sindicado), 2 dias úteis de antecedência."},
-{id:"t_at4_05",area:"AT4",titulo:"LC 14.920/2016 — Organização CBMRS",prob:"media",doc:"LC 14.920/2016",
-conteudo:"Cmt Pelotão=Oficiais Subalternos (Tenentes) ativa QOEM. Cmt Companhia=Oficiais Intermediários (Capitão). Cmt Regional=último posto QOEM (Coronel)."},
-{id:"t_at4_06",area:"AT4",titulo:"CPM — Crimes que mais caem",prob:"alta",doc:"CPM DL 1.001/1969",
-conteudo:"Deserção=8 dias fora. Insubordinação=recusar ordem legal. Motim=3+ militares c/ violência. Ação penal=SEMPRE pública. Furto de uso=NÃO é atípico no CPM!"},
-{id:"t_at4_07",area:"AT4",titulo:"CPPM — IPM em números",prob:"alta",doc:"CPPM DL 1.002/1969",
-conteudo:"IPM preso=20 dias. IPM solto=40 dias. Prorrogação=+20 dias. Autoridade NÃO arquiva. Advogado TEM acesso. Flagrante=QUALQUER pessoa pode prender."},
-{id:"t_at2_05",area:"AT2",titulo:"Cap.7 — Sinais de backdraft",prob:"alta",doc:"Manual CBMMG 2020 Cap.7",
-conteudo:"Porta QUENTE + fumaça escura saindo sob pressão = BACKDRAFT. NÃO abrir diretamente. Ventilar primeiro. Posicionar fora da linha da porta."},
-{id:"t_at5_01",area:"AT5",titulo:"Atos de movimentação — Dec. 57.390/2023",prob:"alta",doc:"Decreto 57.390/2023",
-conteudo:"Inclusão=integra. Exclusão=deixa de integrar. Adição=vincula sem integrar. Efetivação=atribui efetivo. Desligamento=desvincula."},
-{id:"t_at5_02",area:"AT5",titulo:"Trânsito e Instalação",prob:"alta",doc:"Decreto 57.390/2023",
-conteudo:"≤100km=2 dias. >100km=5 dias. Instalação: Cmt OPM de DESTINO (não origem!)."},
-{id:"t_at5_03",area:"AT5",titulo:"IPO e COBOM — IT 03",prob:"alta",doc:"IT 03/AODC-GCG",
-conteudo:"IPO via WhatsApp/Telegram ao CCOB. Conteúdo: tipo+prefixo+síntese+endereço+horário. COBOM: Ebombeiro WEB."},
-{id:"t_at5_04",area:"AT5",titulo:"FR² e AODC — IT 04.3",prob:"media",doc:"IT 04.3/AODC-GCG",
-conteudo:"Cmt BBM solicita FR² ao COBOM. Certificação Logística das Células: definida pela AODC."},
-{id:"t_at5_05",area:"AT5",titulo:"Parte Disciplinar e documentos",prob:"media",doc:"Caderno Temático ABM 2023",
-conteudo:"Parte=subordinado→superior, rotina. PROIBIDO opinião pessoal. Prazo: 2 dias úteis da constatação."}
-];
 
 // ═══════════════════════════════
 // PADRÕES DAS PROVAS
@@ -2029,7 +1999,6 @@ async function initApp(){
   renderSimHome();
   renderAudio();
   renderResumos();
-  renderTrilha();
   renderPadroes();
   if(userProfile.admin||currentUser.email===ADMIN_EMAIL)loadAdminUsers();
   loadVoices();
@@ -2040,11 +2009,11 @@ async function initApp(){
 // ═══════════════════════════════
 async function loadUserData(){
   const snap=await db.ref('progresso/'+currentUser.uid).get();
-  if(snap.exists())userStats={correct:0,wrong:0,byArea:{},seenIds:[],history:[],streak:0,lastStudyDate:'',metaDiaria:10,trilhaFase:1,trilhaVistos:[],...snap.val()};
+  if(snap.exists())userStats={correct:0,wrong:0,byArea:{},seenIds:[],history:[],streak:0,lastStudyDate:'',metaDiaria:10,...snap.val()};
   const cs=await db.ref('cards/'+currentUser.uid).get();
   if(cs.exists())userCards=cs.val();
   db.ref('progresso/'+currentUser.uid).on('value',s=>{
-    if(s.exists()){userStats={correct:0,wrong:0,byArea:{},seenIds:[],history:[],streak:0,lastStudyDate:'',metaDiaria:10,trilhaFase:1,trilhaVistos:[],...s.val()};
+    if(s.exists()){userStats={correct:0,wrong:0,byArea:{},seenIds:[],history:[],streak:0,lastStudyDate:'',metaDiaria:10,...s.val()};
     renderDashboard();updateBadges();}
   });
   db.ref('cards/'+currentUser.uid).on('value',s=>{if(s.exists()){userCards=s.val();renderCards();updateBadges();}});
@@ -2569,55 +2538,6 @@ function finishQuiz(){
   showToast(`Sessão encerrada: ${quizSessao.c}/${quizSessao.t} acertos`);
 }
 
-// ═══════════════════════════════
-// TRILHA
-// ═══════════════════════════════
-function renderTrilha(){
-  const vistos=userStats.trilhaVistos||[];
-  const total=TRILHA.length;
-  const done=vistos.length;
-  const pct=Math.round(done/total*100);
-  const fase=done>=total?2:1;
-
-  document.getElementById('trilha-fase-label').textContent=fase===1?'FASE 1 — PRIMEIRA PASSAGEM':'FASE 2 — QUESTÕES ALEATÓRIAS';
-  document.getElementById('trilha-titulo').textContent=fase===1?'Siga a ordem dos cadernos':'Parabéns! Trilha completa';
-  document.getElementById('trilha-prog-fill').style.width=pct+'%';
-  document.getElementById('trilha-prog-label').textContent=`${done} de ${total} tópicos concluídos`;
-
-  const lista=document.getElementById('trilha-lista');
-  lista.innerHTML='';
-  TRILHA.forEach(t=>{
-    const visto=vistos.includes(t.id);
-    const probLabel=t.prob==='alta'?'🔴 Alta':'🟡 Média';
-    const probClass=t.prob==='alta'?'prob-alta':'prob-media';
-    lista.innerHTML+=`<div class="topico-card${visto?' visto':''}" id="top-${t.id}" onclick="toggleTopico('${t.id}')">
-      <div class="topico-top">
-        <span class="topico-prob ${probClass}">${probLabel}</span>
-        <span class="topico-titulo">${sanitize(t.titulo)}</span>
-        <div class="topico-check${visto?' ok':''}">${visto?'✓':''}</div>
-      </div>
-      <div class="topico-doc">${sanitize(t.doc)}</div>
-      <div class="topico-content">${sanitize(t.conteudo)}
-        <button class="topico-questoes-btn" onclick="event.stopPropagation();marcarVisto('${t.id}');iniciarQuiz('${t.area}')">
-          ${visto?'Praticar questões →':'✅ Marcar como visto e praticar →'}
-        </button>
-      </div>
-    </div>`;
-  });
-}
-
-function toggleTopico(id){
-  const el=document.getElementById('top-'+id);
-  el.classList.toggle('open');
-}
-
-function marcarVisto(id){
-  if(!userStats.trilhaVistos)userStats.trilhaVistos=[];
-  if(!userStats.trilhaVistos.includes(id)){
-    userStats.trilhaVistos.push(id);
-    saveProg();
-    renderTrilha();
-  }
 }
 
 // ═══════════════════════════════
