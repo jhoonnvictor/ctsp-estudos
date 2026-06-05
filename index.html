@@ -164,7 +164,20 @@ input,select,textarea{font-family:inherit;outline:none;}
 .chart-bar.hoje{background:var(--red);}
 .chart-bar-label{font-size:9px;color:var(--text3);font-weight:600;}
 
-/* ═══ QUIZ ═══ */
+/* Modal meta diária */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;display:flex;align-items:flex-end;justify-content:center;}
+.modal-overlay.hidden{display:none;}
+.modal-box{background:white;border-radius:24px 24px 0 0;padding:28px 22px 40px;width:100%;max-width:480px;}
+.modal-title{font-size:18px;font-weight:800;margin-bottom:6px;}
+.modal-sub{font-size:13px;color:var(--text2);margin-bottom:20px;}
+.meta-options{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:20px;}
+.meta-opt{padding:12px 6px;background:var(--bg);border-radius:12px;text-align:center;font-size:15px;font-weight:800;color:var(--text);cursor:pointer;border:2px solid transparent;transition:all .2s;}
+.meta-opt.active{background:var(--red);color:white;border-color:var(--red);}
+.meta-custom-wrap{margin-bottom:20px;}
+.meta-custom-wrap label{font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:6px;}
+.meta-custom-wrap input{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:11px;font-size:16px;font-weight:700;text-align:center;}
+
+
 .quiz-header{background:linear-gradient(135deg,var(--red-dark),var(--red));padding:14px 16px;color:white;}
 .quiz-meta{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
 .quiz-area-tag{background:rgba(255,255,255,.2);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:700;}
@@ -451,9 +464,9 @@ input,select,textarea{font-family:inherit;outline:none;}
           <div class="dash-stat"><div class="dash-stat-v" id="dash-pct">0%</div><div class="dash-stat-l">Acertos</div></div>
           <div class="dash-stat"><div class="dash-stat-v" id="dash-cards">0</div><div class="dash-stat-l">Cards</div></div>
         </div>
-        <div class="dash-meta">
+        <div class="dash-meta" onclick="abrirModalMeta()" style="cursor:pointer;">
           <div class="dash-meta-info">
-            <div class="dash-meta-title">META DIÁRIA</div>
+            <div class="dash-meta-title">META DIÁRIA <span style="font-size:10px;opacity:.6;">✏️ toque p/ ajustar</span></div>
             <div class="dash-meta-bar"><div class="dash-meta-fill" id="dash-meta-fill" style="width:0%"></div></div>
           </div>
           <div class="dash-meta-count" id="dash-meta-count">0/10</div>
@@ -706,6 +719,29 @@ input,select,textarea{font-family:inherit;outline:none;}
   </nav>
 </div>
 
+<!-- Modal Meta Diária -->
+<div class="modal-overlay hidden" id="modal-meta" onclick="fecharModalMeta(event)">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-title">⚡ Meta Diária</div>
+    <div class="modal-sub">Quantas questões você quer responder por dia?</div>
+    <div class="meta-options" id="meta-options">
+      <div class="meta-opt" data-v="5" onclick="selecionarMeta(5)">5</div>
+      <div class="meta-opt" data-v="10" onclick="selecionarMeta(10)">10</div>
+      <div class="meta-opt" data-v="15" onclick="selecionarMeta(15)">15</div>
+      <div class="meta-opt" data-v="20" onclick="selecionarMeta(20)">20</div>
+      <div class="meta-opt" data-v="25" onclick="selecionarMeta(25)">25</div>
+      <div class="meta-opt" data-v="30" onclick="selecionarMeta(30)">30</div>
+      <div class="meta-opt" data-v="40" onclick="selecionarMeta(40)">40</div>
+      <div class="meta-opt" data-v="50" onclick="selecionarMeta(50)">50</div>
+    </div>
+    <div class="meta-custom-wrap">
+      <label>Ou defina um valor personalizado</label>
+      <input type="number" id="meta-custom-input" min="1" max="200" placeholder="Ex: 12" oninput="selecionarMeta(parseInt(this.value)||0)"/>
+    </div>
+    <button class="btn-primary" onclick="salvarMeta()">Salvar meta</button>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 <script>
 // ═══════════════════════════════
@@ -795,7 +831,13 @@ AT2:[
 {id:"a2_05",e:"Sobre técnicas de ataque a incêndio, qual alternativa está CORRETA?",ops:["Ataque direto combina pulso atomizado e pacote d'água.","Ataque indireto/tridimensional: aplica água nas camadas quentes de fumaça quando não é possível combater o foco diretamente.","Ataque combinado: aplica água diretamente na base do foco.","Ataque envolvente: jato compacto de fora mirando teto com incêndio visível.","Ataque transicional: duas ou mais linhas de ataque por diversas frentes."],g:1,doc:"Manual Combate a Incêndio Urbano CBMMG Cap.5",exp:"Ataque indireto/tridimensional = água nas camadas quentes de fumaça, quando não é possível atacar o foco diretamente."},
 {id:"a2_06",e:"Sobre cuidados para evitar danos às mangueiras, qual alternativa está CORRETA?",ops:["Desenrolar periodicamente para evitar ressecamento.","Armazenar em local úmido e exposto ao sol.","Arrastar sobre materiais perfurocortantes ou superfícies quentes.","Deixar veículos passarem por cima, estejam pressurizadas ou não.","Não lavar com água e sabão neutro para garantir integridade."],g:0,doc:"Manual Combate a Incêndio Urbano CBMMG Cap.2",exp:"Desenrolar periodicamente mangueiras pouco usadas evita ressecamento e mantém a flexibilidade."},
 {id:"a2_07",e:"Quais materiais são utilizados para arrombamento e entradas forçadas (Manual CBMMG 2020)?",ops:["Pé de Cabra, malho 10 kg, gadanho, corta-vergalhão.","Pé de Cabra, malho 10 kg, alavanca Halligan, corta-vergalhão.","Croque, malho 10 kg, alavanca Halligan, enxada.","Croque, malho 10 kg, alavanca Halligan, pá de bico.","Pá de bico, malho 10 kg, alavanca Halligan, corta-vergalhão."],g:1,doc:"Manual Combate a Incêndio Urbano CBMMG Cap.3",exp:"Pé de Cabra + malho 10 kg + alavanca Halligan + corta-vergalhão são os 4 materiais padrão."},
-{id:"a2_08",e:"Sobre fenômenos em incêndios, qual definição está CORRETA?",ops:["Slop-over: água no fundo do tanque vaporiza e empurra o líquido, fazendo-o transbordar.","Boil-over: perturbação súbita com vaporização violenta ao combater incêndio com água.","Temperatura de ignição: temperatura mínima para iniciar combustão com fonte DIRETA de calor.","Ponto de fulgor: menor temperatura em que o líquido produz combustão sustentada sem fonte externa.","Ponto de combustão: menor temperatura em que vapores se inflamam momentaneamente."],g:2,doc:"Manual Combate a Incêndio Urbano CBMMG Cap.1",exp:"Temperatura de ignição = mínima para iniciar combustão com fonte DIRETA. Slop-over e Boil-over estão trocados nas demais."}
+{id:"a2_08",e:"Sobre fenômenos em incêndios, qual definição está CORRETA?",ops:["Slop-over: água no fundo do tanque vaporiza e empurra o líquido, fazendo-o transbordar.","Boil-over: perturbação súbita com vaporização violenta ao combater incêndio com água.","Temperatura de ignição: temperatura mínima para iniciar combustão com fonte DIRETA de calor.","Ponto de fulgor: menor temperatura em que o líquido produz combustão sustentada sem fonte externa.","Ponto de combustão: menor temperatura em que vapores se inflamam momentaneamente."],g:2,doc:"Manual Combate a Incêndio Urbano CBMMG Cap.1",exp:"Temperatura de ignição = mínima para iniciar combustão com fonte DIRETA. Slop-over e Boil-over estão trocados nas demais."},
+{id:"a2_09",e:"O processo em que ocorrem comportamentos extremos do fogo como Flashover e Backdraft é a:",ops:["Temperatura de ignição.","Ponto de ignição automática.","Autoignição.","Ponto de Fulgor.","Ponto de combustão."],g:2,doc:"Manual CBMMG Cap.1 — MABOM",exp:"A autoignição merece destaque pois é nesse processo em que ocorrem os comportamentos extremos do fogo como Flashover e Backdraft (MABOM CBMMG p.36)."},
+{id:"b2_09",e:"O aumento da temperatura interfere no limite inferior de explosividade (LIE) de qual forma?",ops:["Reforçando o LIE.","Suprimindo o LIE.","Diminuindo o LIE.","Aumentando o LIE.","Neutralizando o LIE."],g:2,doc:"Manual CBMMG Cap.1 — MABOM",exp:"O aumento da temperatura diminui o Limite Inferior de Explosividade, tornando o ambiente mais propício à explosão com menor concentração do combustível (MABOM CBMMG p.42)."},
+{id:"a2_10",e:"Sobre fenômenos em tanques de líquidos inflamáveis, qual alternativa descreve corretamente o BLEVE?",ops:["Perturbação súbita da superfície ao combater incêndio com água.","Lenta ebulição do líquido inflamável com transbordamento gradual.","Fenômeno perigoso em tanques com gases ou líquidos inflamáveis — explosão do vapor expandido pelo líquido em ebulição.","Ignição súbita de vapores acumulados em espaço confinado.","Vaporização violenta na superfície ao contato com água fria."],g:2,doc:"Manual CBMMG Cap.1 — MABOM",exp:"BLEVE = Boiling Liquid Expanding Vapor Explosion — explosão do vapor expandido pelo líquido em ebulição. Fenômeno em tanques com gases ou líquidos inflamáveis (MABOM CBMMG p.31)."},
+{id:"b2_10",e:"Diferente dos combustíveis sólidos, os materiais líquidos aquecidos não sofrem decomposição química. O fenômeno que ocorre é:",ops:["Alteração de matéria.","Mudança molecular.","Alteração molecular.","Mudança do estado físico.","Mudança de estrutura química."],g:3,doc:"Manual CBMMG Cap.1 — MABOM",exp:"Líquidos passam por mudança do estado físico (não decomposição química), ao contrário dos sólidos que sofrem decomposição de sua estrutura (MABOM CBMMG p.27)."},
+{id:"a2_11",e:"A combustão COMPLETA é aquela em que:",ops:["Os reagentes não são totalmente consumidos e geram monóxido de carbono.","Foram consumidos todos os reagentes e os produtos são gases não inflamáveis como CO₂ e água.","Ocorre apenas em combustíveis gasosos com alta temperatura.","Produz chama visível com concentração de O₂ entre 21% e 14%.","Resulta em fumaça densa devido à queima incompleta dos reagentes."],g:1,doc:"Manual CBMMG Cap.1 — MABOM",exp:"Combustão completa: todos os reagentes são consumidos e os produtos são gases não inflamáveis — dióxido de carbono (CO₂) e água (MABOM CBMMG p.48)."},
+{id:"b2_11",e:"O Slop-Over é definido como:",ops:["Explosão do vapor expandido pelo líquido em ebulição em tanques.","Perturbação súbita da superfície de líquido inflamável ao ser combatido com água, causando vaporização violenta — 1 litro de água vira 1.700 litros de vapor.","Combustão de poeira em suspensão em espaço confinado.","Retorno súbito de chamas ao abrir local com atmosfera pobre em O₂.","Transbordamento lento de óleo em ebulição pelo borde do tanque."],g:1,doc:"Manual CBMMG Cap.1 — MABOM",exp:"Slop-Over: perturbação súbita da superfície ao combater incêndio em líquido inflamável com água. A água vaporiza instantaneamente — 1 litro → 1.700 litros de vapor (MABOM CBMMG)."}
 ],
 AT3:[
 {id:"a3_01",e:"PCR em lactente com 2 socorristas (ITO 23) — proporção CORRETA:",ops:["15:1 — um comprime, outro ventila.","30:2 — os dois em conjunto.","Apenas compressões contínuas sem ventilação.","15:2 — um comprime, outro ventila.","30:2 — um comprime, outro ventila."],g:3,doc:"ITO 23 CBMMG 3ª Ed. 2021",exp:"Lactente com 2 socorristas: 15:2. Com 1 socorrista: 30:2. Em adultos com 2 socorristas: 30:2."},
@@ -957,7 +999,17 @@ AT5B:[
 {id:"a5_13",e:"Conforme o Dec. 57.390/2023, o ato de movimentação que VINCULA o militar a uma organização sem que ele passe a integrar seu efetivo é:",ops:["Inclusão.","Adição.","Efetivação.","Instalação.","Transferência."],g:1,doc:"Decreto 57.390/2023 — Atos de Movimentação",exp:"Adição = vincula sem integrar o efetivo. Diferente de Inclusão (integra o efetivo) e Efetivação (atribui efetivo numericamente)."},
 {id:"b5_13",e:"A IT 03/AODC-GCG estabelece que o IPO deve ser transmitido ao CCOB. Qual é o canal CORRETO previsto na instrução?",ops:["E-mail institucional com cópia para o Cmt OBM.","Rádio operacional em frequência VHF.","WhatsApp ou Telegram — mensagem de texto ao CCOB.","Ligação telefônica gravada para o número 193.","Sistema Ebombeiro WEB exclusivamente."],g:2,doc:"IT 03/AODC-GCG — IPO",exp:"A IT 03 prevê o envio do IPO via WhatsApp ou Telegram em mensagem de texto ao CCOB. O Ebombeiro WEB é usado para o COBOM, não para o IPO."},
 {id:"a5_14",e:"Segundo o Decreto 57.390/2023, quais são as modalidades de transferência dos militares estaduais?",ops:["Antiguidade e necessidade da administração.","Classificação e interesse particular.","Necessidade da administração e interesse do militar.","Antiguidade e interesse particular.","Classificação e antiguidade."],g:1,doc:"Decreto 57.390/2023 — Transferências",exp:"As modalidades de transferência previstas no Dec. 57.390/2023 são: classificação e transferência por interesse particular."},
-{id:"b5_14",e:"Segundo o Decreto 57.390/2023, qual é o período mínimo para praças e oficiais serem transferidos nos OPMs após classificação?",ops:["4 anos para praças e 3 anos para oficiais.","3 anos para praças e 4 anos para oficiais.","2 anos para praças e 4 anos para oficiais.","2 anos para ambos.","3 anos para ambos."],g:2,doc:"Decreto 57.390/2023 — Período Mínimo",exp:"O período mínimo é de 2 anos para praças e 4 anos para oficiais nos OPMs após classificação, conforme Dec. 57.390/2023."}
+{id:"b5_14",e:"Segundo o Decreto 57.390/2023, qual é o período mínimo para praças e oficiais serem transferidos nos OPMs após classificação?",ops:["4 anos para praças e 3 anos para oficiais.","3 anos para praças e 4 anos para oficiais.","2 anos para praças e 4 anos para oficiais.","2 anos para ambos.","3 anos para ambos."],g:2,doc:"Decreto 57.390/2023 — Período Mínimo",exp:"O período mínimo é de 2 anos para praças e 4 anos para oficiais nos OPMs após classificação, conforme Dec. 57.390/2023."},
+{id:"a5_15",e:"Segundo a LC 10.990/1997, são militares na ativa, EXCETO:",ops:["Os servidores militares de carreira.","Os servidores militares temporários.","Os componentes da reserva remunerada, quando convocados.","Os reformados.","Os alunos de órgãos de formação de servidor militar da ativa."],g:3,doc:"LC 10.990/1997 — Militares na Ativa",exp:"Reformados NÃO são militares na ativa. São situação definitiva de inatividade. Os convocados da reserva remunerada são considerados na ativa enquanto convocados."},
+{id:"b5_15",e:"Segundo a LC 10.990/1997, o servidor militar cuja atuação revelar-se incompatível com o cargo será:",ops:["Promovido para cargo de menor responsabilidade.","Imediatamente afastado do cargo.","Submetido a Conselho de Disciplina antes do afastamento.","Transferido compulsoriamente para outro OPM.","Colocado em disponibilidade remunerada."],g:1,doc:"LC 10.990/1997 — Incompatibilidade",exp:"O servidor militar incompatível com o cargo será do mesmo IMEDIATAMENTE afastado (LC 10.990/1997)."},
+{id:"a5_16",e:"Sobre hierarquia e precedência (LC 10.990/1997), em caso de igualdade de posto, têm precedência sobre os demais os Oficiais que possuírem:",ops:["Maior tempo de serviço total.","Curso Superior de Polícia Militar.","Maior número de condecorações.","Maior tempo no posto atual.","Designação para função de maior responsabilidade."],g:1,doc:"LC 10.990/1997 — Precedência",exp:"Em igualdade de posto, os Oficiais que possuírem o Curso Superior de Polícia Militar têm precedência sobre os demais (LC 10.990/1997)."},
+{id:"b5_16",e:"Sobre férias dos servidores militares (LC 10.990/1997), quais assertivas estão CORRETAS? I — Férias de 30 dias para Praças e 60 dias para Oficiais; II — Primeiro período aquisitivo exige 12 meses de exercício; III — Férias podem ser gozadas em até 3 períodos, a requerimento do militar.",ops:["Apenas I e II.","Apenas II e III.","Apenas I e III.","Apenas II.","Todas corretas."],g:1,doc:"LC 10.990/1997 — Férias",exp:"I está ERRADA: férias são de 30 dias para TODOS (praças e oficiais). II e III estão corretas — 12 meses para o primeiro período e possibilidade de 3 frações."},
+{id:"a5_17",e:"Segundo a LC 10.990/1997, a licença para acompanhar cônjuge transferido será concedida:",ops:["Com remuneração e com contagem de tempo de serviço.","Sem remuneração e sem contagem de tempo de serviço.","Com remuneração e sem contagem de tempo de serviço.","Sem remuneração e com contagem de tempo de serviço.","Apenas para servidores com mais de 5 anos de serviço."],g:1,doc:"LC 10.990/1997 — Licença cônjuge",exp:"A licença para acompanhar cônjuge é concedida SEM remuneração e SEM contagem de tempo de serviço (LC 10.990/1997 art. 52, §3º)."},
+{id:"b5_17",e:"Sobre a reforma por limite de idade (LC 10.990/1997), a reforma é aplicada ao atingir os seguintes limites na reserva remunerada:",ops:["80 anos para Oficiais e 70 para Praças.","70 anos para Oficiais e 65 para Praças.","70 anos para Oficiais e Praças.","65 anos para Oficiais e 60 para Praças.","55 anos para Oficiais e 50 para Praças."],g:1,doc:"LC 10.990/1997 — Reforma por idade",exp:"Reforma por limite de idade na reserva: 70 anos para Oficiais e 65 anos para Praças (LC 10.990/1997)."},
+{id:"a5_18",e:"Segundo a LC 10.990/1997, o afastamento por motivo de núpcias ou luto é de até:",ops:["2 dias.","3 dias.","5 dias.","7 dias.","10 dias."],g:2,doc:"LC 10.990/1997 — Afastamentos",exp:"O afastamento por núpcias ou luto é de até 5 dias (LC 10.990/1997)."},
+{id:"b5_18",e:"A remuneração percebida pelos servidores militares em inatividade denomina-se:",ops:["Pensão.","Pecúlio.","Vencimentos.","Subsídio.","Proventos."],g:4,doc:"LC 10.990/1997 — Remuneração na Inatividade",exp:"A remuneração dos militares na inatividade é chamada de PROVENTOS, não 'salário' nem 'vencimentos' (LC 10.990/1997)."},
+{id:"a5_19",e:"Sobre ausência e deserção (LC 10.990/1997), é considerado AUSENTE o servidor militar que se ausentar sem licença por mais de:",ops:["24 horas.","48 horas.","72 horas.","5 dias.","8 dias."],g:0,doc:"LC 10.990/1997 — Ausência",exp:"Ausente = ausência sem licença por mais de 24 horas. Desaparecido = mais de 8 dias em desempenho de serviço. (LC 10.990/1997)"},
+{id:"b5_19",e:"Conforme a LC 10.990/1997, o licenciamento 'ex-officio' se dará, EXCETO:",ops:["Por conclusão de tempo de serviço.","Por conveniência do serviço.","A bem da disciplina.","A pedido do próprio servidor militar.","Por todas as situações acima."],g:3,doc:"LC 10.990/1997 — Licenciamento",exp:"O licenciamento ex-officio ocorre por: conclusão de tempo de serviço, conveniência do serviço ou a bem da disciplina. A pedido do próprio servidor NÃO é 'ex-officio' — este é licenciamento a pedido."}
 ]
 };
 
@@ -1030,6 +1082,69 @@ texto:`SOL-CBMRS (4ª Edição 2022):
   ⚠️ Atenção: são dias CORRIDOS, não úteis!
 • Recurso 2ª instância: 15 dias ÚTEIS após ciência da decisão em 1ª instância
 • Renovação do APPCI: protocolar com mínimo de 30 dias de antecedência`},
+{id:"r_at2_07",area:"AT2",titulo:"Fenômenos Extremos — BLEVE, Slop-Over, Backdraft",prob:"alta",
+texto:`Fenômenos extremos do fogo:
+
+BLEVE (Boiling Liquid Expanding Vapor Explosion):
+• Explosão do vapor expandido pelo líquido em ebulição
+• Ocorre em tanques com GÁS ou LÍQUIDO inflamável
+• 1 litro de líquido GLP = centenas de litros de vapor
+
+Slop-Over:
+• Perturbação súbita da superfície ao combater com ÁGUA
+• 1 litro de água → 1.700 litros de vapor instantaneamente
+• Causa expulsão violenta do líquido inflamável
+
+Backdraft:
+• Retorno de chamas ao abrir ambiente pobre em O₂
+• Indicadores: fumaça escura + vidros quentes + ausência de chamas
+• Ocorre durante processo de AUTOIGNIÇÃO
+
+⚠️ Autoignição = processo onde ocorrem Flashover e Backdraft`},
+
+{id:"r_at5_07",area:"AT5",titulo:"LC 10.990/1997 — Licenças e Afastamentos",prob:"alta",
+texto:`Principais licenças e afastamentos (LC 10.990/1997):
+
+Férias:
+• 30 dias para TODOS (Praças E Oficiais — não confundir!)
+• Primeiro período: exige 12 meses de exercício
+• Podem ser divididas em até 3 períodos (a requerimento)
+• Por necessidade de serviço: acumuláveis até 2 períodos anuais
+
+Afastamentos especiais:
+• Núpcias ou luto: até 5 dias
+• Licença cônjuge transferido: SEM remuneração + SEM tempo de serviço
+• Licença interesse particular: até 2 anos, SEM remuneração
+
+Proventos × Vencimentos:
+• Na ATIVIDADE → vencimentos
+• Na INATIVIDADE → proventos (não 'salário')
+
+Ausência × Desaparecido:
+• Ausente: >24 horas sem licença
+• Desaparecido: >8 dias em desempenho de serviço`},
+
+{id:"r_at5_08",area:"AT5",titulo:"LC 10.990/1997 — Hierarquia, Promoção e Exclusão",prob:"alta",
+texto:`Hierarquia e precedência:
+• Posto = grau hierárquico do Oficial (ato do Governador)
+• Graduação = grau hierárquico da Praça
+• Em igualdade de posto: precedência para quem tem Curso Superior de Polícia Militar
+• Na inatividade: precedência INFERIOR aos da ativa (não superior!)
+
+Reforma por limite de idade na RESERVA:
+• Oficiais: 70 anos
+• Praças: 65 anos
+
+Exclusão e licenciamento ex-officio:
+• Exclusão a bem da disciplina: pena >2 anos transitada em julgado (foro civil ou militar)
+• Licenciamento ex-officio: conclusão de tempo de serviço, conveniência do serviço ou a bem da disciplina
+• A PEDIDO do militar: NÃO é ex-officio
+
+Ausência × Desaparecido × Extraviado:
+• Ausente: >24h sem licença
+• Desaparecido: >8 dias em operação/serviço
+• Extraviado: desaparecido por >30 dias`},
+
 {id:"r_at2_01",area:"AT2",titulo:"Mangueiras — Pressões (CBMMG 2020)",prob:"alta",
 texto:`Mangueiras de combate a incêndio:
 • Diâmetros: 1½" (38mm) e 2½" (63mm)
@@ -2679,6 +2794,51 @@ async function addFlashcard(){
     document.getElementById('fc-f').value='';
     document.getElementById('fc-v').value='';
   }catch(err){showMsg('fc-msg','Erro: '+err.message);}
+}
+
+// ═══════════════════════════════
+// META DIÁRIA PERSONALIZÁVEL
+// ═══════════════════════════════
+let metaTempVal=10;
+
+function abrirModalMeta(){
+  const meta=userStats.metaDiaria||10;
+  metaTempVal=meta;
+  document.getElementById('meta-custom-input').value='';
+  document.querySelectorAll('.meta-opt').forEach(el=>{
+    const v=parseInt(el.dataset.v);
+    el.classList.toggle('active',v===meta);
+  });
+  // se valor não está nas opções, preenche campo custom
+  const presets=[5,10,15,20,25,30,40,50];
+  if(!presets.includes(meta)){
+    document.getElementById('meta-custom-input').value=meta;
+    document.querySelectorAll('.meta-opt').forEach(el=>el.classList.remove('active'));
+  }
+  document.getElementById('modal-meta').classList.remove('hidden');
+}
+
+function fecharModalMeta(e){
+  if(!e||e.target===document.getElementById('modal-meta'))
+    document.getElementById('modal-meta').classList.add('hidden');
+}
+
+function selecionarMeta(v){
+  if(!v||v<1)return;
+  metaTempVal=v;
+  document.querySelectorAll('.meta-opt').forEach(el=>{
+    el.classList.toggle('active',parseInt(el.dataset.v)===v);
+  });
+}
+
+async function salvarMeta(){
+  const v=metaTempVal;
+  if(!v||v<1||v>200){showToast('Meta inválida (1–200).');return;}
+  userStats.metaDiaria=v;
+  await saveProg();
+  renderDashboard();
+  document.getElementById('modal-meta').classList.add('hidden');
+  showToast('Meta atualizada: '+v+' questões/dia ✅');
 }
 
 // ═══════════════════════════════
