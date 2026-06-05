@@ -1859,8 +1859,14 @@ function renderAreaList(){
 
 function iniciarQuiz(area){
   quizArea=area;quizModoErro=false;
+  const agora=Date.now();
+  const sm2=userStats.questoesSM2||{};
   const qs=Object.values(allQuestoes).filter(q=>area==='TODAS'||q.area===area);
-  quizQueue=shuffle(qs).slice(0,20);
+  // Priorizar questões vencidas (next <= agora) ou nunca vistas
+  const vencidas=qs.filter(q=>!sm2[q.id]||sm2[q.id].next<=agora);
+  const restantes=qs.filter(q=>sm2[q.id]&&sm2[q.id].next>agora);
+  const pool=[...shuffle(vencidas),...shuffle(restantes)];
+  quizQueue=pool.slice(0,20);
   quizIdx=0;quizSessao={c:0,t:0};
   document.getElementById('quiz-home-view').classList.add('hidden');
   document.getElementById('quiz-running-view').classList.remove('hidden');
@@ -1973,6 +1979,13 @@ async function responderQuiz(idx){
   if(acertou){const idx2=userStats.seenIds.indexOf(erroKey);if(idx2>-1)userStats.seenIds.splice(idx2,1);}
 
   registrarAtividade();
+
+  // SM-2 por questão
+  if(!userStats.questoesSM2)userStats.questoesSM2={};
+  const cardAtual=userStats.questoesSM2[q.id]||{interval:1,reps:0,ef:2.5};
+  const qSM2=acertou?5:1;
+  userStats.questoesSM2[q.id]=sm2Update(cardAtual,qSM2);
+
   saveProg();
 
   // Feedback
