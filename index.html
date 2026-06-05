@@ -558,6 +558,11 @@ input,select,textarea{font-family:inherit;outline:none;}
             <div class="quick-btn-title">Simulado IA</div>
             <div class="quick-btn-sub">15 questões</div>
           </div>
+          <div class="quick-btn" onclick="iniciarInterleaving()">
+            <div class="quick-btn-icon">🔀</div>
+            <div class="quick-btn-title">Intercalado</div>
+            <div class="quick-btn-sub">Áreas alternadas</div>
+          </div>
         </div>
         <!-- Progresso por área -->
         <div class="sec-title">Desempenho por área</div>
@@ -2219,6 +2224,56 @@ function iniciarSimuladoInteligente(){
   document.getElementById('quiz-home-view').classList.add('hidden');
   document.getElementById('quiz-running-view').classList.remove('hidden');
   document.getElementById('quiz-area-tag').textContent='🎯 Simulado IA';
+  navTo('quiz');renderQuizQ();
+}
+
+function iniciarInterleaving(){
+  // Intercalação inteligente: alterna pares de áreas relacionadas
+  // AT1↔AT3 (legislação + APH), AT2↔AT4 (técnico + institucional), AT5 intercalada
+  const pares=[
+    ['AT1','AT3'],
+    ['AT2','AT4'],
+    ['AT1','AT5'],
+    ['AT3','AT2'],
+    ['AT4','AT1']
+  ];
+  const sm2=userStats.questoesSM2||{};
+  const agora=Date.now();
+  const queue=[];
+  // Pegar 2-3 questões de cada área do par, priorizando vencidas pelo SM2
+  pares.forEach(([a1,a2])=>{
+    [a1,a2].forEach(area=>{
+      const qs=Object.values(allQuestoes).filter(q=>q.area===area);
+      const vencidas=qs.filter(q=>!sm2[q.id]||sm2[q.id].next<=agora);
+      const restantes=qs.filter(q=>sm2[q.id]&&sm2[q.id].next>agora);
+      const pool=[...shuffle(vencidas),...shuffle(restantes)];
+      queue.push(...pool.slice(0,2));
+    });
+  });
+  // Embaralhar mantendo a alternância: pegar 1 de cada área em sequência
+  const byArea={};
+  Object.keys(AI).forEach(k=>{
+    byArea[k]=shuffle(Object.values(allQuestoes).filter(q=>q.area===k));
+  });
+  const areas=Object.keys(AI);
+  const final=[];
+  const perArea=4; // 4 de cada = 20 questões
+  for(let i=0;i<perArea;i++){
+    areas.forEach(area=>{
+      const qs=Object.values(allQuestoes).filter(q=>q.area===area);
+      const vencidas=qs.filter(q=>!sm2[q.id]||sm2[q.id].next<=agora);
+      const restantes=qs.filter(q=>sm2[q.id]&&sm2[q.id].next>agora);
+      const pool=[...shuffle(vencidas),...shuffle(restantes)];
+      if(pool[i])final.push(pool[i]);
+    });
+  }
+  // Remover duplicatas
+  const seen=new Set();
+  quizQueue=final.filter(q=>{if(seen.has(q.id))return false;seen.add(q.id);return true;}).slice(0,20);
+  quizArea='INTERLEAVING';quizModoErro=false;quizIdx=0;quizSessao={c:0,t:0};
+  document.getElementById('quiz-home-view').classList.add('hidden');
+  document.getElementById('quiz-running-view').classList.remove('hidden');
+  document.getElementById('quiz-area-tag').textContent='🔀 Intercalado';
   navTo('quiz');renderQuizQ();
 }
 
