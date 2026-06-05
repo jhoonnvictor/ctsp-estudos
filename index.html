@@ -154,6 +154,11 @@ input,select,textarea{font-family:inherit;outline:none;}
 /* Gráfico mensal simples */
 .chart-wrap{background:rgba(255,255,255,.95);border-radius:14px;padding:14px;box-shadow:var(--shadow);margin-bottom:14px;}
 .chart-bars{display:flex;align-items:flex-end;gap:4px;height:60px;margin-top:10px;}
+.area-evo-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.area-evo-label{font-size:11px;font-weight:700;min-width:32px;color:var(--text2);}
+.area-evo-bar-wrap{flex:1;background:#F0F0F0;border-radius:6px;height:18px;overflow:hidden;}
+.area-evo-bar{height:100%;border-radius:6px;transition:width .4s;display:flex;align-items:center;justify-content:flex-end;padding-right:6px;}
+.area-evo-pct{font-size:10px;font-weight:800;color:white;}
 .chart-bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;}
 .chart-bar{width:100%;background:var(--red-light);border-radius:4px 4px 0 0;transition:height .4s ease;min-height:4px;}
 .chart-bar.hoje{background:var(--red);}
@@ -176,7 +181,7 @@ input,select,textarea{font-family:inherit;outline:none;}
 .btn-revelar{width:100%;padding:14px;background:var(--red);color:white;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:10px;transition:opacity .2s;}
 .btn-revelar:active{opacity:.8;}
 .quiz-opt{background:white;border:2px solid var(--border);border-radius:12px;padding:12px 14px;font-size:14px;color:var(--text);text-align:left;transition:all .2s;display:flex;align-items:flex-start;gap:10px;line-height:1.4;}
-.quiz-opt-letter{width:22px;height:22px;border-radius:50%;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;margin-top:1px;}
+.quiz-opt-letter{width:22px;height:22px;border-radius:50%;background:var(--red);color:white;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;margin-top:1px;}
 .quiz-opt:active{transform:scale(.98);}
 .quiz-opt.selected{border-color:var(--red);background:var(--red-light);}
 .quiz-opt.correta{border-color:var(--green);background:var(--green-light);}
@@ -575,6 +580,11 @@ input,select,textarea{font-family:inherit;outline:none;}
             <span style="font-size:12px;font-weight:700;" id="chart-total-week">0 essa semana</span>
           </div>
           <div class="chart-bars" id="chart-bars"></div>
+        </div>
+        <!-- Gráfico evolução por área -->
+        <div class="sec-title">Evolução por área</div>
+        <div class="chart-wrap" id="area-evolution-wrap">
+          <div id="area-evolution"></div>
         </div>
       </div>
     </div>
@@ -2117,6 +2127,36 @@ function renderChart(){
   }
   bars.innerHTML=html;
   document.getElementById('chart-total-week').textContent=totalSemana+' essa semana';
+  renderAreaEvolution();
+}
+
+function renderAreaEvolution(){
+  const el=document.getElementById('area-evolution');
+  if(!el)return;
+  const ba=userStats.byArea||{};
+  const cores={AT1:'#C0392B',AT2:'#E67E22',AT3:'#2980B9',AT4:'#8E44AD',AT5:'#27AE60'};
+  let html='';
+  Object.entries(AI).forEach(([k,v])=>{
+    const c=(ba[k]?.correct||0),w=(ba[k]?.wrong||0),t=c+w;
+    if(t===0){
+      html+=`<div class="area-evo-row">
+        <div class="area-evo-label">${k}</div>
+        <div class="area-evo-bar-wrap"><div class="area-evo-bar" style="width:0%;background:${cores[k]}"></div></div>
+        <span style="font-size:11px;color:var(--text2);min-width:36px;text-align:right;">—</span>
+      </div>`;
+    } else {
+      const pct=Math.round(c/t*100);
+      const cor=pct>=80?'#27AE60':pct>=60?'#E67E22':'#C0392B';
+      html+=`<div class="area-evo-row">
+        <div class="area-evo-label">${k}</div>
+        <div class="area-evo-bar-wrap"><div class="area-evo-bar" style="width:${pct}%;background:${cor}">
+          ${pct>=20?`<span class="area-evo-pct">${pct}%</span>`:''}
+        </div></div>
+        <span style="font-size:11px;font-weight:700;color:${cor};min-width:36px;text-align:right;">${pct>=20?'':pct+'%'}</span>
+      </div>`;
+    }
+  });
+  el.innerHTML=html;
 }
 
 function updateBadges(){
@@ -2203,7 +2243,14 @@ function iniciarEstudoRapido(){
 function iniciarModoErro(){
   const erradas=Object.values(allQuestoes).filter(q=>(userStats.seenIds||[]).includes(q.id+'_E'));
   if(!erradas.length){showToast('Sem erros para revisar!');return;}
-  quizQueue=shuffle(erradas);quizArea='ERRO';quizModoErro=true;quizIdx=0;quizSessao={c:0,t:0};
+  // Ordenar por erro mais recente primeiro
+  const hist=userStats.erroHistorico||{};
+  erradas.sort((a,b)=>{
+    const la=hist[a.id]?.last||0;
+    const lb=hist[b.id]?.last||0;
+    return lb-la;
+  });
+  quizQueue=erradas;quizArea='ERRO';quizModoErro=true;quizIdx=0;quizSessao={c:0,t:0};
   document.getElementById('quiz-home-view').classList.add('hidden');
   document.getElementById('quiz-running-view').classList.remove('hidden');
   document.getElementById('quiz-area-tag').textContent='🔁 Modo Erro';
@@ -2289,8 +2336,17 @@ function renderQuizQ(){
   document.getElementById('quiz-score-v').textContent=quizSessao.c+'/'+quizSessao.t;
   const opts=document.getElementById('quiz-opts');
   const letras=['A','B','C','D','E'];
-  opts.innerHTML=(q.ops||[]).map((op,i)=>`<button class="quiz-opt" onclick="responderQuiz(${i})">
-    <span class="quiz-opt-letter">${letras[i]}</span><span>${sanitize(op)}</span>
+
+  // Embaralhar alternativas mantendo rastreio do gabarito
+  const indices=(q.ops||[]).map((_,i)=>i);
+  for(let i=indices.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[indices[i],indices[j]]=[indices[j],indices[i]];}
+  const novoGabarito=indices.indexOf(q.g);
+  // Salvar gabarito embaralhado para uso em responderQuiz
+  quizQueue[quizIdx]._shuffledOps=indices.map(i=>q.ops[i]);
+  quizQueue[quizIdx]._shuffledG=novoGabarito;
+
+  opts.innerHTML=indices.map((origIdx,i)=>`<button class="quiz-opt" onclick="responderQuiz(${i})">
+    <span class="quiz-opt-letter">${letras[i]}</span><span>${sanitize(q.ops[origIdx])}</span>
   </button>`).join('');
 
   // Ocultar alternativas — testing effect
@@ -2309,7 +2365,7 @@ async function responderQuiz(idx){
   if(quizAnswered)return;
   quizAnswered=true;
   const q=quizQueue[quizIdx];
-  const correta=q.g;
+  const correta=q._shuffledG!==undefined?q._shuffledG:q.g;
   const acertou=idx===correta;
   const opts=document.querySelectorAll('.quiz-opt');
   opts.forEach((o,i)=>{
@@ -2334,6 +2390,18 @@ async function responderQuiz(idx){
   if(!userStats.seenIds.includes(seenKey))userStats.seenIds.push(seenKey);
   if(acertou){const idx2=userStats.seenIds.indexOf(erroKey);if(idx2>-1)userStats.seenIds.splice(idx2,1);}
 
+  // Histórico de erros por questão
+  if(!acertou){
+    if(!userStats.erroHistorico)userStats.erroHistorico={};
+    const h=userStats.erroHistorico[q.id]||{count:0,last:0};
+    userStats.erroHistorico[q.id]={count:h.count+1,last:Date.now()};
+  } else {
+    // Acertou: zerar histórico de erro dessa questão
+    if(userStats.erroHistorico&&userStats.erroHistorico[q.id]){
+      delete userStats.erroHistorico[q.id];
+    }
+  }
+
   registrarAtividade();
 
   // SM-2 por questão
@@ -2349,7 +2417,9 @@ async function responderQuiz(idx){
   fb.classList.add('show');
   document.getElementById('quiz-fb-title').textContent=acertou?'✅ Correto!':'❌ Incorreto';
   document.getElementById('quiz-fb-title').style.color=acertou?'var(--green)':'var(--red)';
-  document.getElementById('quiz-fb-text').textContent=sanitize(q.exp||'');
+  const contErros=!acertou&&userStats.erroHistorico?.[q.id]?.count||0;
+  const sufixoErro=!acertou&&contErros>1?` (${contErros}ª vez que erra esta questão)`:'';
+  document.getElementById('quiz-fb-text').textContent=sanitize(q.exp||'')+sufixoErro;
 
   // Dica IA para erros
   if(!acertou){
