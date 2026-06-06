@@ -1744,14 +1744,19 @@ auth.onAuthStateChanged(async user=>{
   if(!user){currentUser=null;userProfile=null;showAuth();return;}
   currentUser=user;
   const isAdmEmail=user.email===ADMIN_EMAIL;
-  const snap=await db.ref('usuarios/'+user.uid).get();
-  if(!snap.exists()){
-    await db.ref('usuarios/'+user.uid).set({nome:user.email,email:user.email,admin:isAdmEmail,aprovado:isAdmEmail,criadoEm:Date.now()});
-  } else if(isAdmEmail&&!snap.val().admin){
-    await db.ref('usuarios/'+user.uid).update({admin:true,aprovado:true});
+  try{
+    const snap=await withTimeout(db.ref('usuarios/'+user.uid).get());
+    if(!snap.exists()){
+      await withTimeout(db.ref('usuarios/'+user.uid).set({nome:user.email,email:user.email,admin:isAdmEmail,aprovado:isAdmEmail,criadoEm:Date.now()}));
+    } else if(isAdmEmail&&!snap.val().admin){
+      await withTimeout(db.ref('usuarios/'+user.uid).update({admin:true,aprovado:true}));
+    }
+    const freshSnap=await withTimeout(db.ref('usuarios/'+user.uid).get());
+    userProfile={nome:user.email,email:user.email,admin:isAdmEmail,aprovado:isAdmEmail,...(freshSnap.val()||{})};
+  }catch(e){
+    console.warn('Auth profile fallback:',e.message);
+    userProfile={nome:user.email,email:user.email,admin:isAdmEmail,aprovado:isAdmEmail};
   }
-  const freshSnap=await db.ref('usuarios/'+user.uid).get();
-  userProfile={nome:user.email,email:user.email,admin:isAdmEmail,aprovado:isAdmEmail,...(freshSnap.val()||{})};
   if(!userProfile.aprovado&&!isAdmEmail){showAuth('pending');return;}
   await initApp();
 });
@@ -1796,10 +1801,12 @@ async function initApp(){
 // DATA LOAD
 // ═══════════════════════════════
 async function loadUserData(){
-  const snap=await db.ref('progresso/'+currentUser.uid).get();
-  if(snap.exists())userStats={correct:0,wrong:0,byArea:{},seenIds:[],history:[],streak:0,lastStudyDate:'',metaDiaria:10,...snap.val()};
-  const cs=await db.ref('cards/'+currentUser.uid).get();
-  if(cs.exists())userCards=cs.val();
+  try{
+    const snap=await withTimeout(db.ref('progresso/'+currentUser.uid).get());
+    if(snap.exists())userStats={correct:0,wrong:0,byArea:{},seenIds:[],history:[],streak:0,lastStudyDate:'',metaDiaria:10,...snap.val()};
+    const cs=await withTimeout(db.ref('cards/'+currentUser.uid).get());
+    if(cs.exists())userCards=cs.val();
+  }catch(e){console.warn('loadUserData fallback:',e.message);}
   db.ref('progresso/'+currentUser.uid).on('value',s=>{
     if(s.exists()){userStats={correct:0,wrong:0,byArea:{},seenIds:[],history:[],streak:0,lastStudyDate:'',metaDiaria:10,...s.val()};
     renderDashboard();updateBadges();}
@@ -1810,43 +1817,47 @@ async function loadUserData(){
 async function saveProg(){await db.ref('progresso/'+currentUser.uid).set(userStats);}
 async function saveCard(id,data){userCards[id]=data;await db.ref('cards/'+currentUser.uid+'/'+id).set(data);}
 
+// Timeout wrapper para chamadas Firebase (evita travamento por App Check no iOS)
+function withTimeout(promise,ms=6000){
+  return Promise.race([promise,new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),ms))]);
+}
+
 async function loadQuestoes(){
-  try{
-    const snap=await db.ref('questoes').get();
-    if(snap.exists()){allQuestoes=snap.val();}
-    else{
-      const toSave={};
-      Object.entries(QI).forEach(([area,qs])=>{
-        const areaKey=area.replace(/B$/,'');
-        qs.forEach(q=>{toSave[q.id]={...q,area:areaKey};});
-      });
-      try{await db.ref('questoes').set(toSave);}catch(e){console.warn('Seed questoes sem permissão:',e.code);}
-      allQuestoes=toSave;
-    }
-  }catch(e){
-    console.warn('loadQuestoes usando banco local:',e);
+  const localFallback=()=>{
     const toSave={};
     Object.entries(QI).forEach(([area,qs])=>{
       const areaKey=area.replace(/B$/,'');
       qs.forEach(q=>{toSave[q.id]={...q,area:areaKey};});
     });
-    allQuestoes=toSave;
+    return toSave;
+  };
+  try{
+    const snap=await withTimeout(db.ref('questoes').get());
+    if(snap.exists()){allQuestoes=snap.val();}
+    else{
+      const toSave=localFallback();
+      try{await withTimeout(db.ref('questoes').set(toSave));}catch(e){console.warn('Seed questoes:',e.message);}
+      allQuestoes=toSave;
+    }
+  }catch(e){
+    console.warn('loadQuestoes usando banco local:',e.message);
+    allQuestoes=localFallback();
   }
 }
 
 async function loadFlashcards(){
+  const localFallback=()=>{const t={};FCI.forEach(fc=>{t[fc.id]=fc;});return t;};
   try{
-    const snap=await db.ref('flashcards').get();
+    const snap=await withTimeout(db.ref('flashcards').get());
     if(snap.exists()){allFlashcards=snap.val();}
     else{
-      const toSave={};FCI.forEach(fc=>{toSave[fc.id]=fc;});
-      try{await db.ref('flashcards').set(toSave);}catch(e){console.warn('Seed flashcards sem permissão:',e.code);}
+      const toSave=localFallback();
+      try{await withTimeout(db.ref('flashcards').set(toSave));}catch(e){console.warn('Seed flashcards:',e.message);}
       allFlashcards=toSave;
     }
   }catch(e){
-    console.warn('loadFlashcards usando banco local:',e);
-    const toSave={};FCI.forEach(fc=>{toSave[fc.id]=fc;});
-    allFlashcards=toSave;
+    console.warn('loadFlashcards usando banco local:',e.message);
+    allFlashcards=localFallback();
   }
 }
 
@@ -1923,7 +1934,7 @@ function renderDashboard(){
     const ba=userStats.byArea||{};
     const c=(ba[k]?.correct||0),w=(ba[k]?.wrong||0),t=c+w;
     const p=t>0?Math.round(c/t*100):0;
-    grid.innerHTML+=`<div class="area-card">
+    grid.innerHTML+=`<div class="area-card" onclick="iniciarQuiz('${k}')" style="cursor:pointer">
       <div class="area-card-top">
         <div class="area-icon" style="background:${a.bg}">${a.icon}</div>
         <div><div class="area-card-name">${a.nome.split('—')[1]?.trim()||a.nome}</div><div class="area-card-code">${k}</div></div>
@@ -2729,7 +2740,7 @@ async function loadAdminUsers(){
   const el=document.getElementById('admin-users-list');
   el.innerHTML='<p style="color:var(--text2);font-size:13px">Carregando...</p>';
   try{
-    const snap=await db.ref('usuarios').get();
+    const snap=await withTimeout(db.ref('usuarios').get(),8000);
     if(!snap.exists()||!snap.val()){el.innerHTML='<p style="color:var(--text2);font-size:13px">Nenhum usuário cadastrado.</p>';return;}
     const users=snap.val();
     let html='';
