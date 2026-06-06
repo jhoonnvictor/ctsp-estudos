@@ -6,7 +6,9 @@
 <meta name="mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-<meta name="theme-color" content="#C0392B"/>
+<meta name="apple-mobile-web-app-title" content="CTSP"/>
+<meta name="theme-color" content="#00003B"/>
+<link rel="apple-touch-icon" href="img/logo.png"/>
 <title>Bombeiro CTSP</title>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' https://*.googleapis.com https://*.gstatic.com https://*.firebase.com https://*.firebaseio.com https://*.firebaseapp.com https://ctsp-anthropic-proxy.jvictor-projetos-ti.workers.dev https://www.recaptcha.net https://recaptcha.net https://www.google.com https://www.gstatic.com wss://*.firebaseio.com data: blob:;">
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -34,8 +36,33 @@ input,select,textarea{font-family:inherit;outline:none;}
 
 /* LOADING */
 #loading{position:fixed;inset:0;background:var(--red);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;gap:16px;}
-#loading img{width:90px;height:90px;border-radius:50%;background:white;padding:8px;object-fit:contain;animation:pulse 1.5s ease-in-out infinite;}
-#loading p{color:white;font-size:13px;font-weight:700;letter-spacing:.08em;opacity:.85;}
+#loading img{width:230px;height:230px;border-radius:50%;background:white;padding:8px;object-fit:contain;animation:pulse 1.5s ease-in-out infinite;transition:opacity .6s ease,transform .6s ease;}
+#loading img.fade-out{opacity:0;transform:scale(.85);}
+#loading p{color:white;font-size:13px;font-weight:700;letter-spacing:.08em;opacity:.85;transition:opacity .4s ease;}
+#loading p.fade-out{opacity:0;}
+#loading .welcome-text{position:absolute;color:white;font-size:20px;font-weight:800;letter-spacing:.02em;text-align:center;padding:0 32px;opacity:0;transform:translateY(10px);transition:opacity .5s ease,transform .5s ease;line-height:1.4;}
+#loading .welcome-text.show{opacity:1;transform:translateY(0);}
+
+/* SPLASH SCREEN pós-login */
+#splash-screen{position:fixed;inset:0;background:var(--red);z-index:9990;display:none;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:24px;}
+#splash-screen.active{display:flex;}
+#splash-screen.fade-out{opacity:0;transition:opacity .4s ease;}
+.splash-dias{font-size:72px;font-weight:800;color:white;line-height:1;}
+.splash-dias-label{font-size:14px;color:rgba(255,255,255,.8);font-weight:600;letter-spacing:.06em;text-transform:uppercase;margin-top:-8px;}
+.splash-dominio-wrap{width:100%;max-width:360px;}
+.splash-sec{font-size:11px;font-weight:800;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;}
+.splash-area-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.splash-area-label{font-size:12px;font-weight:700;color:white;min-width:34px;}
+.splash-area-bar-wrap{flex:1;background:rgba(255,255,255,.2);border-radius:6px;height:16px;overflow:hidden;}
+.splash-area-bar{height:100%;border-radius:6px;transition:width .8s ease;display:flex;align-items:center;justify-content:flex-end;padding-right:5px;}
+.splash-area-pct{font-size:10px;font-weight:800;color:white;}
+.splash-sugestao{background:rgba(255,255,255,.15);border-radius:16px;padding:14px 16px;width:100%;max-width:360px;border:1px solid rgba(255,255,255,.25);}
+.splash-sug-label{font-size:10px;font-weight:800;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;}
+.splash-sug-area{font-size:16px;font-weight:800;color:white;margin-bottom:4px;}
+.splash-sug-motivo{font-size:12px;color:rgba(255,255,255,.8);line-height:1.4;}
+.splash-btn{background:white;color:var(--red);border-radius:14px;padding:14px 32px;font-size:15px;font-weight:800;margin-top:8px;border:none;cursor:pointer;}
+@keyframes countUp{from{opacity:0;transform:scale(.5);}to{opacity:1;transform:scale(1);}}
+.splash-dias.animate{animation:countUp .5s cubic-bezier(.34,1.56,.64,1) forwards;}
 @keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.06);}}
 
 /* AUTH */
@@ -54,7 +81,7 @@ input,select,textarea{font-family:inherit;outline:none;}
 .auth-tab.active{background:var(--red);color:white;box-shadow:0 2px 8px rgba(192,57,43,.3);}
 .field{margin-bottom:14px;}
 .field label{display:block;font-size:11px;font-weight:700;color:var(--text2);margin-bottom:5px;text-transform:uppercase;letter-spacing:.05em;}
-.field input,.field select,.field textarea{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:11px;font-size:15px;color:var(--text);background:var(--bg);transition:border-color .2s;}
+.field input,.field select,.field textarea{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:11px;font-size:15px;color:var(--text);background:white;transition:border-color .2s;}
 .field input:focus,.field select:focus{border-color:var(--red);background:white;}
 .btn-primary{width:100%;padding:14px;background:var(--red);color:white;border-radius:12px;font-size:15px;font-weight:700;letter-spacing:.02em;transition:all .2s;box-shadow:0 4px 16px rgba(192,57,43,.3);}
 .btn-primary:active{transform:scale(.98);}
@@ -68,7 +95,7 @@ input,select,textarea{font-family:inherit;outline:none;}
 #app.active{display:flex;}
 
 /* HEADER */
-.app-header{height:var(--header-h);background:var(--red);display:flex;align-items:center;padding:0 14px;gap:10px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.18);}
+.app-header{height:calc(var(--header-h) + env(safe-area-inset-top));background:var(--red);display:flex;align-items:center;padding:env(safe-area-inset-top) 14px 0;gap:10px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.18);}
 .header-logo{width:34px;height:34px;border-radius:50%;background:white;padding:3px;object-fit:contain;flex-shrink:0;}
 .header-titles{flex:1;}
 .header-title{color:white;font-size:15px;font-weight:800;line-height:1.1;}
@@ -367,6 +394,47 @@ input,select,textarea{font-family:inherit;outline:none;}
 .hidden{display:none!important;}
 .mt8{margin-top:8px;}
 .mt14{margin-top:14px;}
+
+/* ═══ CONFIGURAÇÕES MODAL ═══ */
+.config-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border);}
+.config-row:last-child{border-bottom:none;}
+.config-label{font-size:14px;font-weight:600;color:var(--text);}
+.config-sub{font-size:11px;color:var(--text2);margin-top:2px;}
+.config-input{border:1.5px solid var(--border);border-radius:10px;padding:8px 12px;font-size:14px;font-weight:700;color:var(--text);background:white;width:160px;text-align:center;}
+.config-input:focus{border-color:var(--red);}
+.btn-config-reset{background:var(--red-light);color:var(--red);border-radius:10px;padding:8px 14px;font-size:12px;font-weight:700;}
+.btn-config-save{background:var(--red);color:white;border-radius:10px;padding:8px 14px;font-size:12px;font-weight:700;}
+
+/* ═══ ÍNDICE DE DOMÍNIO ═══ */
+.dominio-card{background:white;border-radius:16px;padding:16px;box-shadow:var(--shadow);margin-bottom:14px;}
+.dominio-titulo{font-size:13px;font-weight:800;color:var(--text);margin-bottom:4px;}
+.dominio-geral-wrap{display:flex;align-items:center;gap:14px;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--border);}
+.dominio-geral-ring{flex-shrink:0;}
+.dominio-geral-info{flex:1;}
+.dominio-geral-pct{font-size:28px;font-weight:800;color:var(--text);line-height:1;}
+.dominio-geral-label{font-size:11px;color:var(--text2);margin-top:2px;}
+.dominio-area-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.dominio-area-icon{font-size:14px;flex-shrink:0;}
+.dominio-area-info{flex:1;}
+.dominio-area-name{font-size:11px;font-weight:700;color:var(--text);}
+.dominio-area-bar-wrap{height:8px;background:var(--border);border-radius:4px;overflow:hidden;margin-top:3px;}
+.dominio-area-bar{height:100%;border-radius:4px;transition:width .4s;}
+.dominio-area-pct{font-size:12px;font-weight:800;min-width:36px;text-align:right;}
+
+/* Cards de objetivos/semana */
+.obj-card{background:white;border-radius:14px;padding:14px;box-shadow:var(--shadow);margin-bottom:10px;border-left:4px solid var(--red);}
+.obj-card-label{font-size:10px;font-weight:800;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;}
+.obj-card-area{font-size:15px;font-weight:800;color:var(--text);}
+.obj-card-motivo{font-size:12px;color:var(--text2);margin-top:4px;line-height:1.4;}
+.obj-card-pct{font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;margin-top:6px;display:inline-block;}
+
+/* Botão reload discreto */
+.btn-reload{position:absolute;top:14px;right:14px;background:rgba(255,255,255,.15);color:rgba(255,255,255,.7);border-radius:8px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:14px;border:none;cursor:pointer;transition:opacity .2s;}
+.btn-reload:active{opacity:.6;}
+
+/* Botão voltar quiz */
+.btn-voltar-quiz{background:rgba(255,255,255,.2);color:white;border-radius:8px;padding:5px 10px;font-size:12px;font-weight:700;display:flex;align-items:center;gap:4px;}
+.btn-voltar-quiz:active{opacity:.7;}
 </style>
 </head>
 <body>
@@ -374,7 +442,24 @@ input,select,textarea{font-family:inherit;outline:none;}
 <!-- LOADING -->
 <div id="loading">
   <img src="img/logo.png" onerror="this.style.display='none'" alt="CBMRS">
-  <p>BOMBEIRO CTSP 2026</p>
+  <div class="welcome-text" id="welcome-text">Bem-vindo,<br>vamos iniciar os estudos?</div>
+  <p id="loading-sub">BOMBEIRO CTSP 2026</p>
+</div>
+
+<!-- SPLASH SCREEN pós-login -->
+<div id="splash-screen">
+  <div class="splash-dias animate" id="splash-dias">0</div>
+  <div class="splash-dias-label">dias de estudo</div>
+  <div class="splash-dominio-wrap">
+    <div class="splash-sec">Domínio por área</div>
+    <div id="splash-areas"></div>
+  </div>
+  <div class="splash-sugestao" id="splash-sugestao">
+    <div class="splash-sug-label">🎯 Objetivo desta semana</div>
+    <div class="splash-sug-area" id="splash-sug-area">—</div>
+    <div class="splash-sug-motivo" id="splash-sug-motivo"></div>
+  </div>
+  <button class="splash-btn" onclick="fecharSplash()">Iniciar estudos →</button>
 </div>
 
 <!-- AUTH -->
@@ -429,7 +514,8 @@ input,select,textarea{font-family:inherit;outline:none;}
     </div>
     <div class="header-right">
       <div class="streak-badge" id="hdr-streak">🔥 0</div>
-      <div class="header-name" id="hdr-nome"></div>
+      <div class="header-name" id="hdr-nome" onclick="abrirModalConfig()" style="cursor:pointer;text-decoration:underline dotted;text-underline-offset:2px;" title="Toque para configurar"></div>
+      <button class="btn-logout" onclick="abrirModalConfig()" style="background:rgba(255,255,255,.18);margin-right:4px;">⚙️</button>
       <button class="btn-logout" onclick="doLogout()">Sair</button>
     </div>
   </header>
@@ -439,7 +525,8 @@ input,select,textarea{font-family:inherit;outline:none;}
 
     <!-- INÍCIO -->
     <div class="screen active" id="screen-inicio">
-      <div class="dash-hero">
+      <div class="dash-hero" style="position:relative;">
+        <button class="btn-reload" onclick="location.reload()" title="Recarregar">↺</button>
         <div class="dash-top">
           <div>
             <div class="dash-greeting">Olá,</div>
@@ -515,6 +602,29 @@ input,select,textarea{font-family:inherit;outline:none;}
         <div class="chart-wrap" id="area-evolution-wrap">
           <div id="area-evolution"></div>
         </div>
+        <!-- Índice de Domínio Real -->
+        <div class="sec-title">Índice de domínio real</div>
+        <div class="dominio-card" id="dominio-card">
+          <div class="dominio-geral-wrap">
+            <div class="dominio-geral-ring">
+              <div class="ring-container" style="width:64px;height:64px;">
+                <svg class="ring-svg" width="64" height="64" viewBox="0 0 64 64">
+                  <circle class="ring-bg" cx="32" cy="32" r="27"/>
+                  <circle class="ring-fg" id="dominio-ring" cx="32" cy="32" r="27" stroke-dasharray="169.6" stroke-dashoffset="169.6" stroke="var(--blue)"/>
+                </svg>
+                <div class="ring-center"><div class="ring-pct" id="dominio-geral-pct" style="color:var(--blue)">0%</div></div>
+              </div>
+            </div>
+            <div class="dominio-geral-info">
+              <div class="dominio-geral-pct" id="dominio-geral-num">0%</div>
+              <div class="dominio-geral-label">Domínio geral<br><span style="font-size:10px;color:var(--text3)">Quiz 50% · Cards 30% · Resumos 20%</span></div>
+            </div>
+          </div>
+          <div id="dominio-areas"></div>
+        </div>
+        <!-- Objetivo da Semana -->
+        <div class="sec-title">Objetivo da semana</div>
+        <div id="dash-objetivo"></div>
       </div>
     </div>
 
@@ -538,6 +648,7 @@ input,select,textarea{font-family:inherit;outline:none;}
       <div id="quiz-running-view" class="hidden">
         <div class="quiz-header">
           <div class="quiz-meta">
+            <button class="btn-voltar-quiz" onclick="voltarMenuQuiz()">← Voltar</button>
             <div class="quiz-area-tag" id="quiz-area-tag">Quiz</div>
             <div class="quiz-score-box"><div class="quiz-score-v" id="quiz-score-v">0/0</div><div class="quiz-score-l">Sessão</div></div>
           </div>
@@ -749,6 +860,29 @@ input,select,textarea{font-family:inherit;outline:none;}
 </div>
 
 <div class="toast" id="toast"></div>
+
+<!-- Modal Configurações -->
+<div class="modal-overlay hidden" id="modal-config" onclick="fecharModalConfig(event)">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-title">⚙️ Configurações</div>
+    <div class="modal-sub">Personalize sua experiência de estudo</div>
+    <div class="config-row">
+      <div>
+        <div class="config-label">Meu apelido</div>
+        <div class="config-sub">Como você aparece no app</div>
+      </div>
+      <input type="text" class="config-input" id="config-nome-input" placeholder="Ex: João" maxlength="20">
+    </div>
+    <div class="config-row">
+      <div>
+        <div class="config-label">Dias de estudo</div>
+        <div class="config-sub" id="config-streak-info">0 dias acumulados</div>
+      </div>
+      <button class="btn-config-reset" onclick="resetarStreak()">Zerar</button>
+    </div>
+    <button class="btn-primary" style="margin-top:20px" onclick="salvarConfig()">Salvar</button>
+  </div>
+</div>
 <script>
 // ═══════════════════════════════
 // FIREBASE
@@ -1740,14 +1874,24 @@ async function doRegister(){
   finally{btn.disabled=false;btn.textContent='Criar conta';}
 }
 
-function doLogout(){if(speechUtter)speechSynthesis.cancel();auth.signOut();}
+function doLogout(){
+  if(speechUtter)speechSynthesis.cancel();
+  auth.signOut().then(()=>{
+    document.getElementById('app').classList.remove('active');
+    document.getElementById('auth-screen').classList.add('active');
+    document.getElementById('splash-screen').classList.remove('active');
+    showAuthTab('login');
+  });
+}
 
 // ═══════════════════════════════
 // AUTH STATE
 // ═══════════════════════════════
 auth.onAuthStateChanged(async user=>{
-  document.getElementById('loading').style.display='none';
-  if(!user){currentUser=null;userProfile=null;showAuth();return;}
+  if(!user){
+    document.getElementById('loading').style.display='none';
+    currentUser=null;userProfile=null;showAuth();return;
+  }
   currentUser=user;
   const isAdmEmail=user.email===ADMIN_EMAIL;
   try{
@@ -1763,8 +1907,34 @@ auth.onAuthStateChanged(async user=>{
     console.warn('Auth profile fallback:',e.message);
     userProfile={nome:user.email,email:user.email,admin:isAdmEmail,aprovado:isAdmEmail};
   }
-  if(!userProfile.aprovado&&!isAdmEmail){showAuth('pending');return;}
-  await initApp();
+  if(!userProfile.aprovado&&!isAdmEmail){
+    document.getElementById('loading').style.display='none';
+    showAuth('pending');return;
+  }
+  // Animação de boas-vindas no loading
+  const loadImg=document.querySelector('#loading img');
+  const loadSub=document.getElementById('loading-sub');
+  const welcomeText=document.getElementById('welcome-text');
+  if(loadImg){
+    loadImg.style.animation='none';
+    setTimeout(()=>{
+      loadImg.classList.add('fade-out');
+      if(loadSub)loadSub.classList.add('fade-out');
+      setTimeout(()=>{
+        if(welcomeText)welcomeText.classList.add('show');
+        setTimeout(()=>{
+          if(welcomeText)welcomeText.style.opacity='0';
+          setTimeout(async()=>{
+            document.getElementById('loading').style.display='none';
+            await initApp();
+          },500);
+        },1800);
+      },600);
+    },800);
+  } else {
+    document.getElementById('loading').style.display='none';
+    await initApp();
+  }
 });
 
 function showAuth(tab='login'){
@@ -1779,7 +1949,8 @@ function showAuth(tab='login'){
 async function initApp(){
   document.getElementById('auth-screen').classList.remove('active');
   document.getElementById('app').classList.add('active');
-  document.getElementById('hdr-nome').textContent=userProfile.nome||currentUser.email;
+  const nomeDisplay=userProfile.nome&&userProfile.nome!==currentUser.email?userProfile.nome.split(' ')[0]:(currentUser.email||'').split('@')[0];
+  document.getElementById('hdr-nome').textContent=nomeDisplay||'Bombeiro';
   if(userProfile.admin||currentUser.email===ADMIN_EMAIL){
     const nav=document.getElementById('bottom-nav');
     if(!document.getElementById('nav-admin')){
@@ -1801,6 +1972,8 @@ async function initApp(){
   renderResumos();
   renderPadroes();
   if(userProfile.admin||currentUser.email===ADMIN_EMAIL)loadAdminUsers();
+  // Mostrar splash screen
+  mostrarSplash();
 }
 
 // ═══════════════════════════════
@@ -1873,21 +2046,22 @@ async function loadFlashcards(){
 }
 
 // ═══════════════════════════════
-// STREAK
+// STREAK — conta por acesso após meia-noite
 // ═══════════════════════════════
 function updateStreak(){
   const today=new Date().toISOString().slice(0,10);
-  const last=userStats.lastStudyDate||'';
-  const yesterday=new Date(Date.now()-86400000).toISOString().slice(0,10);
-  if(last===today){/* já contou hoje */}
-  else if(last===yesterday){userStats.streak=(userStats.streak||0)+1;userStats.lastStudyDate=today;saveProg();}
-  else if(last!==today){userStats.streak=1;userStats.lastStudyDate=today;saveProg();}
+  const last=userStats.lastAccessDate||userStats.lastStudyDate||'';
+  if(last!==today){
+    // Novo acesso em dia diferente — incrementa sem resetar
+    userStats.streak=(userStats.streak||0)+1;
+    userStats.lastAccessDate=today;
+    saveProg();
+  }
   document.getElementById('hdr-streak').textContent='🔥 '+(userStats.streak||0);
 }
 
 function registrarAtividade(){
   const today=new Date().toISOString().slice(0,10);
-  if(userStats.lastStudyDate!==today){userStats.lastStudyDate=today;userStats.streak=(userStats.streak||0)+1;}
   const hist=userStats.history||[];
   const todayEntry=hist.find(h=>h.date===today);
   if(todayEntry)todayEntry.n=(todayEntry.n||0)+1;
@@ -1972,6 +2146,8 @@ function renderDashboard(){
   const erroSubEl=document.getElementById('erro-sub');
   if(erroSubEl)erroSubEl.textContent=erros>0?erros+' para revisar':'Sem erros ainda';
   updateBadges();
+  renderDominio();
+  renderObjetivoSemana();
 }
 
 function renderPontoFraco(){
@@ -2074,7 +2250,13 @@ function updateBadges(){
 // ═══════════════════════════════
 // QUIZ
 // ═══════════════════════════════
-function renderAreaList(){
+function voltarMenuQuiz(){
+  if(!confirm('Sair da sessão atual?'))return;
+  document.getElementById('quiz-running-view').classList.add('hidden');
+  document.getElementById('quiz-home-view').classList.remove('hidden');
+  document.querySelector('.btn-revelar')?.remove();
+  quizQueue=[];quizIdx=0;quizSessao={c:0,t:0};
+}
   const list=document.getElementById('area-list');
   list.innerHTML='';
   Object.entries(AI).forEach(([k,a])=>{
@@ -2241,6 +2423,7 @@ function renderQuizQ(){
 
   // Ocultar alternativas — testing effect
   opts.style.display='none';
+  document.querySelector('.btn-revelar')?.remove();
   const btnRevelar=document.createElement('button');
   btnRevelar.className='btn-revelar';
   btnRevelar.textContent='👁 Revelar alternativas';
@@ -2451,6 +2634,7 @@ function renderResumos(){
   }
   const r=fila[0];
   resumoAtualId=r.id;
+  registrarVisualizacaoResumo(r.id);
   const aInfo=AI[r.area]||{};
   const probLabel=r.prob==='alta'?'🔴 Alta probabilidade':r.prob==='media'?'🟡 Média':'🟢 Baixa';
   content.innerHTML=`
@@ -2534,6 +2718,7 @@ async function avaliarResumo(dif){
 function ouvirResumo(id){
   const r=RESUMOS_BANCO.find(x=>x.id===id);
   if(!r)return;
+  registrarVisualizacaoResumo(id);
   if(speechSynthesis.speaking){speechSynthesis.cancel();
     const btn=document.getElementById('resumo-audio-btn');
     if(btn){btn.textContent='▶ Ouvir este resumo';btn.classList.remove('playing');}
@@ -2872,6 +3057,199 @@ async function salvarMeta(){
   renderDashboard();
   document.getElementById('modal-meta').classList.add('hidden');
   showToast('Meta atualizada: '+v+' questões/dia ✅');
+}
+
+// ═══════════════════════════════
+// ÍNDICE DE DOMÍNIO REAL
+// ═══════════════════════════════
+function calcDominio(){
+  const ba=userStats.byArea||{};
+  const sm2Cards=userCards||{};
+  const agora=Date.now();
+  const result={};
+  Object.keys(AI).forEach(k=>{
+    // Quiz: % acertos ponderada (50%)
+    const c=(ba[k]?.correct||0),w=(ba[k]?.wrong||0),t=c+w;
+    const quizPct=t>0?c/t:0;
+
+    // Flashcards: % cards revisados nessa área (30%)
+    const cardsArea=Object.values(allFlashcards).filter(fc=>fc.a===k);
+    const cardsTotal=cardsArea.length;
+    const cardsRevisados=cardsArea.filter(fc=>{
+      const uc=sm2Cards[fc.id];
+      return uc&&uc.reps>0;
+    }).length;
+    const cardsPct=cardsTotal>0?cardsRevisados/cardsTotal:0;
+
+    // Resumos: % resumos revisados nessa área (20%)
+    const resumosArea=RESUMOS_BANCO.filter(r=>r.area===k);
+    const resumosTotal=resumosArea.length;
+    const resumosRevisados=resumosArea.filter(r=>{
+      const ur=userStats['resumo_'+r.id];
+      return ur&&(ur.reps>0||userStats['resumo_visto_'+r.id]);
+    }).length;
+    const resumosPct=resumosTotal>0?resumosRevisados/resumosTotal:0;
+
+    const dominio=Math.round((quizPct*0.5+cardsPct*0.3+resumosPct*0.2)*100);
+    result[k]={dominio,quizPct:Math.round(quizPct*100),cardsPct:Math.round(cardsPct*100),resumosPct:Math.round(resumosPct*100)};
+  });
+  return result;
+}
+
+function renderDominio(){
+  const dom=calcDominio();
+  const vals=Object.values(dom).map(d=>d.dominio);
+  const geral=vals.length>0?Math.round(vals.reduce((a,b)=>a+b,0)/vals.length):0;
+
+  // Ring geral
+  const circ=169.6;
+  const offset=circ-(circ*geral/100);
+  const ringEl=document.getElementById('dominio-ring');
+  if(ringEl){ringEl.style.strokeDashoffset=offset;}
+  const ptEl=document.getElementById('dominio-geral-pct');
+  const numEl=document.getElementById('dominio-geral-num');
+  if(ptEl)ptEl.textContent=geral+'%';
+  if(numEl)numEl.textContent=geral+'% de domínio';
+
+  // Áreas
+  const areasEl=document.getElementById('dominio-areas');
+  if(!areasEl)return;
+  const cores={AT1:'#E74C3C',AT2:'#E67E22',AT3:'#2980B9',AT4:'#8E44AD',AT5:'#27AE60'};
+  areasEl.innerHTML=Object.entries(AI).map(([k,a])=>{
+    const d=dom[k]||{dominio:0};
+    const cor=d.dominio>=80?'#27AE60':d.dominio>=60?'#E67E22':'#C0392B';
+    return `<div class="dominio-area-row">
+      <div class="dominio-area-icon">${a.icon}</div>
+      <div class="dominio-area-info">
+        <div class="dominio-area-name">${k} — ${a.nome.split('—')[1]?.trim()||a.nome}</div>
+        <div class="dominio-area-bar-wrap"><div class="dominio-area-bar" style="width:${d.dominio}%;background:${cor}"></div></div>
+      </div>
+      <div class="dominio-area-pct" style="color:${cor}">${d.dominio}%</div>
+    </div>`;
+  }).join('');
+}
+
+function renderObjetivoSemana(){
+  const dom=calcDominio();
+  const el=document.getElementById('dash-objetivo');
+  if(!el)return;
+  // Área com menor domínio que tenha pelo menos algum dado (ou qualquer)
+  let piorArea=null,piorVal=101;
+  Object.entries(dom).forEach(([k,d])=>{
+    if(d.dominio<piorVal){piorVal=d.dominio;piorArea=k;}
+  });
+  if(!piorArea){el.innerHTML='';return;}
+  const a=AI[piorArea];
+  const cor=piorVal>=80?'#27AE60':piorVal>=60?'#E67E22':'#C0392B';
+  const bg=piorVal>=80?'var(--green-light)':piorVal>=60?'var(--amber-light)':'var(--red-light)';
+  el.innerHTML=`<div class="obj-card">
+    <div class="obj-card-label">🎯 Foco da semana — sistema definiu</div>
+    <div class="obj-card-area">${a.icon} ${a.nome}</div>
+    <div class="obj-card-motivo">Menor índice de domínio entre suas áreas. Priorize questões, flashcards e resumos desta área.</div>
+    <span class="obj-card-pct" style="background:${bg};color:${cor}">${piorVal}% de domínio</span>
+    <button onclick="iniciarQuiz('${piorArea}')" style="display:block;width:100%;margin-top:10px;padding:10px;background:var(--red);color:white;border-radius:10px;font-size:13px;font-weight:700;border:none;cursor:pointer;">Estudar agora →</button>
+  </div>`;
+}
+
+// ═══════════════════════════════
+// SPLASH SCREEN
+// ═══════════════════════════════
+function mostrarSplash(){
+  const splash=document.getElementById('splash-screen');
+  splash.classList.add('active');
+
+  // Dias de estudo
+  const dias=userStats.streak||0;
+  const diasEl=document.getElementById('splash-dias');
+  diasEl.textContent='0';
+  diasEl.classList.remove('animate');
+  setTimeout(()=>{diasEl.classList.add('animate');diasEl.textContent=dias;},100);
+
+  // Domínio por área
+  const dom=calcDominio();
+  const cores={AT1:'#E74C3C',AT2:'#E67E22',AT3:'#2980B9',AT4:'#8E44AD',AT5:'#27AE60'};
+  const areasEl=document.getElementById('splash-areas');
+  if(areasEl){
+    areasEl.innerHTML=Object.entries(AI).map(([k,a])=>{
+      const d=dom[k]||{dominio:0};
+      return `<div class="splash-area-row">
+        <div class="splash-area-label">${k}</div>
+        <div class="splash-area-bar-wrap"><div class="splash-area-bar" style="width:0%;background:${cores[k]}" id="splash-bar-${k}"></div></div>
+        <span style="font-size:11px;font-weight:800;color:white;min-width:32px;text-align:right;">${d.dominio}%</span>
+      </div>`;
+    }).join('');
+    // Animar barras
+    setTimeout(()=>{
+      Object.entries(AI).forEach(([k])=>{
+        const d=dom[k]||{dominio:0};
+        const bar=document.getElementById('splash-bar-'+k);
+        if(bar)bar.style.width=d.dominio+'%';
+      });
+    },200);
+  }
+
+  // Objetivo da semana
+  let piorArea=null,piorVal=101;
+  Object.entries(dom).forEach(([k,d])=>{if(d.dominio<piorVal){piorVal=d.dominio;piorArea=k;}});
+  if(piorArea){
+    const a=AI[piorArea];
+    document.getElementById('splash-sug-area').textContent=a.icon+' '+a.nome;
+    document.getElementById('splash-sug-motivo').textContent='Menor domínio ('+piorVal+'%). Foque aqui esta semana.';
+  }
+}
+
+function fecharSplash(){
+  const splash=document.getElementById('splash-screen');
+  splash.classList.add('fade-out');
+  setTimeout(()=>{splash.classList.remove('active','fade-out');},400);
+}
+
+// ═══════════════════════════════
+// RASTREAR LEITURA/AUDIÇÃO RESUMOS
+// ═══════════════════════════════
+function registrarVisualizacaoResumo(id){
+  if(!userStats['resumo_visto_'+id]){
+    userStats['resumo_visto_'+id]=Date.now();
+    saveProg();
+  }
+}
+
+// ═══════════════════════════════
+// CONFIGURAÇÕES
+// ═══════════════════════════════
+function abrirModalConfig(){
+  const nomeAtual=userProfile.nome&&userProfile.nome!==currentUser.email?userProfile.nome.split(' ')[0]:'';
+  document.getElementById('config-nome-input').value=nomeAtual;
+  document.getElementById('config-streak-info').textContent=(userStats.streak||0)+' dias acumulados';
+  document.getElementById('modal-config').classList.remove('hidden');
+}
+
+function fecharModalConfig(e){
+  if(!e||e.target===document.getElementById('modal-config'))
+    document.getElementById('modal-config').classList.add('hidden');
+}
+
+async function salvarConfig(){
+  const nome=document.getElementById('config-nome-input').value.trim();
+  if(nome){
+    userProfile.nome=nome;
+    await db.ref('usuarios/'+currentUser.uid).update({nome});
+    const nomeDisplay=nome.split(' ')[0];
+    document.getElementById('hdr-nome').textContent=nomeDisplay;
+    document.getElementById('dash-nome').textContent=nomeDisplay;
+  }
+  document.getElementById('modal-config').classList.add('hidden');
+  showToast('Configurações salvas ✅');
+}
+
+async function resetarStreak(){
+  if(!confirm('Zerar contagem de dias? Essa ação não pode ser desfeita.'))return;
+  userStats.streak=0;
+  userStats.lastAccessDate='';
+  await saveProg();
+  document.getElementById('hdr-streak').textContent='🔥 0';
+  document.getElementById('config-streak-info').textContent='0 dias acumulados';
+  showToast('Contagem zerada.');
 }
 
 // ═══════════════════════════════
