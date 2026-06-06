@@ -608,6 +608,11 @@ input,select,textarea{font-family:inherit;outline:none;}
           <div class="dash-meta-count" id="dash-meta-count">0/10</div>
         </div>
       </div>
+      <!-- Alerta dados não carregados -->
+      <div id="dash-reload-alert" style="display:none;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:12px;margin:0 14px 0;padding:10px 14px;align-items:center;gap:10px;justify-content:space-between;">
+        <span style="color:white;font-size:12px;font-weight:600;">⚠️ Dados não carregaram</span>
+        <button onclick="location.reload()" style="background:white;color:var(--red);border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;">Recarregar</button>
+      </div>
       <div class="dash-body">
         <!-- Ponto fraco -->
         <div id="dash-weak" class="weak-card hidden">
@@ -2044,12 +2049,19 @@ async function initApp(){
 // DATA LOAD
 // ═══════════════════════════════
 async function loadUserData(){
-  try{
-    const snap=await withTimeout(db.ref('progresso/'+currentUser.uid).get());
-    if(snap.exists())userStats={correct:0,wrong:0,byArea:{},seenIds:[],history:[],streak:0,lastStudyDate:'',metaDiaria:10,...snap.val()};
-    const cs=await withTimeout(db.ref('cards/'+currentUser.uid).get());
-    if(cs.exists())userCards=cs.val();
-  }catch(e){console.warn('loadUserData fallback:',e.message);}
+  // Tentar até 3x com delay crescente
+  for(let attempt=1;attempt<=3;attempt++){
+    try{
+      const snap=await withTimeout(db.ref('progresso/'+currentUser.uid).get(),attempt*8000);
+      if(snap.exists())userStats={correct:0,wrong:0,byArea:{},seenIds:[],history:[],streak:0,lastStudyDate:'',metaDiaria:10,...snap.val()};
+      const cs=await withTimeout(db.ref('cards/'+currentUser.uid).get(),attempt*8000);
+      if(cs.exists())userCards=cs.val();
+      break; // sucesso
+    }catch(e){
+      console.warn('loadUserData tentativa '+attempt+':',e.message);
+      if(attempt<3)await new Promise(r=>setTimeout(r,1500*attempt));
+    }
+  }
   db.ref('progresso/'+currentUser.uid).on('value',s=>{
     if(s.exists()){userStats={correct:0,wrong:0,byArea:{},seenIds:[],history:[],streak:0,lastStudyDate:'',metaDiaria:10,...s.val()};
     renderDashboard();updateBadges();}
@@ -2061,7 +2073,7 @@ async function saveProg(){await db.ref('progresso/'+currentUser.uid).set(userSta
 async function saveCard(id,data){userCards[id]=data;await db.ref('cards/'+currentUser.uid+'/'+id).set(data);}
 
 // Timeout wrapper para chamadas Firebase (evita travamento por App Check no iOS)
-function withTimeout(promise,ms=6000){
+function withTimeout(promise,ms=12000){
   return Promise.race([promise,new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),ms))]);
 }
 
@@ -2246,6 +2258,12 @@ function renderDashboard(){
       </div>
     </div>`;
   });
+
+  // Alerta de dados vazios — sugere recarregar se tudo zerado
+  const totalQ=Object.keys(allQuestoes).length;
+  const totalFC=Object.keys(allFlashcards).length;
+  const alertEl=document.getElementById('dash-reload-alert');
+  if(alertEl){alertEl.style.display=(totalQ===0||totalFC===0)?'flex':'none';}
 
   // Gráfico 7 dias
   renderChart();
