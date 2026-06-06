@@ -2267,7 +2267,10 @@ function voltarMenuQuiz(){
   document.querySelector('.btn-revelar')?.remove();
   quizQueue=[];quizIdx=0;quizSessao={c:0,t:0};
 }
+
+function renderAreaList(){
   const list=document.getElementById('area-list');
+  if(!list)return;
   list.innerHTML='';
   Object.entries(AI).forEach(([k,a])=>{
     const ba=userStats.byArea||{};
