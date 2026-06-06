@@ -591,7 +591,7 @@ input,select,textarea{font-family:inherit;outline:none;}
       <div class="dash-hero" style="position:relative;">
         <div class="dash-top">
           <div>
-            <div class="dash-greeting">Olá, <span id="dash-nome-greeting" style="font-size:12px;opacity:.8;font-weight:600;"></span></div>
+            <div class="dash-greeting">Olá,</div>
             <div class="dash-name" id="dash-nome">Bombeiro</div>
           </div>
         </div>
@@ -2219,22 +2219,23 @@ function renderDashboard(){
   const metaPct=Math.min(100,Math.round(todayN/meta*100));
 
   const nomeDisplay=userProfile.nome&&userProfile.nome!==currentUser.email?userProfile.nome.split(' ')[0]:(currentUser.email||'').split('@')[0];
-  document.getElementById('dash-nome').textContent=nomeDisplay||'Bombeiro';
+  const dashNome=document.getElementById('dash-nome');
+  if(dashNome)dashNome.textContent=nomeDisplay||'Bombeiro';
   const greetSpan=document.getElementById('dash-nome-greeting');
-  if(greetSpan)greetSpan.textContent=nomeDisplay||'Bombeiro';
+  if(greetSpan)greetSpan.textContent='';
   document.getElementById('dash-total').textContent=total;
   document.getElementById('dash-pct').textContent=pct+'%';
   document.getElementById('dash-cards').textContent=Object.keys(userCards).length;
   document.getElementById('dash-meta-fill').style.width=metaPct+'%';
   document.getElementById('dash-meta-count').textContent=todayN+'/'+meta;
-  document.getElementById('dash-ring-label').textContent=todayN+'/'+meta;
+  const drl=document.getElementById('dash-ring-label');if(drl)drl.textContent=todayN+'/'+meta;
   document.getElementById('quick-sub').textContent='Foco nos fracos';
 
   // Ring
   const circ=169.6;
   const offset=circ-(circ*metaPct/100);
-  document.getElementById('dash-ring').style.strokeDashoffset=offset;
-  document.getElementById('dash-ring-pct').textContent=metaPct+'%';
+  const drEl=document.getElementById('dash-ring');if(drEl)drEl.style.strokeDashoffset=offset;
+  const drPct=document.getElementById('dash-ring-pct');if(drPct)drPct.textContent=metaPct+'%';
 
   // Ponto fraco
   renderPontoFraco();
