@@ -591,11 +591,8 @@ input,select,textarea{font-family:inherit;outline:none;}
       <div class="dash-hero" style="position:relative;">
         <div class="dash-top">
           <div>
-            <div class="dash-greeting">Olá,</div>
+            <div class="dash-greeting">Olá, <span id="dash-nome-greeting" style="font-size:12px;opacity:.8;font-weight:600;"></span></div>
             <div class="dash-name" id="dash-nome">Bombeiro</div>
-          </div>
-          <div class="dash-streak-pill">
-            <span id="dash-streak-top">🔥 0</span>
           </div>
         </div>
         <div class="dash-stats">
@@ -2209,7 +2206,10 @@ function renderDashboard(){
   const todayN=(userStats.history||[]).find(h=>h.date===today)?.n||0;
   const metaPct=Math.min(100,Math.round(todayN/meta*100));
 
-  const nomeDisplay=userProfile.nome&&userProfile.nome!==currentUser.email?userProfile.nome.split(' ')[0]:(currentUser.email||'').split('@')[0];document.getElementById('dash-nome').textContent=nomeDisplay||'Bombeiro';
+  const nomeDisplay=userProfile.nome&&userProfile.nome!==currentUser.email?userProfile.nome.split(' ')[0]:(currentUser.email||'').split('@')[0];
+  document.getElementById('dash-nome').textContent=nomeDisplay||'Bombeiro';
+  const greetSpan=document.getElementById('dash-nome-greeting');
+  if(greetSpan)greetSpan.textContent=nomeDisplay||'Bombeiro';
   document.getElementById('dash-total').textContent=total;
   document.getElementById('dash-pct').textContent=pct+'%';
   document.getElementById('dash-cards').textContent=Object.keys(userCards).length;
