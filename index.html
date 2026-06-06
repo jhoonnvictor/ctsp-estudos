@@ -2017,7 +2017,7 @@ async function initApp(){
   document.getElementById('auth-screen').classList.remove('active');
   document.getElementById('app').classList.add('active');
   const nomeDisplay=userProfile.nome&&userProfile.nome!==currentUser.email?userProfile.nome.split(' ')[0]:(currentUser.email||'').split('@')[0];
-  document.getElementById('hdr-nome').textContent=nomeDisplay||'Bombeiro';
+  const hnEl=document.getElementById('hdr-nome');if(hnEl)hnEl.textContent=nomeDisplay||'Bombeiro';
   if(userProfile.admin||currentUser.email===ADMIN_EMAIL){
     const nav=document.getElementById('bottom-nav');
     if(!document.getElementById('nav-admin')){
@@ -3366,7 +3366,7 @@ async function salvarConfig(){
     userProfile.nome=nome;
     await db.ref('usuarios/'+currentUser.uid).update({nome});
     const nomeDisplay=nome.split(' ')[0];
-    document.getElementById('hdr-nome').textContent=nomeDisplay;
+    const hn2El=document.getElementById('hdr-nome');if(hn2El)hn2El.textContent=nomeDisplay;
     document.getElementById('dash-nome').textContent=nomeDisplay;
   }
   const metaInp=document.getElementById('config-meta-input');
