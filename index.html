@@ -96,7 +96,7 @@ input,select,textarea{font-family:inherit;outline:none;}
 
 /* HEADER */
 .app-header{height:calc(var(--header-h) + env(safe-area-inset-top));background:var(--red);display:flex;align-items:center;padding:env(safe-area-inset-top) 14px 0;gap:10px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.18);}
-.header-logo{width:34px;height:34px;border-radius:50%;background:transparent;padding:0;object-fit:contain;flex-shrink:0;}
+.header-logo{width:34px;height:34px;background:transparent;padding:0;object-fit:contain;flex-shrink:0;}
 .header-titles{flex:1;}
 .header-title{color:white;font-size:15px;font-weight:800;line-height:1.1;}
 .header-sub{color:rgba(255,255,255,.65);font-size:10px;}
@@ -121,7 +121,7 @@ input,select,textarea{font-family:inherit;outline:none;}
 
 /* ═══ DASHBOARD ═══ */
 .dash-hero{background:linear-gradient(135deg,var(--red-dark),var(--red));padding:16px 16px 20px;color:white;position:relative;overflow:hidden;}
-.dash-hero::after{content:'';position:absolute;right:-30px;top:-30px;width:150px;height:150px;background:rgba(255,255,255,.05);border-radius:50%;}
+.dash-hero::after{display:none;}
 .dash-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;}
 .dash-greeting{font-size:12px;opacity:.75;margin-bottom:2px;}
 .dash-name{font-size:22px;font-weight:800;}
@@ -507,7 +507,7 @@ input,select,textarea{font-family:inherit;outline:none;}
 <div id="app">
   <!-- HEADER -->
   <header class="app-header">
-    <img class="header-logo" src="img/logo.png" onerror="this.style.background='rgba(255,255,255,.3)'" alt="CBMRS">
+    <img class="header-logo" src="img/logo.png" onerror="this.style.opacity='0'" alt="CBMRS">
     <div class="header-titles">
       <div class="header-title">Bombeiro CTSP</div>
       <div class="header-sub">CBMRS · CTSP 2026</div>
@@ -1875,7 +1875,7 @@ async function doRegister(){
 }
 
 function doLogout(){
-  if(speechUtter)speechSynthesis.cancel();
+  try{if(speechUtter&&speechSynthesis)speechSynthesis.cancel();}catch(e){}
   auth.signOut().then(()=>{
     document.getElementById('app').classList.remove('active');
     document.getElementById('auth-screen').classList.add('active');
