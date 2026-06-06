@@ -524,8 +524,14 @@ input,select,textarea{font-family:inherit;outline:none;}
         <div class="quiz-home">
           <div class="quiz-home-title">Quiz</div>
           <div class="quiz-home-sub">Escolha uma área ou mode especial</div>
-          <button class="erro-mode-btn" onclick="iniciarModoErro()">🔁 Modo Erro — Revisar questões erradas</button>
-          <button class="erro-mode-btn" style="background:linear-gradient(135deg,#2980b9,#3498db)" onclick="iniciarInterleaving()">🔀 Intercalado — Alternar entre áreas</button>
+          <button class="erro-mode-btn" onclick="iniciarModoErro()">
+            <div style="display:flex;flex-direction:column;align-items:flex-start;gap:2px;flex:1">
+              <span>🔁 Modo Erro — Revisar questões erradas</span>
+              <span style="font-size:11px;opacity:.7" id="erro-sub">Sem erros ainda</span>
+            </div>
+          </button>
+          <button class="erro-mode-btn" style="background:linear-gradient(135deg,#2980b9,#3498db);color:white;border-color:#2980b9" onclick="iniciarInterleaving()">🔀 Intercalado — Alternar entre áreas</button>
+          <div class="sec-title" style="margin-top:4px">Escolha uma área</div>
           <div class="area-list" id="area-list"></div>
         </div>
       </div>
@@ -1843,6 +1849,8 @@ async function loadQuestoes(){
     console.warn('loadQuestoes usando banco local:',e.message);
     allQuestoes=localFallback();
   }
+  // Garantir que a lista de áreas está sempre populada após carregar
+  renderAreaList();
 }
 
 async function loadFlashcards(){
@@ -1859,6 +1867,9 @@ async function loadFlashcards(){
     console.warn('loadFlashcards usando banco local:',e.message);
     allFlashcards=localFallback();
   }
+  // Atualizar cards e badges após carregar
+  renderCards();
+  updateBadges();
 }
 
 // ═══════════════════════════════
@@ -1896,6 +1907,12 @@ function navTo(s){
   const nav=document.getElementById('nav-'+s);
   if(nav)nav.classList.add('active');
   window.scrollTo(0,0);
+  // Re-render lazy ao navegar — garante dados frescos mesmo após timeout Firebase
+  if(s==='quiz'){renderAreaList();}
+  if(s==='cards'){renderCards();}
+  if(s==='resumos'){renderResumos();updateBadges();}
+  if(s==='padroes'){renderPadroes();}
+  if(s==='admin'&&isAdmin()){loadAdminUsers();}
 }
 
 // ═══════════════════════════════
@@ -1952,7 +1969,8 @@ function renderDashboard(){
 
   // Erros count
   const erros=Object.values(allQuestoes).filter(q=>userStats.seenIds?.includes(q.id+'_E')).length;
-  document.getElementById('erro-sub').textContent=erros>0?erros+' para revisar':'Sem erros ainda';
+  const erroSubEl=document.getElementById('erro-sub');
+  if(erroSubEl)erroSubEl.textContent=erros>0?erros+' para revisar':'Sem erros ainda';
   updateBadges();
 }
 
@@ -2738,10 +2756,13 @@ function setAdminTab(t,btn){
 async function loadAdminUsers(){
   if(!isAdmin())return;
   const el=document.getElementById('admin-users-list');
+  if(!el)return;
   el.innerHTML='<p style="color:var(--text2);font-size:13px">Carregando...</p>';
   try{
     const snap=await withTimeout(db.ref('usuarios').get(),8000);
-    if(!snap.exists()||!snap.val()){el.innerHTML='<p style="color:var(--text2);font-size:13px">Nenhum usuário cadastrado.</p>';return;}
+    if(!snap||!snap.exists()||!snap.val()){
+      el.innerHTML='<p style="color:var(--text2);font-size:13px">Nenhum usuário cadastrado.</p>';return;
+    }
     const users=snap.val();
     let html='';
     Object.entries(users).forEach(([uid,u])=>{
@@ -2765,7 +2786,8 @@ async function loadAdminUsers(){
     el.innerHTML=html||'<p style="color:var(--text2);font-size:13px">Nenhum usuário.</p>';
   }catch(err){
     console.error('loadAdminUsers erro:',err);
-    el.innerHTML='<p style="color:var(--red);font-size:13px">Erro ao carregar: '+err.message+'</p>';
+    const msg=err.message==='timeout'?'Tempo limite — toque para tentar novamente':'Erro: '+err.message;
+    el.innerHTML=`<p style="color:var(--red);font-size:13px">${msg}</p><button onclick="loadAdminUsers()" style="margin-top:8px;padding:10px 16px;background:var(--red);color:white;border-radius:10px;font-size:13px;font-weight:700;border:none;cursor:pointer;">Tentar novamente</button>`;
   }
 }
 
