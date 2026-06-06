@@ -41,7 +41,7 @@ input,select,textarea{font-family:inherit;outline:none;}
 
 /* LOADING */
 #loading{position:fixed;inset:0;background:var(--red);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;gap:16px;}
-#loading img{width:min(250px,62vw);height:min(250px,62vw);object-fit:contain;animation:pulse 1.5s ease-in-out infinite;transition:opacity .6s ease,transform .6s ease;}
+#loading img{width:min(312px,76vw);height:min(312px,76vw);object-fit:contain;animation:pulse 1.5s ease-in-out infinite;transition:opacity .6s ease,transform .6s ease;}
 #loading img.fade-out{opacity:0;transform:scale(.85);}
 #loading p{color:white;font-size:13px;font-weight:700;letter-spacing:.08em;opacity:.85;transition:opacity .4s ease;}
 #loading p.fade-out{opacity:0;}
@@ -412,6 +412,24 @@ input,select,textarea{font-family:inherit;outline:none;}
 .mt8{margin-top:8px;}
 .mt14{margin-top:14px;}
 
+/* Info button */
+.info-btn{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:rgba(255,255,255,.2);color:rgba(255,255,255,.9);font-size:9px;font-weight:800;cursor:pointer;margin-left:4px;vertical-align:middle;transition:background .2s;flex-shrink:0;}
+.info-btn:active{background:rgba(255,255,255,.35);}
+
+/* Info tooltip modal */
+.info-tooltip{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;display:flex;align-items:center;justify-content:center;padding:24px;animation:fadeIn .2s;}
+.info-tooltip.hidden{display:none;}
+.info-tooltip-box{background:white;border-radius:20px;padding:24px;max-width:340px;width:100%;}
+.info-tooltip-title{font-size:15px;font-weight:800;color:var(--text);margin-bottom:10px;}
+.info-tooltip-text{font-size:13px;color:var(--text2);line-height:1.6;}
+.info-tooltip-close{width:100%;padding:12px;background:var(--red);color:white;border-radius:12px;font-size:14px;font-weight:700;margin-top:16px;border:none;cursor:pointer;}
+
+/* Dominio badges */
+.dominio-badge{font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;}
+
+/* Dash meta sem cursor */
+.dash-meta{cursor:default;}
+
 /* ═══ CONFIGURAÇÕES MODAL ═══ */
 .config-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border);}
 .config-row:last-child{border-bottom:none;}
@@ -543,7 +561,6 @@ input,select,textarea{font-family:inherit;outline:none;}
     <!-- INÍCIO -->
     <div class="screen active" id="screen-inicio">
       <div class="dash-hero" style="position:relative;">
-        <button class="btn-reload" onclick="location.reload()" title="Recarregar">↺</button>
         <div class="dash-top">
           <div>
             <div class="dash-greeting">Olá,</div>
@@ -568,9 +585,9 @@ input,select,textarea{font-family:inherit;outline:none;}
           <div class="dash-stat"><div class="dash-stat-v" id="dash-pct">0%</div><div class="dash-stat-l">Acertos</div></div>
           <div class="dash-stat"><div class="dash-stat-v" id="dash-cards">0</div><div class="dash-stat-l">Cards</div></div>
         </div>
-        <div class="dash-meta" onclick="abrirModalMeta()" style="cursor:pointer;">
+        <div class="dash-meta">
           <div class="dash-meta-info">
-            <div class="dash-meta-title">META DIÁRIA <span style="font-size:10px;opacity:.6;">✏️ toque p/ ajustar</span></div>
+            <div class="dash-meta-title">META DIÁRIA</div>
             <div class="dash-meta-bar"><div class="dash-meta-fill" id="dash-meta-fill" style="width:0%"></div></div>
           </div>
           <div class="dash-meta-count" id="dash-meta-count">0/10</div>
@@ -603,7 +620,7 @@ input,select,textarea{font-family:inherit;outline:none;}
           </div>
         </div>
         <!-- Progresso por área -->
-        <div class="sec-title">Desempenho por área</div>
+        <div class="sec-title">Desempenho por área <span class="info-btn" onclick="showInfo('desempenho')">?</span></div>
         <div class="area-grid" id="dash-areas"></div>
         <!-- Gráfico últimos 7 dias -->
         <div class="sec-title">Últimos 7 dias</div>
@@ -615,26 +632,22 @@ input,select,textarea{font-family:inherit;outline:none;}
           <div class="chart-bars" id="chart-bars"></div>
         </div>
         <!-- Gráfico evolução por área -->
-        <div class="sec-title">Evolução por área</div>
+        <div class="sec-title">Evolução por área <span class="info-btn" onclick="showInfo('evolucao')">?</span></div>
         <div class="chart-wrap" id="area-evolution-wrap">
           <div id="area-evolution"></div>
         </div>
         <!-- Índice de Domínio Real -->
-        <div class="sec-title">Índice de domínio real</div>
+        <div class="sec-title">Índice de domínio real <span class="info-btn" onclick="showInfo('dominio')">?</span></div>
         <div class="dominio-card" id="dominio-card">
           <div class="dominio-geral-wrap">
-            <div class="dominio-geral-ring">
-              <div class="ring-container" style="width:64px;height:64px;">
-                <svg class="ring-svg" width="64" height="64" viewBox="0 0 64 64">
-                  <circle class="ring-bg" cx="32" cy="32" r="27"/>
-                  <circle class="ring-fg" id="dominio-ring" cx="32" cy="32" r="27" stroke-dasharray="169.6" stroke-dashoffset="169.6" stroke="var(--blue)"/>
-                </svg>
-                <div class="ring-center"><div class="ring-pct" id="dominio-geral-pct" style="color:var(--blue)">0%</div></div>
-              </div>
-            </div>
             <div class="dominio-geral-info">
               <div class="dominio-geral-pct" id="dominio-geral-num">0%</div>
-              <div class="dominio-geral-label">Domínio geral<br><span style="font-size:10px;color:var(--text3)">Quiz 50% · Cards 30% · Resumos 20%</span></div>
+              <div class="dominio-geral-label">de domínio geral</div>
+              <div style="display:flex;gap:12px;margin-top:6px;">
+                <span class="dominio-badge" style="background:var(--blue-light);color:var(--blue)">Quiz 50%</span>
+                <span class="dominio-badge" style="background:var(--green-light);color:var(--green)">Cards 30%</span>
+                <span class="dominio-badge" style="background:var(--amber-light);color:var(--amber)">Resumos 20%</span>
+              </div>
             </div>
           </div>
           <div id="dominio-areas"></div>
@@ -896,6 +909,13 @@ input,select,textarea{font-family:inherit;outline:none;}
         <div class="config-sub" id="config-streak-info">0 dias acumulados</div>
       </div>
       <button class="btn-config-reset" onclick="resetarStreak()">Zerar</button>
+    </div>
+    <div class="config-row">
+      <div>
+        <div class="config-label">Meta diária</div>
+        <div class="config-sub">Questões por dia</div>
+      </div>
+      <input type="number" class="config-input" id="config-meta-input" min="1" max="200" placeholder="10">
     </div>
     <button class="btn-primary" style="margin-top:20px" onclick="salvarConfig()">Salvar</button>
   </div>
@@ -3178,8 +3198,7 @@ function renderDominio(){
   // Ring geral
   const circ=169.6;
   const offset=circ-(circ*geral/100);
-  const ringEl=document.getElementById('dominio-ring');
-  if(ringEl){ringEl.style.strokeDashoffset=offset;}
+  // ring dominio removido
   const ptEl=document.getElementById('dominio-geral-pct');
   const numEl=document.getElementById('dominio-geral-num');
   if(ptEl)ptEl.textContent=geral+'%';
@@ -3295,6 +3314,8 @@ function abrirModalConfig(){
   const nomeAtual=userProfile.nome&&userProfile.nome!==currentUser.email?userProfile.nome.split(' ')[0]:'';
   document.getElementById('config-nome-input').value=nomeAtual;
   document.getElementById('config-streak-info').textContent=(userStats.streak||0)+' dias acumulados';
+  const metaInp=document.getElementById('config-meta-input');
+  if(metaInp)metaInp.value=userStats.metaDiaria||10;
   document.getElementById('modal-config').classList.remove('hidden');
 }
 
@@ -3311,6 +3332,13 @@ async function salvarConfig(){
     const nomeDisplay=nome.split(' ')[0];
     document.getElementById('hdr-nome').textContent=nomeDisplay;
     document.getElementById('dash-nome').textContent=nomeDisplay;
+  }
+  const metaInp=document.getElementById('config-meta-input');
+  const metaVal=metaInp?parseInt(metaInp.value)||0:0;
+  if(metaVal>=1&&metaVal<=200){
+    userStats.metaDiaria=metaVal;
+    await saveProg();
+    renderDashboard();
   }
   document.getElementById('modal-config').classList.add('hidden');
   showToast('Configurações salvas ✅');
@@ -3337,6 +3365,34 @@ function showMsg(id,txt,tipo){
   setTimeout(()=>{if(el)el.textContent='';},4000);
 }
 
+function showInfo(tipo){
+  const textos={
+    desempenho:'Percentual de acertos por área. Calculado dividindo respostas corretas pelo total respondido naquela área.',
+    evolucao:'Progressão do seu desempenho por área ao longo do tempo, baseada no seu histórico de respostas.',
+    dominio:'Índice composto: Quiz vale 50% do cálculo, Cards 30% e Resumos 20%. Mede o domínio real do conteúdo, não só o treino.'
+  };
+  const titulos={desempenho:'Desempenho por Área',evolucao:'Evolução por Área',dominio:'Índice de Domínio Real'};
+  let box=document.getElementById('info-tooltip');
+  if(!box){
+    box=document.createElement('div');
+    box.id='info-tooltip';
+    box.className='info-tooltip hidden';
+    const inner=document.createElement('div');
+    inner.className='info-tooltip-box';
+    inner.innerHTML='<div class="info-tooltip-title" id="info-t-title"></div><div class="info-tooltip-text" id="info-t-text"></div>';
+    const btn=document.createElement('button');
+    btn.className='info-tooltip-close';
+    btn.textContent='Entendi';
+    btn.onclick=()=>box.classList.add('hidden');
+    inner.appendChild(btn);
+    box.appendChild(inner);
+    box.onclick=(e)=>{if(e.target===box)box.classList.add('hidden');};
+    document.body.appendChild(box);
+  }
+  document.getElementById('info-t-title').textContent=titulos[tipo]||'';
+  document.getElementById('info-t-text').textContent=textos[tipo]||'';
+  box.classList.remove('hidden');
+}
 function showToast(msg){
   const t=document.getElementById('toast');
   t.textContent=msg;t.classList.add('show');
