@@ -188,6 +188,21 @@ input,select,textarea{font-family:inherit;outline:none;}
 
 /* Quick actions */
 .quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.adapt-btn{display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,#3a1c71,#5b2a9e);color:#fff;border-radius:16px;padding:14px 16px;margin-bottom:12px;cursor:pointer;box-shadow:var(--shadow-md);transition:transform .2s var(--ease-out);}
+.adapt-btn:active{transform:scale(.98);}
+.adapt-btn-icon{font-size:26px;}
+.adapt-btn-info{flex:1;}
+.adapt-btn-title{font-size:15px;font-weight:800;}
+.adapt-btn-sub{font-size:11px;opacity:.85;margin-top:2px;}
+.adapt-btn-arrow{font-size:20px;font-weight:700;opacity:.9;}
+.topico-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);}
+.topico-row:last-child{border-bottom:none;}
+.topico-code{font-size:11px;font-weight:800;color:var(--text2);min-width:34px;}
+.topico-name{flex:1;font-size:12px;color:var(--text);line-height:1.3;}
+.topico-bar-wrap{width:74px;height:7px;background:var(--border);border-radius:6px;overflow:hidden;flex-shrink:0;}
+.topico-bar{height:100%;border-radius:6px;transition:width .5s var(--ease-out);}
+.topico-pct{font-size:12px;font-weight:800;min-width:34px;text-align:right;}
+.topico-area-head{font-size:12px;font-weight:800;color:var(--text2);margin:12px 0 2px;}
 .quick-btn{background:white;border-radius:16px;padding:14px 12px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:6px;cursor:pointer;transition:transform .2s var(--ease-out),box-shadow .2s;border:1.5px solid transparent;}
 .quick-btn:active{transform:scale(.97);}
 .quick-btn.destaque{border-color:var(--red);background:var(--red-light);}
@@ -626,6 +641,14 @@ input,select,textarea{font-family:inherit;outline:none;}
         </div>
         <!-- Quick actions -->
         <div class="sec-title">Estudar agora</div>
+        <div class="adapt-btn" onclick="iniciarEstudoAdaptativo()">
+          <div class="adapt-btn-icon">🧠</div>
+          <div class="adapt-btn-info">
+            <div class="adapt-btn-title">Modo Adaptativo</div>
+            <div class="adapt-btn-sub">12 questões dos seus tópicos mais fracos (BKT)</div>
+          </div>
+          <div class="adapt-btn-arrow">→</div>
+        </div>
         <div class="quick-grid">
           <div class="quick-btn destaque" onclick="iniciarEstudoRapido()">
             <div class="quick-btn-icon">⚡</div>
@@ -815,6 +838,8 @@ input,select,textarea{font-family:inherit;outline:none;}
         <div id="padroes-lista"></div>
         <div class="sec-title mt14">Tópicos de alta incidência</div>
         <div class="incidencia-card" id="incidencia-lista"></div>
+        <div class="sec-title mt14">🧠 Domínio por tópico <span class="info-btn" onclick="showInfo('bkt')">?</span></div>
+        <div class="incidencia-card" id="dominio-topicos"></div>
       </div>
     </div>
 
@@ -992,6 +1017,102 @@ function sm2Update(card,q){
 }
 function sm2Resumo(card,dif){const q=dif==='dif'?1:dif==='med'?3:5;return sm2Update(card,q);}
 function shuffle(a){const r=[...a];for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]];}return r;}
+
+// ═══════════════════════════════
+// FASE 2 — MOTOR ADAPTATIVO (BKT por tópico + FSRS-lite + seleção adaptativa)
+// Aditivo: SM-2 (flashcards/resumos/questoesSM2) permanece intacto.
+// ═══════════════════════════════
+
+// ── F2.2 BKT — P(saber) por tópico ──
+const BKT_P={L0:0.30,T:0.15,S:0.10,G:0.20}; // G≈1/5 opções
+function bktUpdate(topico,acertou){
+  if(!topico)return;
+  if(!userStats.bkt)userStats.bkt={};
+  const cur=userStats.bkt[topico]||{pL:BKT_P.L0,n:0};
+  const pL=cur.pL;
+  const post=acertou
+    ? (pL*(1-BKT_P.S))/(pL*(1-BKT_P.S)+(1-pL)*BKT_P.G)
+    : (pL*BKT_P.S)/(pL*BKT_P.S+(1-pL)*(1-BKT_P.G));
+  const pLnew=post+(1-post)*BKT_P.T;
+  userStats.bkt[topico]={pL:Math.min(0.99,Math.max(0.01,pLnew)),n:(cur.n||0)+1,last:Date.now()};
+}
+function bktDe(topico){const b=userStats.bkt&&userStats.bkt[topico];return b?b.pL:BKT_P.L0;}
+
+// ── F2.3 FSRS-lite (questões): estabilidade S e dificuldade D ──
+function fsrsUpdate(card,acertou){
+  const now=Date.now();
+  let{S=0,D=5,reps=0,last=now}=card||{};
+  if(!reps||S<=0){
+    S=acertou?3:0.6; D=acertou?5:6.5;
+  }else{
+    const R=Math.pow(1+(now-last)/86400000/(9*S),-1); // curva de esquecimento
+    D=Math.min(10,Math.max(1,D-0.6*((acertou?3:1)-3)));
+    D=D+0.05*(5-D); // regressão suave à média
+    if(acertou){
+      const inc=Math.max(1.12,1+(11-D)*0.09*(1-R));
+      S=Math.max(S*inc,S+0.5);
+    }else{
+      S=Math.max(0.5,S*0.4*(1-(D-1)/22));
+    }
+  }
+  const interval=Math.max(1,Math.round(S)); // R≈0,9 em ~S dias
+  return{S:+S.toFixed(3),D:+D.toFixed(2),reps:(reps||0)+1,last:now,next:now+interval*86400000,interval};
+}
+
+// ── Data de revisão unificada: FSRS → SM-2 legado → vencida ──
+function questaoDue(id){
+  const f=userStats.questoesFSRS&&userStats.questoesFSRS[id];
+  if(f&&f.next)return f.next;
+  const s=userStats.questoesSM2&&userStats.questoesSM2[id];
+  if(s&&s.next)return s.next;
+  return 0; // nunca vista → vencida
+}
+function registrarRespostaAdaptativa(q,acertou){
+  if(!q)return;
+  bktUpdate(q.topico,acertou);
+  if(!userStats.questoesFSRS)userStats.questoesFSRS={};
+  userStats.questoesFSRS[q.id]=fsrsUpdate(userStats.questoesFSRS[q.id],acertou);
+}
+
+// ── F2.1 Perfil de domínio por tópico ──
+function perfilTopicos(){
+  const cont={};
+  Object.values(allQuestoes).forEach(q=>{if(q.topico)cont[q.topico]=(cont[q.topico]||0)+1;});
+  return Object.keys(TOPICOS).map(t=>{
+    const b=userStats.bkt&&userStats.bkt[t];
+    return{t,nome:TOPICOS[t].n,area:TOPICOS[t].a,pL:b?b.pL:BKT_P.L0,n:b?b.n:0,nQ:cont[t]||0};
+  });
+}
+
+// ── F2.4 Seleção adaptativa por tópico ──
+function selecionarAdaptativo(limite=12){
+  const perfil=perfilTopicos().filter(p=>p.nQ>0);
+  perfil.forEach(p=>{p.peso=(1-p.pL)*(p.n<3?1.4:1);}); // fraqueza + reforço p/ pouco vistos
+  const totalPeso=perfil.reduce((s,p)=>s+p.peso,0)||1;
+  let pool=[];
+  perfil.forEach(p=>{
+    const cota=Math.max(1,Math.round(p.peso/totalPeso*limite*1.6));
+    const qs=Object.values(allQuestoes).filter(q=>q.topico===p.t)
+      .sort((a,b)=>questaoDue(a.id)-questaoDue(b.id)); // vencidas/nunca vistas primeiro
+    pool.push(...qs.slice(0,cota));
+  });
+  pool=pool.map(q=>({q,pL:bktDe(q.topico),due:questaoDue(q.id)}));
+  pool.sort((a,b)=>(a.pL-b.pL)||(a.due-b.due));
+  const seen=new Set();const out=[];
+  for(const it of pool){if(seen.has(it.q.id))continue;seen.add(it.q.id);out.push(it.q);if(out.length>=limite)break;}
+  return shuffle(out);
+}
+function iniciarEstudoAdaptativo(){
+  if(!allQuestoes||!Object.keys(allQuestoes).length){showToast('Banco ainda carregando, tente em instantes.');return;}
+  const fila=selecionarAdaptativo(12);
+  if(!fila.length){showToast('Sem questões disponíveis para o modo adaptativo.');return;}
+  const topFraco=perfilTopicos().filter(p=>p.nQ>0).sort((a,b)=>a.pL-b.pL)[0];
+  quizQueue=fila;quizArea='ADAPTATIVO';quizModoErro=false;quizIdx=0;quizSessao={c:0,t:0};quizAnswered=false;
+  document.getElementById('quiz-home-view').classList.add('hidden');
+  document.getElementById('quiz-running-view').classList.remove('hidden');
+  document.getElementById('quiz-area-tag').textContent='🧠 Adaptativo'+(topFraco?' · foco '+topFraco.t:'');
+  navTo('quiz');renderQuizQ();
+}
 
 // ═══════════════════════════════
 // AREA INFO
@@ -2638,6 +2759,9 @@ async function responderQuiz(idx){
   const qSM2=acertou?5:1;
   userStats.questoesSM2[q.id]=sm2Update(cardAtual,qSM2);
 
+  // FASE 2 — BKT por tópico + FSRS-lite por questão
+  registrarRespostaAdaptativa(q,acertou);
+
   saveProg();
 
   // Feedback
@@ -2978,7 +3102,9 @@ async function encerrarSimulado(){
     const area=q.area||'';
     if(!byArea[area])byArea[area]={c:0,t:0};
     byArea[area].t++;
-    if(simRespostas[i]===q.g){correct++;byArea[area].c++;}
+    const ac=simRespostas[i]===q.g;
+    if(ac){correct++;byArea[area].c++;}
+    registrarRespostaAdaptativa(q,ac); // FASE 2 — simulado alimenta BKT/FSRS
   });
   const pct=Math.round(correct/simQuestoes.length*100);
   document.getElementById('sim-home-view').classList.add('hidden');
@@ -3066,6 +3192,32 @@ function renderPadroes(){
     </div>
     <span class="incidencia-prob" style="background:${i.prob==='alta'?'#FDECEA':'#FEF5E7'};color:${i.prob==='alta'?'#C0392B':'#E67E22'}">${i.prob==='alta'?'🔴 Alta':'🟡 Média'}</span>
   </div>`).join('');
+  renderDominioTopicos();
+}
+
+function renderDominioTopicos(){
+  const el=document.getElementById('dominio-topicos');
+  if(!el)return;
+  const perfil=perfilTopicos();
+  const cor=p=>p>=70?'var(--green)':p>=45?'var(--amber)':'var(--red)';
+  let html='';
+  ['AT1','AT2','AT3','AT4','AT5'].forEach(a=>{
+    const ts=perfil.filter(p=>p.area===a);
+    if(!ts.length)return;
+    const ai=AI[a]||{};
+    html+=`<div class="topico-area-head">${ai.icon||''} ${sanitize(ai.nome||a)}</div>`;
+    ts.forEach(p=>{
+      const pct=Math.round(p.pL*100);
+      const tag=p.n===0?'<span style="font-size:10px;color:var(--text3)"> · sem dados</span>':'';
+      html+=`<div class="topico-row">
+        <span class="topico-code">${sanitize(p.t)}</span>
+        <span class="topico-name">${sanitize(p.nome)}${tag}</span>
+        <span class="topico-bar-wrap"><span class="topico-bar" style="width:${pct}%;background:${cor(pct)}"></span></span>
+        <span class="topico-pct" style="color:${cor(pct)}">${pct}%</span>
+      </div>`;
+    });
+  });
+  el.innerHTML=html||'<p style="font-size:13px;color:var(--text2)">Responda algumas questões para gerar seu perfil por tópico.</p>';
 }
 
 function togglePadrao(i){document.getElementById('pad-'+i).classList.toggle('open');}
@@ -3443,9 +3595,10 @@ function showInfo(tipo){
   const textos={
     desempenho:'Percentual de acertos por área. Calculado dividindo respostas corretas pelo total respondido naquela área.',
     evolucao:'Progressão do seu desempenho por área ao longo do tempo, baseada no seu histórico de respostas.',
-    dominio:'Índice composto: Quiz vale 50% do cálculo, Cards 30% e Resumos 20%. Mede o domínio real do conteúdo, não só o treino.'
+    dominio:'Índice composto: Quiz vale 50% do cálculo, Cards 30% e Resumos 20%. Mede o domínio real do conteúdo, não só o treino.',
+    bkt:'Probabilidade de você dominar cada tópico (modelo BKT). A cada resposta o sistema ajusta a estimativa considerando acerto por sorte (~20%) e erro por descuido (~10%). O Modo Adaptativo prioriza os tópicos com menor domínio.'
   };
-  const titulos={desempenho:'Desempenho por Área',evolucao:'Evolução por Área',dominio:'Índice de Domínio Real'};
+  const titulos={desempenho:'Desempenho por Área',evolucao:'Evolução por Área',dominio:'Índice de Domínio Real',bkt:'Domínio por Tópico (BKT)'};
   let box=document.getElementById('info-tooltip');
   if(!box){
     box=document.createElement('div');
