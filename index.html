@@ -118,7 +118,7 @@ input,select,textarea{font-family:inherit;outline:none;}
 .btn-logout{background:rgba(255,255,255,.18);color:white;border-radius:8px;padding:6px 10px;font-size:11px;font-weight:700;}
 
 /* CONTENT */
-.app-content{flex:1;overflow-y:auto;padding-bottom:calc(var(--nav-h) + 8px);background:transparent;}
+.app-content{flex:1;overflow-y:auto;padding-bottom:calc(var(--nav-h) + env(safe-area-inset-bottom) + 16px);background:transparent;}
 
 /* BOTTOM NAV */
 .bottom-nav{position:fixed;bottom:0;left:0;right:0;height:var(--nav-h);background:#00003B;border-top:1px solid rgba(255,255,255,.1);display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom);}
@@ -365,6 +365,9 @@ input,select,textarea{font-family:inherit;outline:none;}
 .resumo-btn.dif{background:#FDECEA;color:#C0392B;}
 .resumo-btn.med{background:#FEF5E7;color:#E67E22;}
 .resumo-btn.fac{background:#E8F8F0;color:#27AE60;}
+.resumo-filtros{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;}
+.resumo-filtro{padding:6px 13px;border-radius:20px;font-size:12px;font-weight:700;border:1px solid var(--border);background:white;color:var(--text2);cursor:pointer;}
+.resumo-filtro.on{background:var(--red);color:white;border-color:var(--red);}
 .resumos-list{display:flex;flex-direction:column;gap:10px;}
 .resumo-list-item{background:white;border-radius:12px;padding:12px 14px;box-shadow:var(--shadow);display:flex;align-items:center;gap:10px;cursor:pointer;}
 .resumo-list-vence{font-size:11px;color:var(--text3);}
@@ -2913,6 +2916,7 @@ async function avaliarCard(dif){
 // RESUMOS
 // ═══════════════════════════════
 let resumoAtualId=null;
+let resumoFiltroAT='todos';
 function renderResumos(){
   const now=Date.now();
   const fila=RESUMOS_BANCO.filter(r=>{
@@ -2955,9 +2959,20 @@ function renderResumos(){
 }
 
 function renderResumoLista(){
-  const now=Date.now();
-  let html='<div class="sec-title mt14">Todos os resumos</div><div class="resumos-list">';
-  RESUMOS_BANCO.forEach(r=>{
+  const areas=[...new Set(RESUMOS_BANCO.map(r=>r.area))].sort();
+  if(resumoFiltroAT!=='todos'&&!areas.includes(resumoFiltroAT))resumoFiltroAT='todos';
+  let chips='<div class="resumo-filtros">';
+  chips+=`<button class="resumo-filtro${resumoFiltroAT==='todos'?' on':''}" data-at="todos" onclick="filtrarResumos('todos')">Todos</button>`;
+  areas.forEach(a=>{chips+=`<button class="resumo-filtro${resumoFiltroAT===a?' on':''}" data-at="${a}" onclick="filtrarResumos('${a}')">${a}</button>`;});
+  chips+='</div>';
+  return '<div class="sec-title mt14">Todos os resumos</div>'+chips+'<div class="resumos-list" id="resumos-list-itens">'+resumoListaItens()+'</div>';
+}
+
+function resumoListaItens(){
+  const lista=RESUMOS_BANCO.filter(r=>resumoFiltroAT==='todos'||r.area===resumoFiltroAT);
+  if(!lista.length)return '<div style="text-align:center;padding:16px;color:var(--text2);font-size:13px;">Nenhum resumo nesta área.</div>';
+  let html='';
+  lista.forEach(r=>{
     const aInfo=AI[r.area]||{};
     const ur=userStats['resumo_'+r.id];
     const vence=ur?.next?new Date(ur.next).toLocaleDateString('pt-BR'):'Hoje';
@@ -2966,7 +2981,14 @@ function renderResumoLista(){
       <div style="flex:1"><div style="font-size:13px;font-weight:700">${sanitize(r.titulo)}</div><div class="resumo-list-vence">${aInfo.nome} · Revisão: ${vence}</div></div>
     </div>`;
   });
-  return html+'</div>';
+  return html;
+}
+
+function filtrarResumos(at){
+  resumoFiltroAT=at;
+  const el=document.getElementById('resumos-list-itens');
+  if(el)el.innerHTML=resumoListaItens();
+  document.querySelectorAll('.resumo-filtro').forEach(b=>b.classList.toggle('on',b.dataset.at===at));
 }
 
 function mostrarResumoDirecto(id){
@@ -3474,25 +3496,40 @@ function renderDominio(){
 }
 
 function renderObjetivoSemana(){
-  const dom=calcDominio();
   const el=document.getElementById('dash-objetivo');
   if(!el)return;
-  // Área com menor domínio que tenha pelo menos algum dado (ou qualquer)
-  let piorArea=null,piorVal=101;
-  Object.entries(dom).forEach(([k,d])=>{
-    if(d.dominio<piorVal){piorVal=d.dominio;piorArea=k;}
-  });
-  if(!piorArea){el.innerHTML='';return;}
-  const a=AI[piorArea];
-  const cor=piorVal>=80?'#27AE60':piorVal>=60?'#E67E22':'#C0392B';
-  const bg=piorVal>=80?'var(--green-light)':piorVal>=60?'var(--amber-light)':'var(--red-light)';
+  // F3.5 — foco por TÓPICO via BKT (perfilTopicos), mais granular que por área.
+  const perfil=perfilTopicos().filter(p=>p.nQ>0);
+  if(!perfil.length){el.innerHTML='';return;}
+  // Pior tópico: menor pL; desempate prioriza os com mais evidência (n maior).
+  perfil.sort((a,b)=>(a.pL-b.pL)||(b.n-a.n));
+  const p=perfil[0];
+  const pct=Math.round(p.pL*100);
+  const a=AI[p.area]||{};
+  const cor=pct>=80?'#27AE60':pct>=60?'#E67E22':'#C0392B';
+  const bg=pct>=80?'var(--green-light)':pct>=60?'var(--amber-light)':'var(--red-light)';
+  const motivo=p.n===0
+    ?'Tópico ainda não praticado — comece por aqui para o sistema mapear seu domínio.'
+    :`Menor domínio estimado (BKT) entre seus tópicos, com base em ${p.n} resposta${p.n>1?'s':''}.`;
   el.innerHTML=`<div class="obj-card">
     <div class="obj-card-label">🎯 Foco da semana — sistema definiu</div>
-    <div class="obj-card-area">${a.icon} ${a.nome}</div>
-    <div class="obj-card-motivo">Menor índice de domínio entre suas áreas. Priorize questões, flashcards e resumos desta área.</div>
-    <span class="obj-card-pct" style="background:${bg};color:${cor}">${piorVal}% de domínio</span>
-    <button onclick="iniciarQuiz('${piorArea}')" style="display:block;width:100%;margin-top:10px;padding:10px;background:var(--red);color:white;border-radius:10px;font-size:13px;font-weight:700;border:none;cursor:pointer;">Estudar agora →</button>
+    <div class="obj-card-area">${a.icon||''} ${sanitize(p.nome)}</div>
+    <div class="obj-card-motivo">${motivo} <span style="opacity:.7">(${p.t} · ${p.area})</span></div>
+    <span class="obj-card-pct" style="background:${bg};color:${cor}">${pct}% de domínio</span>
+    <button onclick="iniciarEstudoTopico('${p.t}')" style="display:block;width:100%;margin-top:10px;padding:10px;background:var(--red);color:white;border-radius:10px;font-size:13px;font-weight:700;border:none;cursor:pointer;">Estudar este tópico agora →</button>
   </div>`;
+}
+
+function iniciarEstudoTopico(t){
+  if(!allQuestoes||!Object.keys(allQuestoes).length){showToast('Banco ainda carregando, tente em instantes.');return;}
+  let fila=Object.values(allQuestoes).filter(q=>q.topico===t).sort((x,y)=>questaoDue(x.id)-questaoDue(y.id));
+  if(!fila.length){showToast('Sem questões para este tópico.');return;}
+  fila=shuffle(fila.slice(0,12));
+  quizQueue=fila;quizArea='ADAPTATIVO';quizModoErro=false;quizIdx=0;quizSessao={c:0,t:0};quizAnswered=false;
+  document.getElementById('quiz-home-view').classList.add('hidden');
+  document.getElementById('quiz-running-view').classList.remove('hidden');
+  document.getElementById('quiz-area-tag').textContent='🎯 Foco '+t;
+  navTo('quiz');renderQuizQ();
 }
 
 // ═══════════════════════════════
