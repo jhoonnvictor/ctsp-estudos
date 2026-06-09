@@ -155,7 +155,8 @@ input,select,textarea{font-family:inherit;outline:none;}
 .dash-meta-fill{height:100%;background:white;border-radius:3px;transition:width .4s ease;}
 .dash-meta-count{font-size:13px;font-weight:800;}
 .dash-body{padding:14px;background:transparent;}
-.sec-title{font-size:11px;font-weight:800;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;}
+.sec-title{font-size:11px;font-weight:800;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;position:relative;padding-left:18px;}
+.sec-title::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:11px;height:3px;border-radius:2px;background:linear-gradient(90deg,var(--red),var(--amber));}
 .sec-title a{font-size:11px;color:var(--red);font-weight:700;text-transform:none;letter-spacing:0;}
 
 /* Ring SVG */
@@ -168,7 +169,9 @@ input,select,textarea{font-family:inherit;outline:none;}
 
 /* Cards de progresso por área */
 .area-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}.area-grid>.area-card:last-child:nth-child(odd){grid-column:1/-1;max-width:calc(50% - 5px);margin:0 auto;}
-.area-card{background:white;border-radius:16px;padding:14px;box-shadow:var(--shadow);transition:transform .2s var(--ease-out),box-shadow .2s;}
+.area-card{position:relative;overflow:hidden;background:white;border-radius:16px;padding:14px;padding-left:16px;box-shadow:var(--shadow);transition:transform .2s var(--ease-out),box-shadow .2s;}
+.area-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--ac,var(--red));}
+.area-card:active{transform:scale(.97);}
 .area-card-top{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
 .area-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
 .area-card-name{font-size:11px;font-weight:700;color:var(--text);line-height:1.2;}
@@ -195,6 +198,19 @@ input,select,textarea{font-family:inherit;outline:none;}
 .adapt-btn-title{font-size:15px;font-weight:800;}
 .adapt-btn-sub{font-size:11px;opacity:.85;margin-top:2px;}
 .adapt-btn-arrow{font-size:20px;font-weight:700;opacity:.9;}
+.diag-card{position:relative;overflow:hidden;display:flex;align-items:center;gap:14px;background:linear-gradient(135deg,var(--red-dark),var(--red));color:#fff;border-radius:18px;padding:16px 18px;margin-bottom:14px;cursor:pointer;box-shadow:var(--shadow-md);transition:transform .2s var(--ease-out);}
+.diag-card.hidden{display:none;}
+.diag-card:active{transform:scale(.98);}
+.diag-card-icon{font-size:30px;flex-shrink:0;}
+.diag-card-info{flex:1;}
+.diag-card-tag{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;opacity:.85;}
+.diag-card-title{font-size:16px;font-weight:800;margin-top:2px;}
+.diag-card-sub{font-size:11.5px;opacity:.92;margin-top:4px;line-height:1.35;}
+.quiz-fb-erro{display:flex;flex-direction:column;gap:6px;margin:10px 0;}
+.quiz-fb-erro .fb-linha{font-size:12.5px;line-height:1.35;padding:8px 10px;border-radius:8px;}
+.quiz-fb-erro .fb-marcada{background:var(--red-light);color:var(--red-dark);}
+.quiz-fb-erro .fb-correta{background:var(--green-light);color:#1e7a47;}
+.quiz-fb-erro .fb-rotulo{display:block;font-weight:800;font-size:9.5px;text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px;opacity:.8;}
 .topico-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);}
 .topico-row:last-child{border-bottom:none;}
 .topico-code{font-size:11px;font-weight:800;color:var(--text2);min-width:34px;}
@@ -203,9 +219,11 @@ input,select,textarea{font-family:inherit;outline:none;}
 .topico-bar{height:100%;border-radius:6px;transition:width .5s var(--ease-out);}
 .topico-pct{font-size:12px;font-weight:800;min-width:34px;text-align:right;}
 .topico-area-head{font-size:12px;font-weight:800;color:var(--text2);margin:12px 0 2px;}
-.quick-btn{background:white;border-radius:16px;padding:14px 12px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:6px;cursor:pointer;transition:transform .2s var(--ease-out),box-shadow .2s;border:1.5px solid transparent;}
-.quick-btn:active{transform:scale(.97);}
-.quick-btn.destaque{border-color:var(--red);background:var(--red-light);}
+.quick-btn{position:relative;overflow:hidden;background:white;border-radius:16px;padding:16px 12px;box-shadow:var(--shadow-md);display:flex;flex-direction:column;gap:6px;cursor:pointer;transition:transform .2s var(--ease-out),box-shadow .2s;border:1px solid rgba(0,0,0,.04);}
+.quick-btn::after{content:'';position:absolute;left:0;right:0;top:0;height:3px;background:linear-gradient(90deg,var(--red),var(--amber));opacity:.9;}
+.quick-btn:active{transform:scale(.97);box-shadow:var(--shadow);}
+.quick-btn.destaque{border-color:transparent;background:var(--red-light);}
+.quick-btn.destaque::after{opacity:1;}
 .quick-btn-icon{font-size:24px;}
 .quick-btn-title{font-size:13px;font-weight:700;color:var(--text);}
 .quick-btn-sub{font-size:11px;color:var(--text2);}
@@ -220,7 +238,7 @@ input,select,textarea{font-family:inherit;outline:none;}
 .area-evo-pct{font-size:10px;font-weight:800;color:white;}
 .chart-bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;}
 .chart-bar{width:100%;background:var(--red-light);border-radius:4px 4px 0 0;transition:height .4s ease;min-height:4px;}
-.chart-bar.hoje{background:var(--red);}
+.chart-bar.hoje{background:linear-gradient(180deg,#F0883C,var(--red));}
 .chart-bar-label{font-size:9px;color:var(--text3);font-weight:600;}
 
 /* Modal meta diária */
@@ -442,7 +460,7 @@ input,select,textarea{font-family:inherit;outline:none;}
 
 /* Gráfico 7 dias melhorado */
 .chart-bar{width:100%;background:rgba(211,36,18,.15);border-radius:6px 6px 0 0;transition:height .5s var(--ease-out);min-height:4px;}
-.chart-bar.hoje{background:var(--red);}
+.chart-bar.hoje{background:linear-gradient(180deg,#F0883C,var(--red));}
 .chart-bar-label{font-size:9px;color:var(--text3);font-weight:600;margin-top:3px;}
 
 /* Quiz intercalado — cor consistente */
@@ -632,6 +650,16 @@ input,select,textarea{font-family:inherit;outline:none;}
         <button onclick="location.reload()" style="background:white;color:var(--red);border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;">Recarregar</button>
       </div>
       <div class="dash-body">
+        <!-- FEAT-01: Simulado de nivelamento (onboarding) -->
+        <div id="diag-card" class="diag-card hidden" onclick="iniciarDiagnostico()">
+          <div class="diag-card-icon">🧭</div>
+          <div class="diag-card-info">
+            <div class="diag-card-tag">Comece por aqui</div>
+            <div class="diag-card-title">Simulado de nivelamento</div>
+            <div class="diag-card-sub">15 questões pelas 5 áreas para medir seu domínio. A plataforma aprende seu nível e passa a adaptar os estudos a partir daí.</div>
+          </div>
+          <div class="adapt-btn-arrow">→</div>
+        </div>
         <!-- Ponto fraco -->
         <div id="dash-weak" class="weak-card hidden">
           <div class="weak-icon">⚠️</div>
@@ -737,6 +765,7 @@ input,select,textarea{font-family:inherit;outline:none;}
           <div class="quiz-opts" id="quiz-opts"></div>
           <div class="quiz-feedback" id="quiz-feedback">
             <div class="quiz-feedback-title" id="quiz-fb-title"></div>
+            <div class="quiz-fb-erro" id="quiz-fb-erro" style="display:none"></div>
             <div class="quiz-feedback-text" id="quiz-fb-text"></div>
             <div class="quiz-ai-tip" id="quiz-ai-tip" style="display:none">💡 <span id="quiz-ai-tip-text"></span></div>
           </div>
@@ -1235,7 +1264,7 @@ AT5:[
 AT1B:[
 {id:"b1_01",topico:"T1.3",e:"Segundo o Decreto Estadual nº 51.803/2014, o prazo para regularização após lavratura do auto de infração, antes da aplicação de multa, é de:",ops:["15 dias corridos.","30 dias corridos.","20 dias úteis.","10 dias úteis.","60 dias corridos."],g:1,doc:"Decreto 51.803/2014",exp:"O prazo para regularização após o auto de infração é de 30 dias corridos."},
 {id:"b1_02",topico:"T1.1",e:"Conforme a LC 14.376/2013, a altura de uma edificação é medida a partir do:",ops:["Nível da rua até o teto do último pavimento habitável.","Ponto mais baixo do terreno até o último pavimento.","Nível de descarga até o piso do último pavimento habitável utilizado como saída de emergência.","Nível do piso térreo até o último pavimento.","Ponto de maior altitude do terreno até o telhado."],g:2,doc:"LC 14.376/2013 art.6º",exp:"Altura = nível de descarga até o piso do último pavimento habitável utilizado como saída de emergência."},
-{id:"b1_03",topico:"T1.1",e:"Qual das alternativas abaixo apresenta a classificação CORRETA quanto à ocupação/uso das edificações, segundo a LC 14.376/2013?",ops:["F-1: Residencial unifamiliar; F-2: Residencial coletivo; F-3: Serviços profissionais.","F-1: Residencial unifamiliar; F-2: Residencial coletivo; F-3: Comércio.","F-5: Serviços automotivos; F-6: Educacional; F-7: Local de reunião de público.","F-5: Educacional; F-6: Local de reunião de público; F-7: Serviços de saúde.","F-6: Educacional; F-8: Serviços de saúde; F-11: Indústrias."],g:3,doc:"LC 14.376/2013 - Tabela de ocupações",exp:"F-5: Educacional; F-6: Local de reunião de público; F-7: Serviços de saúde é a sequência correta."},
+{id:"b1_03",topico:"T1.1",e:"Na classificação das edificações quanto à ocupação/uso (Tabela 1 do Anexo A do Decreto 51.803/2014, que regulamenta a LC 14.376/2013), qual associação GRUPO → ocupação está CORRETA?",ops:["Grupo A: Residencial; Grupo E: Educacional e cultura física; Grupo F: Local de reunião de público; Grupo H: Serviço de saúde e institucional.","Grupo A: Local de reunião de público; Grupo E: Residencial; Grupo F: Educacional; Grupo H: Comercial.","Grupo F-1: Residencial unifamiliar; Grupo F-2: Residencial coletivo; Grupo F-3: Serviços profissionais.","Grupo C: Educacional; Grupo E: Serviço de saúde; Grupo F: Industrial; Grupo H: Residencial.","Grupo A: Industrial; Grupo E: Depósito; Grupo F: Comercial; Grupo H: Educacional."],g:0,doc:"LC 14.376/2013 / Decreto 51.803/2014 - Anexo A, Tabela 1",exp:"A ocupação é classificada por GRUPOS designados por LETRA: A=Residencial, B=Hospedagem, C=Comercial, D=Serviço profissional, E=Educacional e cultura física, F=Local de reunião de público, G=Serviço automotivo, H=Saúde/institucional, I=Industrial, J=Depósito, L=Explosivos, M=Especial. As divisões F-1, F-2, F-5, F-6, F-7... pertencem TODAS ao grupo F (local de reunião de público) - não são grupos distintos."},
 {id:"b1_04",topico:"T1.4",e:"Segundo a RT CBMRS nº 14/2016, em relação aos extintores portáteis: I-carga útil mínima de pó BC = 4 kg; II-carga útil mínima de CO₂ = 6 kg; III-manutenção anual obrigatória; IV-recarga imediatamente após uso parcial. Quais estão CORRETAS?",ops:["Apenas I e III.","Apenas II e IV.","Apenas I, III e IV.","Apenas II, III e IV.","I, II, III e IV."],g:2,doc:"RT CBMRS nº 14/2016",exp:"I, III e IV corretos. II errado: carga mínima de CO₂ portátil é de 4 kg, não 6 kg."},
 {id:"b1_05",topico:"T1.2",e:"O PSPCI (RT CBMRS nº 05 Parte 03/2025) pode ser utilizado para edificações F-11 e F-12 com área de até:",ops:["500 m².","750 m².","1.000 m².","1.500 m².","2.000 m²."],g:3,doc:"RT CBMRS nº 05 Parte 03/2025",exp:"PSPCI para F-11 e F-12: área entre 750 e 1.500 m² (até 1.500 m²)."},
 {id:"b1_06",topico:"T1.3",e:"A multa diária prevista no Decreto 51.803/2014 é aplicada quando:",ops:["O proprietário não comparecer à notificação inicial.","A irregularidade persistir após o prazo da multa simples.","O responsável técnico revogar a ART do projeto.","A edificação for interditada preventivamente.","O laudo de vistoria for reprovado pela segunda vez."],g:1,doc:"Decreto 51.803/2014",exp:"A multa diária é aplicada quando a irregularidade persiste após o prazo dado pela multa simples."},
@@ -1741,17 +1770,18 @@ Tipos de documentos:
 • OFÍCIO: comunicação externa ou formal com outras instituições`},
 
 // ── AT1 novos ──
-{id:"r_at1_06",area:"AT1",titulo:"Classificação de Ocupações — LC 14.376/2013",prob:"alta",
-texto:`Classificações de uso/ocupação (Tabela):
-• F-1: Residencial unifamiliar
-• F-2: Residencial coletivo (prédios)
-• F-5: Educacional (escolas, universidades)
-• F-6: Local de reunião de público (igrejas, teatros, estádios)
-• F-7: Serviços de saúde (hospitais, clínicas)
-• F-8: Serviços profissionais (escritórios, bancos)
-• F-11: Depósito / armazenamento
-• F-12: Indústrias
-⚠️ F-6 e F-7 têm exigências máximas de segurança!`},
+{id:"r_at1_06",area:"AT1",titulo:"Classificação de Ocupações — Dec. 51.803/2014 (LC 14.376/2013)",prob:"alta",
+texto:`Ocupação/uso é classificada por GRUPOS (letra) — Tabela 1, Anexo A:
+• A — Residencial (A-1 unifamiliar, A-2 multifamiliar, A-3 coletiva)
+• B — Serviço de hospedagem (hotéis, pousadas)
+• C — Comercial
+• D — Serviço profissional (escritórios, bancos)
+• E — Educacional e cultura física (escolas, academias)
+• F — Local de reunião de público (igrejas, teatros, estádios)
+• G — Serviço automotivo
+• H — Serviço de saúde e institucional (hospitais, clínicas)
+• I — Industrial  • J — Depósito  • L — Explosivos  • M — Especial
+⚠️ As divisões F-1, F-2, F-5, F-6, F-7... pertencem TODAS ao grupo F (reunião de público). Divisões F-5/F-6/F-7 têm exigências específicas nas RTCBMRS.`},
 
 {id:"r_at1_07",area:"AT1",titulo:"Altura da Edificação — LC 14.376/2013",prob:"alta",
 texto:`Altura = medida do NÍVEL DE DESCARGA até o PISO do último pavimento habitável utilizado como saída de emergência.
@@ -2477,6 +2507,7 @@ function navTo(s){
   const nav=document.getElementById('nav-'+s);
   if(nav)nav.classList.add('active');
   window.scrollTo(0,0);
+  if(s==='inicio'){renderDashboard();}
   if(s==='quiz'){renderAreaList();}
   if(s==='cards'){renderCards();}
   if(s==='resumos'){renderResumos();updateBadges();}
@@ -2560,6 +2591,10 @@ function renderDashboard(){
   // Ponto fraco
   renderPontoFraco();
 
+  // FEAT-01: card de nivelamento só enquanto não concluído
+  const diagCard=document.getElementById('diag-card');
+  if(diagCard)diagCard.classList.toggle('hidden', !!userStats.diagFeito);
+
   // Áreas
   const grid=document.getElementById('dash-areas');
   grid.innerHTML='';
@@ -2567,7 +2602,7 @@ function renderDashboard(){
     const ba=userStats.byArea||{};
     const c=(ba[k]?.correct||0),w=(ba[k]?.wrong||0),t=c+w;
     const p=t>0?Math.round(c/t*100):0;
-    grid.innerHTML+=`<div class="area-card" onclick="iniciarQuiz('${k}')" style="cursor:pointer">
+    grid.innerHTML+=`<div class="area-card" onclick="iniciarQuiz('${k}')" style="--ac:${a.color};background:${a.bg};cursor:pointer">
       <div class="area-card-top">
         <div class="area-icon" style="background:${a.bg}">${a.icon}</div>
         <div><div class="area-card-name">${a.nome.split('—')[1]?.trim()||a.nome}</div><div class="area-card-code">${k}</div></div>
@@ -2704,6 +2739,7 @@ function voltarMenuQuiz(){
   document.getElementById('quiz-home-view').classList.remove('hidden');
   document.querySelector('.btn-revelar')?.remove();
   quizQueue=[];quizIdx=0;quizSessao={c:0,t:0};
+  renderAreaList();
 }
 
 function renderAreaList(){
@@ -2794,6 +2830,27 @@ function iniciarSimuladoInteligente(){
   document.getElementById('quiz-home-view').classList.add('hidden');
   document.getElementById('quiz-running-view').classList.remove('hidden');
   document.getElementById('quiz-area-tag').textContent='🎯 Simulado IA';
+  navTo('quiz');renderQuizQ();
+}
+
+function iniciarDiagnostico(){
+  // Simulado de nivelamento: amostra balanceada das 5 áreas para medir o domínio base.
+  // Passa pelo motor de quiz padrão → alimenta byArea + BKT por tópico (registrarRespostaAdaptativa).
+  const porArea=3;
+  const buckets={};
+  Object.keys(AI).forEach(area=>{
+    buckets[area]=shuffle(Object.values(allQuestoes).filter(q=>q.area===area)).slice(0,porArea);
+  });
+  // Intercalar: 1 de cada área por rodada, mantendo variedade ao longo do simulado
+  const fila=[];
+  for(let i=0;i<porArea;i++){
+    Object.keys(AI).forEach(area=>{ if(buckets[area][i])fila.push(buckets[area][i]); });
+  }
+  if(!fila.length){showToast('Banco de questões ainda não carregou. Tente recarregar.');return;}
+  quizQueue=fila;quizArea='DIAGNOSTICO';quizModoErro=false;quizIdx=0;quizSessao={c:0,t:0};quizAnswered=false;
+  document.getElementById('quiz-home-view').classList.add('hidden');
+  document.getElementById('quiz-running-view').classList.remove('hidden');
+  document.getElementById('quiz-area-tag').textContent='🧭 Nivelamento';
   navTo('quiz');renderQuizQ();
 }
 
@@ -2944,28 +3001,40 @@ async function responderQuiz(idx){
   fb.classList.add('show');
   document.getElementById('quiz-fb-title').textContent=acertou?'✅ Correto!':'❌ Incorreto';
   document.getElementById('quiz-fb-title').style.color=acertou?'var(--green)':'var(--red)';
+  // CONT-01: mostrar a alternativa marcada × a correta
+  const opsDisplay=q._shuffledOps||q.ops||[];
+  const escolhidaTxt=opsDisplay[idx]||'';
+  const corretaTxt=opsDisplay[correta]||'';
+  const erroEl=document.getElementById('quiz-fb-erro');
+  if(erroEl){
+    if(!acertou){
+      erroEl.style.display='flex';
+      erroEl.innerHTML=`<div class="fb-linha fb-marcada"><span class="fb-rotulo">Você marcou</span>${sanitize(escolhidaTxt)}</div>`+
+        `<div class="fb-linha fb-correta"><span class="fb-rotulo">Resposta correta</span>${sanitize(corretaTxt)}</div>`;
+    } else { erroEl.style.display='none'; erroEl.innerHTML=''; }
+  }
   const contErros=!acertou&&userStats.erroHistorico?.[q.id]?.count||0;
   const sufixoErro=!acertou&&contErros>1?` (${contErros}ª vez que erra esta questão)`:'';
-  document.getElementById('quiz-fb-text').textContent=sanitize(q.exp||'')+sufixoErro;
+  document.getElementById('quiz-fb-text').textContent=(q.exp||'')+sufixoErro;
 
-  // Dica IA para erros
+  // Dica IA — específica do erro do aluno
   if(!acertou){
-    buscarDicaIA(q);
+    buscarDicaIA(q,escolhidaTxt);
   }
 
   document.getElementById('quiz-next-btn').classList.add('show');
   document.getElementById('quiz-score-v').textContent=quizSessao.c+'/'+quizSessao.t;
 }
 
-async function buscarDicaIA(q){
+async function buscarDicaIA(q,escolhida){
   try{
     const resp=await fetch('https://ctsp-anthropic-proxy.jvictor-projetos-ti.workers.dev',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
         model:ANTHROPIC_MODEL,max_tokens:150,
-        system:'Você é um instrutor do CTSP 2026 CBMRS. Dê uma dica curta (máximo 2 linhas) para memorizar o conceito correto da questão. Seja objetivo e prático.',
-        messages:[{role:'user',content:`Questão: ${q.e}\nGabarito: ${q.ops[q.g]}\nExplicação: ${q.exp}\n\nDê uma dica curta para memorizar.`}]
+        system:'Você é instrutor do CTSP 2026 do CBMRS. O aluno errou uma questão. Em no máximo 2 linhas, aponte objetivamente POR QUE a alternativa que ele marcou está errada e fixe o conceito correto. Não repita apenas a resposta certa — explique o erro. Seja direto e prático.',
+        messages:[{role:'user',content:`Questão: ${q.e}\nAlternativa marcada (errada): ${escolhida||'(não informada)'}\nResposta correta: ${q.ops[q.g]}\nExplicação base: ${q.exp}\n\nExplique por que a alternativa marcada está errada e fixe o conceito correto.`}]
       })
     });
     const data=await resp.json();
@@ -2988,6 +3057,14 @@ function finishQuiz(){
   document.getElementById('quiz-running-view').classList.add('hidden');
   document.getElementById('quiz-home-view').classList.remove('hidden');
   renderAreaList();
+  if(quizArea==='DIAGNOSTICO'&&!userStats.diagFeito){
+    userStats.diagFeito=true;
+    userStats.diagData=Date.now();
+    saveProg();
+    navTo('inicio');
+    showToast(`✅ Nivelamento concluído: ${quizSessao.c}/${quizSessao.t}. Seu perfil de domínio está pronto!`);
+    return;
+  }
   renderDashboard();
   showToast(`Sessão encerrada: ${quizSessao.c}/${quizSessao.t} acertos`);
 }
