@@ -734,6 +734,15 @@ input,select,textarea{font-family:inherit;outline:none;}
           </div>
           <button class="btn-weak" onclick="estudarFraco()">Estudar</button>
         </div>
+        <div id="dash-due" class="weak-card hidden">
+          <div class="weak-icon" style="background:var(--amber-light);color:var(--ember-deep)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><polyline points="3 4 3 9 8 9"/><polyline points="12 7 12 12 15.5 14"/></svg></div>
+          <div class="weak-info">
+            <div class="weak-title">Revisões de hoje</div>
+            <div class="weak-area" id="due-count">—</div>
+            <div class="weak-pct">Repetição espaçada (FSRS)</div>
+          </div>
+          <button class="btn-weak" onclick="iniciarRevisaoDue()">Revisar</button>
+        </div>
         <!-- Quick actions -->
         <div class="sec-title">Estudar agora</div>
         <div class="adapt-btn" onclick="iniciarEstudoAdaptativo()">
@@ -862,7 +871,7 @@ input,select,textarea{font-family:inherit;outline:none;}
           <div class="sim-cards">
             <div class="sim-card" onclick="iniciarSimulado('completo')">
               <div class="sim-card-icon" style="background:var(--red-light);color:var(--red);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
-              <div class="sim-card-info"><h3>Simulado Completo</h3><p>60 questões · 3 horas · CTSP 2026</p></div>
+              <div class="sim-card-info"><h3>Simulado Real</h3><p>60 questões · proporção do edital (14/8/14/12/12) · 3 horas</p></div>
             </div>
             <div class="sim-card" onclick="iniciarSimulado('inteligente')">
               <div class="sim-card-icon" style="background:var(--amber-light);color:var(--ember-deep);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none"/></svg></div>
@@ -1231,6 +1240,18 @@ function perfilTopicos(){
   });
 }
 
+// ── S34 INTERLEAVE: alternância deliberada de tópicos (prática intercalada) ──
+function interleavePorTopico(arr){
+  const grupos={};
+  arr.forEach(q=>{const k=q.topico||'?';(grupos[k]=grupos[k]||[]).push(q);});
+  const chaves=shuffle(Object.keys(grupos));
+  const out=[];
+  while(out.length<arr.length){
+    for(const k of chaves){const g=grupos[k];if(g.length)out.push(g.shift());}
+  }
+  return out;
+}
+
 // ── F2.4 Seleção adaptativa por tópico ──
 function selecionarAdaptativo(limite=12){
   const perfil=perfilTopicos().filter(p=>p.nQ>0);
@@ -1247,7 +1268,7 @@ function selecionarAdaptativo(limite=12){
   pool.sort((a,b)=>(a.pL-b.pL)||(a.due-b.due));
   const seen=new Set();const out=[];
   for(const it of pool){if(seen.has(it.q.id))continue;seen.add(it.q.id);out.push(it.q);if(out.length>=limite)break;}
-  return shuffle(out);
+  return interleavePorTopico(out); // S34: intercala tópicos em vez de embaralhar
 }
 function iniciarEstudoAdaptativo(){
   if(!allQuestoes||!Object.keys(allQuestoes).length){showToast('Banco ainda carregando, tente em instantes.');return;}
@@ -1258,6 +1279,25 @@ function iniciarEstudoAdaptativo(){
   document.getElementById('quiz-home-view').classList.add('hidden');
   document.getElementById('quiz-running-view').classList.remove('hidden');
   document.getElementById('quiz-area-tag').textContent='Adaptativo'+(topFraco?' · foco '+topFraco.t:'');
+  navTo('quiz');renderQuizQ();
+}
+
+// ── S34 REV-HOJE: revisões vencidas (FSRS) ──
+function questoesDueHoje(){
+  const f=userStats.questoesFSRS||{};
+  const agora=Date.now();
+  return Object.values(allQuestoes)
+    .filter(q=>f[q.id]&&f[q.id].next&&f[q.id].next<=agora)
+    .sort((a,b)=>f[a.id].next-f[b.id].next); // mais atrasadas primeiro
+}
+function iniciarRevisaoDue(){
+  const due=questoesDueHoje();
+  if(!due.length){showToast('Nenhuma revisão vencida. Tudo em dia!');return;}
+  quizQueue=interleavePorTopico(due.slice(0,12));
+  quizArea='REVISAO';quizModoErro=false;quizIdx=0;quizSessao={c:0,t:0};quizAnswered=false;
+  document.getElementById('quiz-home-view').classList.add('hidden');
+  document.getElementById('quiz-running-view').classList.remove('hidden');
+  document.getElementById('quiz-area-tag').textContent='Revisão do dia · FSRS';
   navTo('quiz');renderQuizQ();
 }
 
@@ -2737,6 +2777,15 @@ function renderDashboard(){
   // Ponto fraco
   renderPontoFraco();
 
+  // S34 REV-HOJE: card de revisões vencidas
+  const due=questoesDueHoje();
+  const dueCard=document.getElementById('dash-due');
+  if(dueCard){
+    dueCard.classList.toggle('hidden',due.length===0);
+    const dc=document.getElementById('due-count');
+    if(dc)dc.textContent=due.length+(due.length===1?' questão vencida':' questões vencidas');
+  }
+
   // FEAT-01: card de nivelamento só enquanto não concluído
   const diagCard=document.getElementById('diag-card');
   if(diagCard)diagCard.classList.toggle('hidden', !!userStats.diagFeito);
@@ -3475,7 +3524,18 @@ function iniciarSimulado(modo){
     }
     simQuestoes=pool.slice(0,15);
   } else {
-    simQuestoes=shuffle(qs).slice(0,60);
+    // S34 SIM-REAL: proporção oficial do Edital 004/ABM-DENS/2025 — AT1:14 AT2:8 AT3:14 AT4:12 AT5:12.
+    // Blocos na ordem da prova oficial (AT1→AT5); embaralhamento só dentro de cada área. Sem feedback até o fim.
+    const dist={AT1:14,AT2:8,AT3:14,AT4:12,AT5:12};
+    let pool=[];
+    Object.entries(dist).forEach(([area,n])=>{
+      pool.push(...shuffle(qs.filter(q=>q.area===area)).slice(0,n));
+    });
+    if(pool.length<60){
+      const extras=shuffle(qs).filter(q=>!pool.find(p=>p.id===q.id));
+      pool.push(...extras.slice(0,60-pool.length));
+    }
+    simQuestoes=pool;
   }
   simTempo=modo==='inteligente'?2700:10800;
   document.getElementById('sim-home-view').classList.add('hidden');
