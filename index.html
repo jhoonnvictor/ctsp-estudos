@@ -44,6 +44,27 @@
   --font-display:'Barlow Condensed',-apple-system,'Helvetica Neue',Arial,sans-serif;
   --fire-line:linear-gradient(90deg,var(--red) 0%,var(--ember) 100%);
 }
+/* ── S30: Modo noturno ── */
+html[data-theme="dark"]{
+  --paper:#0D1322;--paper-2:#19233E;--surface:#141C33;--bg:#19233E;
+  --text:#EAECF4;--text2:#A7AEC5;--text3:#6F7794;
+  --border:#283354;--line-soft:#222C49;
+  --red:#F05B43;--red-dark:#FF9A86;--red-light:#3A1712;
+  --green:#46C07A;--green-light:#11301F;
+  --amber:#E8A04C;--amber-light:#33260F;
+  --blue:#5EA5DA;--blue-light:#13273D;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 4px 14px rgba(0,0,0,.32);
+  --shadow-md:0 2px 4px rgba(0,0,0,.34),0 10px 28px rgba(0,0,0,.42);
+  --shadow-lg:0 8px 32px rgba(0,0,0,.55);
+}
+html[data-theme="dark"] body::before{background:radial-gradient(900px 480px at 85% -10%,rgba(240,136,60,.05),transparent 60%),radial-gradient(700px 420px at -10% 100%,rgba(0,0,0,.35),transparent 55%);}
+html[data-theme="dark"] body::after{opacity:.22;mix-blend-mode:screen;}
+html[data-theme="dark"] .quiz-opt.selected{background:#1D2A4D;border-color:var(--ember);}
+html[data-theme="dark"] .quiz-opt.selected .quiz-opt-letter{background:var(--ember);color:#1C1206;}
+html[data-theme="dark"] .meta-opt.active,html[data-theme="dark"] .resumo-filtro.on,html[data-theme="dark"] .admin-tab.active{background:var(--ember);border-color:var(--ember);color:#1C1206;}
+html[data-theme="dark"] .field input:focus,html[data-theme="dark"] .field select:focus,html[data-theme="dark"] .config-input:focus{border-color:var(--ember);box-shadow:0 0 0 3px rgba(240,136,60,.12);}
+html[data-theme="dark"] .diag-card{background:linear-gradient(135deg,#7E180B,#C2412C);}
+html[data-theme="dark"] .quick-btn.destaque{border-color:#4A2B1A;background:linear-gradient(180deg,#241A14,var(--surface));}
 html,body{height:100%;font-family:-apple-system,'SF Pro Display','Helvetica Neue',Arial,sans-serif;background:var(--paper);color:var(--text);overflow-x:hidden;}
 /* Atmosfera: grão de papel técnico + luz quente sutil */
 body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
@@ -181,6 +202,15 @@ input,select,textarea{font-family:inherit;outline:none;}
 .dash-meta-bar{height:6px;background:rgba(255,255,255,.18);border-radius:3px;overflow:hidden;}
 .dash-meta-fill{height:100%;background:var(--fire-line);border-radius:3px;transition:width .4s ease;}
 .dash-meta-count{font-family:var(--font-display);font-size:17px;font-weight:700;font-variant-numeric:tabular-nums;}
+/* S30: hero com anel de meta */
+.dash-sub{font-size:11px;color:rgba(255,255,255,.55);margin-top:5px;font-weight:600;letter-spacing:.02em;}
+.dash-statline{display:flex;align-items:stretch;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:12px 4px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);position:relative;z-index:1;}
+.dash-statline .dash-stat{flex:1;background:none;border:none;border-radius:0;padding:0 4px;backdrop-filter:none;-webkit-backdrop-filter:none;}
+.dash-stat-div{width:1px;background:rgba(255,255,255,.13);margin:5px 0;flex-shrink:0;}
+/* S30: seletor de tema */
+.theme-seg{display:flex;background:var(--paper-2);border:1px solid var(--border);border-radius:11px;padding:3px;gap:2px;}
+.theme-seg button{font-size:11px;font-weight:700;padding:7px 11px;border-radius:8px;background:transparent;color:var(--text2);transition:all .15s;}
+.theme-seg button.on{background:var(--surface);color:var(--text);box-shadow:var(--shadow);}
 .dash-body{padding:16px 14px;background:transparent;}
 .sec-title{font-family:var(--font-display);font-size:14px;font-weight:600;color:var(--text);text-transform:uppercase;letter-spacing:.13em;margin:4px 0 10px;display:flex;align-items:center;justify-content:space-between;position:relative;padding-left:18px;}
 .sec-title::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:11px;height:3px;border-radius:2px;background:var(--fire-line);}
@@ -660,25 +690,30 @@ input,select,textarea{font-family:inherit;outline:none;}
       <div class="dash-hero" style="position:relative;">
         <div class="dash-top">
           <div>
-            <div class="dash-greeting">Olá,</div>
+            <div class="dash-greeting" id="dash-greeting">Olá,</div>
             <div class="dash-name" id="dash-nome">Bombeiro</div>
+            <div class="dash-sub">Preparatório CTSP 2026</div>
+          </div>
+          <div class="dash-ring-wrap">
+            <div style="position:relative;width:86px;height:86px;">
+              <svg class="ring-svg" width="86" height="86" viewBox="0 0 60 60"><circle class="ring-bg" cx="30" cy="30" r="27"/><circle class="ring-fg" id="dash-ring" cx="30" cy="30" r="27" stroke-dasharray="169.6" stroke-dashoffset="169.6"/></svg>
+              <div class="ring-center"><div class="ring-pct" id="dash-ring-pct">0%</div><div class="ring-lbl">META</div></div>
+            </div>
+            <div class="dash-ring-label" id="dash-ring-label">0/10</div>
           </div>
         </div>
-        <div class="dash-stats">
+        <div class="dash-statline">
           <div class="dash-stat"><div class="dash-stat-v" id="dash-total">0</div><div class="dash-stat-l">Questões</div></div>
+          <div class="dash-stat-div"></div>
           <div class="dash-stat"><div class="dash-stat-v" id="dash-pct">0%</div><div class="dash-stat-l">Acertos</div></div>
+          <div class="dash-stat-div"></div>
           <div class="dash-stat"><div class="dash-stat-v" id="dash-cards">0</div><div class="dash-stat-l">Cards</div></div>
-        </div>
-        <div class="dash-meta">
-          <div class="dash-meta-info">
-            <div class="dash-meta-title">META DIÁRIA</div>
-            <div class="dash-meta-bar"><div class="dash-meta-fill" id="dash-meta-fill" style="width:0%"></div></div>
-          </div>
-          <div class="dash-meta-count" id="dash-meta-count">0/10</div>
+          <div class="dash-stat-div"></div>
+          <div class="dash-stat"><div class="dash-stat-v" style="display:flex;align-items:center;justify-content:center;gap:3px"><span id="dash-streak">0</span><svg style="width:13px;height:13px;color:var(--ember)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c1.5 3.5 5 5.2 5 9a5 5 0 0 1-10 0c0-2 .9-3.4 1.8-4.7.4 1.2 1.2 2 2.2 2.5C10.6 6.7 11 4.4 12 2z"/></svg></div><div class="dash-stat-l">Dias</div></div>
         </div>
       </div>
       <!-- Alerta dados não carregados -->
-      <div id="dash-reload-alert" style="display:none;background:var(--red-light);border:1px solid #F0D9CF;border-radius:12px;margin:12px 14px 0;padding:10px 14px;align-items:center;gap:10px;justify-content:space-between;">
+      <div id="dash-reload-alert" style="display:none;background:var(--red-light);border:1px solid var(--border);border-radius:12px;margin:12px 14px 0;padding:10px 14px;align-items:center;gap:10px;justify-content:space-between;">
         <span style="color:var(--red-dark);font-size:12px;font-weight:600;">Dados não carregaram</span>
         <button onclick="location.reload()" style="background:var(--red);color:white;border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;">Recarregar</button>
       </div>
@@ -958,24 +993,24 @@ input,select,textarea{font-family:inherit;outline:none;}
   <!-- BOTTOM NAV -->
   <nav class="bottom-nav" id="bottom-nav">
     <div class="nav-item active" id="nav-inicio" onclick="navTo('inicio')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Início
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Início
     </div>
     <div class="nav-item" id="nav-quiz" onclick="navTo('quiz')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Quiz
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Quiz
     </div>
     <div class="nav-item" id="nav-cards" onclick="navTo('cards')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>Cards
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>Cards
       <span class="nav-badge hidden" id="badge-cards">0</span>
     </div>
     <div class="nav-item" id="nav-simulado" onclick="navTo('simulado')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Simulado
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Simulado
     </div>
     <div class="nav-item" id="nav-resumos" onclick="navTo('resumos')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Resumos
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Resumos
       <span class="nav-badge hidden" id="badge-resumos">0</span>
     </div>
     <div class="nav-item" id="nav-padroes" onclick="navTo('padroes')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Padrões
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Padrões
     </div>
   </nav>
 </div>
@@ -1019,6 +1054,17 @@ input,select,textarea{font-family:inherit;outline:none;}
     </div>
     <div class="config-row">
       <div>
+        <div class="config-label">Aparência</div>
+        <div class="config-sub">Tema do aplicativo</div>
+      </div>
+      <div class="theme-seg" id="theme-seg">
+        <button type="button" data-t="claro" onclick="setTema('claro')">Claro</button>
+        <button type="button" data-t="escuro" onclick="setTema('escuro')">Escuro</button>
+        <button type="button" data-t="auto" onclick="setTema('auto')">Auto</button>
+      </div>
+    </div>
+    <div class="config-row">
+      <div>
         <div class="config-label">Dias de estudo</div>
         <div class="config-sub" id="config-streak-info">0 dias acumulados</div>
       </div>
@@ -1053,6 +1099,25 @@ appCheck.activate('6Lf1nw0tAAAAABuGxbqJzesfcIuZbXOLbMZf3_GY', true);
 
 const auth=firebase.auth();
 const db=firebase.database();
+// ── S30: Modo noturno ──
+function lerTema(){try{return localStorage.getItem('ctsp_theme')||'claro';}catch(e){return 'claro';}}
+function aplicarTema(pref){
+  const mq=window.matchMedia('(prefers-color-scheme: dark)');
+  const dark=pref==='escuro'||(pref==='auto'&&mq.matches);
+  document.documentElement.setAttribute('data-theme',dark?'dark':'light');
+  document.querySelectorAll('#theme-seg button').forEach(b=>b.classList.toggle('on',b.dataset.t===pref));
+}
+function setTema(p){
+  try{localStorage.setItem('ctsp_theme',p);}catch(e){}
+  aplicarTema(p);
+  showToast(p==='auto'?'Tema automático (segue o aparelho)':p==='escuro'?'Modo noturno ativado':'Tema claro ativado');
+}
+(function(){
+  const mq=window.matchMedia('(prefers-color-scheme: dark)');
+  const cb=()=>aplicarTema(lerTema());
+  try{mq.addEventListener('change',cb);}catch(e){try{mq.addListener(cb);}catch(e2){}}
+  aplicarTema(lerTema());
+})();
 const ADMIN_EMAIL="jvictor.projetos.ti@gmail.com";
 const ANTHROPIC_MODEL="claude-sonnet-4-20250514";
 
@@ -1068,6 +1133,22 @@ function checkRateLimit(){const now=Date.now();if(now-loginAttempts.lastReset>60
 // ═══════════════════════════════
 let currentUser=null,userProfile=null;
 let userStats={correct:0,wrong:0,byArea:{},seenIds:[],history:[],streak:0,lastStudyDate:'',metaDiaria:10};
+// ── S30 BUG-DATA: proteção de persistência ──
+const PROG_DEFAULT={correct:0,wrong:0,byArea:{},seenIds:[],history:[],streak:0,lastStudyDate:'',metaDiaria:10};
+let dataLoaded=false;        // leitura do Firebase confirmada nesta sessão
+let progressoLocalOk=false;  // userStats veio do espelho local (último estado bom deste aparelho)
+let savePendente=false;      // progresso aguardando sincronização
+let alertaConexao=false;
+function chaveEspelho(){return 'ctsp_prog_'+(currentUser?currentUser.uid:'anon');}
+function gravarEspelho(){try{localStorage.setItem(chaveEspelho(),JSON.stringify(userStats));}catch(e){}}
+function lerEspelho(){try{const r=localStorage.getItem(chaveEspelho());return r?JSON.parse(r):null;}catch(e){return null;}}
+function mostrarAlertaConexao(on){
+  alertaConexao=on;
+  const el=document.getElementById('dash-reload-alert');if(!el)return;
+  const sp=el.querySelector('span');
+  if(on){if(sp)sp.textContent='Sem conexão com o servidor — progresso protegido';el.style.display='flex';}
+  else{if(sp)sp.textContent='Dados não carregaram';el.style.display='none';}
+}
 let userCards={};
 let allQuestoes={},allFlashcards={};
 let quizQueue=[],quizIdx=0,quizArea='TODAS',quizSessao={c:0,t:0},quizAnswered=false,quizModoErro=false;
@@ -1187,11 +1268,11 @@ function iniciarEstudoAdaptativo(){
 // AREA INFO
 // ═══════════════════════════════
 const AI={
-  AT1:{nome:"Segurança Contra Incêndios",icon:'<svg class="ai-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 3.5V11c0 5-3.4 8.6-8 10-4.6-1.4-8-5-8-10V5.5L12 2z"/></svg>',color:"#C2330F",bg:"#FBEDE6",n:14},
-  AT2:{nome:"Combate a Incêndios",icon:'<svg class="ai-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c1.5 3.5 5 5.2 5 9a5 5 0 0 1-10 0c0-2 .9-3.4 1.8-4.7.4 1.2 1.2 2 2.2 2.5C10.6 6.7 11 4.4 12 2z"/></svg>',color:"#C77B1D",bg:"#FAF1E3",n:8},
-  AT3:{nome:"Buscas e Salvamentos",icon:'<svg class="ai-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><line x1="5.6" y1="5.6" x2="9.2" y2="9.2"/><line x1="14.8" y1="14.8" x2="18.4" y2="18.4"/><line x1="14.8" y1="9.2" x2="18.4" y2="5.6"/><line x1="5.6" y1="18.4" x2="9.2" y2="14.8"/></svg>',color:"#1F5C8B",bg:"#E9F1F7",n:14},
-  AT4:{nome:"Direito Institucional",icon:'<svg class="ai-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M8 21h8M4 7h16"/><path d="M7 7l-3 6a3 3 0 0 0 6 0L7 7z"/><path d="M17 7l-3 6a3 3 0 0 0 6 0l-3-6z"/></svg>',color:"#7A2E3F",bg:"#F7ECEF",n:12},
-  AT5:{nome:"Normas Administrativas",icon:'<svg class="ai-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><rect x="9" y="2.5" width="6" height="3.5" rx="1"/><path d="M9 11h6M9 15h6"/></svg>',color:"#4E6B33",bg:"#EFF3E8",n:12}
+  AT1:{nome:"Segurança Contra Incêndios",icon:'<svg class="ai-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 3.5V11c0 5-3.4 8.6-8 10-4.6-1.4-8-5-8-10V5.5L12 2z"/></svg>',color:"#E03A1B",bg:"color-mix(in srgb,#E03A1B 16%,transparent)",n:14},
+  AT2:{nome:"Combate a Incêndios",icon:'<svg class="ai-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c1.5 3.5 5 5.2 5 9a5 5 0 0 1-10 0c0-2 .9-3.4 1.8-4.7.4 1.2 1.2 2 2.2 2.5C10.6 6.7 11 4.4 12 2z"/></svg>',color:"#E8820E",bg:"color-mix(in srgb,#E8820E 15%,transparent)",n:8},
+  AT3:{nome:"Buscas e Salvamentos",icon:'<svg class="ai-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><line x1="5.6" y1="5.6" x2="9.2" y2="9.2"/><line x1="14.8" y1="14.8" x2="18.4" y2="18.4"/><line x1="14.8" y1="9.2" x2="18.4" y2="5.6"/><line x1="5.6" y1="18.4" x2="9.2" y2="14.8"/></svg>',color:"#1E7BC2",bg:"color-mix(in srgb,#1E7BC2 14%,transparent)",n:14},
+  AT4:{nome:"Direito Institucional",icon:'<svg class="ai-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M8 21h8M4 7h16"/><path d="M7 7l-3 6a3 3 0 0 0 6 0L7 7z"/><path d="M17 7l-3 6a3 3 0 0 0 6 0l-3-6z"/></svg>',color:"#C2375E",bg:"color-mix(in srgb,#C2375E 14%,transparent)",n:12},
+  AT5:{nome:"Normas Administrativas",icon:'<svg class="ai-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><rect x="9" y="2.5" width="6" height="3.5" rx="1"/><path d="M9 11h6M9 15h6"/></svg>',color:"#5C9233",bg:"color-mix(in srgb,#5C9233 15%,transparent)",n:12}
 };
 // F1.1 — taxonomia de tópicos (base inerte p/ Fase 2; sem lógica adaptativa)
 const TOPICOS={
@@ -2406,7 +2487,7 @@ async function initApp(){
     if(!document.getElementById('nav-admin')){
       const btn=document.createElement('div');
       btn.className='nav-item';btn.id='nav-admin';
-      btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>Admin';
+      btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>Admin';
       btn.onclick=()=>navTo('admin');
       nav.appendChild(btn);
     }
@@ -2436,7 +2517,8 @@ async function loadUserData(){
   for(let attempt=1;attempt<=3;attempt++){
     try{
       const snap=await withTimeout(db.ref('progresso/'+currentUser.uid).get(),attempt*8000);
-      if(snap.exists())userStats={correct:0,wrong:0,byArea:{},seenIds:[],history:[],streak:0,lastStudyDate:'',metaDiaria:10,...snap.val()};
+      if(snap.exists())userStats={...PROG_DEFAULT,...snap.val()};
+      dataLoaded=true;gravarEspelho(); // S30: leitura confirmada — gravações liberadas
       const cs=await withTimeout(db.ref('cards/'+currentUser.uid).get(),attempt*8000);
       if(cs.exists())userCards=cs.val();
       break; // sucesso
@@ -2445,14 +2527,45 @@ async function loadUserData(){
       if(attempt<3)await new Promise(r=>setTimeout(r,1500*attempt));
     }
   }
+  // S30 BUG-DATA: se o Firebase não respondeu, NUNCA seguir com zeros graváveis.
+  if(!dataLoaded){
+    const esp=lerEspelho();
+    if(esp){userStats={...PROG_DEFAULT,...esp};progressoLocalOk=true;showToast('Sem conexão — usando dados salvos no aparelho');}
+    mostrarAlertaConexao(true);
+  }
+  // Listener: usado apenas para RECUPERAÇÃO do load inicial; após dataLoaded, a memória é a fonte de verdade.
   db.ref('progresso/'+currentUser.uid).on('value',s=>{
-    if(s.exists()){userStats={correct:0,wrong:0,byArea:{},seenIds:[],history:[],streak:0,lastStudyDate:'',metaDiaria:10,...s.val()};
-    renderDashboard();updateBadges();}
+    if(dataLoaded)return;
+    if(savePendente&&progressoLocalOk){
+      // Progresso local (espelho + sessão) vence: este aparelho tinha o último estado bom.
+      dataLoaded=true;savePendente=false;mostrarAlertaConexao(false);
+      saveProg();showToast('Conexão restabelecida — progresso sincronizado');
+      renderDashboard();updateBadges();return;
+    }
+    if(s.exists())userStats={...PROG_DEFAULT,...s.val()};
+    dataLoaded=true;gravarEspelho();mostrarAlertaConexao(false);
+    renderDashboard();updateBadges();
+  });
+  // Flush de pendências quando a conexão volta
+  db.ref('.info/connected').on('value',s=>{
+    if(s.val()===true&&dataLoaded&&savePendente){savePendente=false;saveProg();}
   });
   db.ref('cards/'+currentUser.uid).on('value',s=>{if(s.exists()){userCards=s.val();renderCards();updateBadges();}});
 }
 
-async function saveProg(){await db.ref('progresso/'+currentUser.uid).set(userStats);}
+async function saveProg(){
+  gravarEspelho(); // espelho local sempre, mesmo offline
+  if(!dataLoaded){
+    if(progressoLocalOk)savePendente=true; // estado confiável deste aparelho → sincroniza depois
+    return; // S30 BUG-DATA: jamais gravar no servidor antes da leitura confirmada
+  }
+  try{await db.ref('progresso/'+currentUser.uid).set(userStats);}
+  catch(e){
+    console.warn('saveProg 1ª tentativa:',e.message);
+    try{await db.ref('progresso/'+currentUser.uid).set(userStats);}
+    catch(e2){savePendente=true;showToast('Sem conexão — progresso guardado no aparelho');}
+  }
+}
 async function saveCard(id,data){userCards[id]=data;await db.ref('cards/'+currentUser.uid+'/'+id).set(data);}
 
 // Timeout wrapper para chamadas Firebase (evita travamento por App Check no iOS)
@@ -2508,6 +2621,8 @@ async function loadFlashcards(){
 // STREAK — conta por acesso após meia-noite
 // ═══════════════════════════════
 function updateStreak(){
+  document.getElementById('hdr-streak-n').textContent=(userStats.streak||0);
+  if(!dataLoaded&&!progressoLocalOk)return; // S30 BUG-DATA: nunca incrementar/gravar sobre estado não carregado
   const today=new Date().toISOString().slice(0,10);
   const last=userStats.lastAccessDate||userStats.lastStudyDate||'';
   if(last!==today){
@@ -2605,13 +2720,16 @@ function renderDashboard(){
   const nomeDisplay=userProfile.nome&&userProfile.nome!==currentUser.email?userProfile.nome.split(' ')[0]:(currentUser.email||'').split('@')[0];
   const dashNome=document.getElementById('dash-nome');
   if(dashNome)dashNome.textContent=nomeDisplay||'Bombeiro';
-  const greetSpan=document.getElementById('dash-nome-greeting');
-  if(greetSpan)greetSpan.textContent='';
+  // S30: saudação contextual
+  const hh=new Date().getHours();
+  const gEl=document.getElementById('dash-greeting');
+  if(gEl)gEl.textContent=(hh<5?'Boa madrugada':hh<12?'Bom dia':hh<18?'Boa tarde':'Boa noite')+',';
   document.getElementById('dash-total').textContent=total;
   document.getElementById('dash-pct').textContent=pct+'%';
   document.getElementById('dash-cards').textContent=Object.keys(userCards).length;
-  document.getElementById('dash-meta-fill').style.width=metaPct+'%';
-  document.getElementById('dash-meta-count').textContent=todayN+'/'+meta;
+  const mf=document.getElementById('dash-meta-fill');if(mf)mf.style.width=metaPct+'%';
+  const mc=document.getElementById('dash-meta-count');if(mc)mc.textContent=todayN+'/'+meta;
+  const dsk=document.getElementById('dash-streak');if(dsk)dsk.textContent=(userStats.streak||0);
   const drl=document.getElementById('dash-ring-label');if(drl)drl.textContent=todayN+'/'+meta;
   document.getElementById('quick-sub').textContent='Foco nos fracos';
 
@@ -2652,7 +2770,7 @@ function renderDashboard(){
   const totalQ=Object.keys(allQuestoes).length;
   const totalFC=Object.keys(allFlashcards).length;
   const alertEl=document.getElementById('dash-reload-alert');
-  if(alertEl){alertEl.style.display=(totalQ===0||totalFC===0)?'flex':'none';}
+  if(alertEl){alertEl.style.display=(totalQ===0||totalFC===0||alertaConexao)?'flex':'none';}
 
   // Gráfico 7 dias
   renderChart();
@@ -3143,7 +3261,7 @@ function renderCard(){
       <div class="card-flip" id="card-flip-el" onclick="flipCard()">
         <div class="card-face card-front">
           <div class="card-label">Frente — Pergunta</div>
-          <div class="card-area-tag" style="background:${aInfo.bg||'#f5f5f5'};color:${aInfo.color||'#666'}">${aInfo.icon||''} ${area}</div>
+          <div class="card-area-tag" style="background:${aInfo.bg||'var(--paper-2)'};color:${aInfo.color||'var(--text2)'}">${aInfo.icon||''} ${area}</div>
           <div class="card-text">${sanitize(fc.f)}</div>
           <div class="card-hint">Toque para ver a resposta</div>
         </div>
@@ -3206,7 +3324,7 @@ function renderResumos(){
     <div class="resumo-card">
       <div class="resumo-card-top">
         <span class="resumo-area-tag" style="background:${aInfo.bg};color:${aInfo.color}">${aInfo.icon} ${r.area}</span>
-        <span class="resumo-dif-tag" style="background:#FEF5E7;color:#E67E22">${probLabel}</span>
+        <span class="resumo-dif-tag" style="background:var(--amber-light);color:var(--amber)">${probLabel}</span>
       </div>
       <div class="resumo-titulo">${sanitize(r.titulo)}</div>
       <div class="resumo-texto">${sanitize(r.texto).replace(/\n/g,'<br>')}</div>
@@ -3267,7 +3385,7 @@ function mostrarResumoDirecto(id){
     <div class="resumo-card">
       <div class="resumo-card-top">
         <span class="resumo-area-tag" style="background:${aInfo.bg};color:${aInfo.color}">${aInfo.icon} ${r.area}</span>
-        <span class="resumo-dif-tag" style="background:#FEF5E7;color:#E67E22">${probLabel}</span>
+        <span class="resumo-dif-tag" style="background:var(--amber-light);color:var(--amber)">${probLabel}</span>
       </div>
       <div class="resumo-titulo">${sanitize(r.titulo)}</div>
       <div class="resumo-texto">${sanitize(r.texto).replace(/\n/g,'<br>')}</div>
@@ -3409,6 +3527,21 @@ async function encerrarSimulado(){
     const ac=simRespostas[i]===q.g;
     if(ac){correct++;byArea[area].c++;}
     registrarRespostaAdaptativa(q,ac); // FASE 2 — simulado alimenta BKT/FSRS
+    // S30 BUG-ERRO: simulado conversa com o resto do site (contadores, Modo Erro, meta diária)
+    if(ac)userStats.correct=(userStats.correct||0)+1;else userStats.wrong=(userStats.wrong||0)+1;
+    if(!userStats.byArea)userStats.byArea={};
+    if(!userStats.byArea[area])userStats.byArea[area]={correct:0,wrong:0};
+    if(ac)userStats.byArea[area].correct++;else userStats.byArea[area].wrong++;
+    const sk=q.id+(ac?'_C':'_E'),ek=q.id+'_E';
+    if(!userStats.seenIds)userStats.seenIds=[];
+    if(!userStats.seenIds.includes(sk))userStats.seenIds.push(sk);
+    if(ac){const ix=userStats.seenIds.indexOf(ek);if(ix>-1)userStats.seenIds.splice(ix,1);}
+    if(!ac){
+      if(!userStats.erroHistorico)userStats.erroHistorico={};
+      const eh=userStats.erroHistorico[q.id]||{count:0,last:0};
+      userStats.erroHistorico[q.id]={count:eh.count+1,last:Date.now()};
+    }else if(userStats.erroHistorico&&userStats.erroHistorico[q.id]){delete userStats.erroHistorico[q.id];}
+    registrarAtividade();
   });
   const pct=Math.round(correct/simQuestoes.length*100);
   document.getElementById('sim-home-view').classList.add('hidden');
