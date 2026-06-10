@@ -84,7 +84,6 @@ button{font-family:inherit;cursor:pointer;border:none;outline:none;}
 input,select,textarea{font-family:inherit;outline:none;}
 /* Ícones inline do sistema */
 .ai-ic{width:1.05em;height:1.05em;display:inline-block;vertical-align:-0.16em;}
-.ui-ic{width:22px;height:22px;display:block;}
 /* Números técnicos */
 .num,.dash-stat-v,.sim-timer,.splash-dias,.quiz-score-v,.cards-h-stat-v,.dominio-geral-pct,.sim-result-score,.sim-hist-score,.ring-pct{font-variant-numeric:tabular-nums;}
 
@@ -110,7 +109,6 @@ input,select,textarea{font-family:inherit;outline:none;}
 .splash-area-label{font-family:var(--font-display);font-size:13px;font-weight:600;color:white;min-width:34px;letter-spacing:.04em;}
 .splash-area-bar-wrap{flex:1;background:rgba(255,255,255,.14);border-radius:6px;height:16px;overflow:hidden;}
 .splash-area-bar{height:100%;border-radius:6px;transition:width .8s ease;display:flex;align-items:center;justify-content:flex-end;padding-right:5px;}
-.splash-area-pct{font-size:10px;font-weight:800;color:white;}
 .splash-sugestao{background:rgba(255,255,255,.07);border-radius:16px;padding:14px 16px;width:100%;max-width:360px;border:1px solid rgba(255,255,255,.14);position:relative;}
 .splash-sug-label{font-family:var(--font-display);font-size:12px;font-weight:600;color:var(--ember);text-transform:uppercase;letter-spacing:.14em;margin-bottom:6px;}
 .splash-sug-area{font-size:16px;font-weight:800;color:white;margin-bottom:4px;}
@@ -126,6 +124,15 @@ input,select,textarea{font-family:inherit;outline:none;}
 @keyframes barGrow{from{width:0!important;}to{}}
 @keyframes ringGrow{from{stroke-dashoffset:var(--ring-full,170)!important;}to{}}
 @keyframes navPop{0%{transform:scale(.8);}60%{transform:scale(1.15);}100%{transform:scale(1);}}
+@keyframes optPulse{0%{transform:scale(1);}40%{transform:scale(1.02);}100%{transform:scale(1);}}
+@keyframes optShake{0%,100%{transform:translateX(0);}20%{transform:translateX(-5px);}40%{transform:translateX(5px);}60%{transform:translateX(-3px);}80%{transform:translateX(3px);}}
+@media (prefers-reduced-motion: no-preference){
+.quiz-opt.correta{animation:optPulse .45s var(--ease-out);}
+.quiz-opt.errada{animation:optShake .4s ease;}
+}
+@media (prefers-reduced-motion: reduce){
+*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;}
+}
 
 /* AUTH */
 #auth-screen{display:none;min-height:100vh;position:relative;flex-direction:column;align-items:center;justify-content:flex-end;padding:0;}
@@ -167,7 +174,6 @@ input,select,textarea{font-family:inherit;outline:none;}
 .header-right{display:flex;align-items:center;gap:6px;}
 .streak-badge{background:rgba(240,136,60,.16);border:1px solid rgba(240,136,60,.35);color:var(--ember);border-radius:20px;padding:4px 10px;font-size:12px;font-weight:800;display:flex;align-items:center;gap:4px;font-variant-numeric:tabular-nums;}
 .streak-badge svg{width:12px;height:12px;}
-.header-name{color:rgba(255,255,255,.8);font-size:11px;text-align:right;max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .btn-logout{background:rgba(255,255,255,.12);color:white;border-radius:9px;padding:6px 8px;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;}
 .btn-logout svg{width:16px;height:16px;}
 
@@ -198,16 +204,9 @@ input,select,textarea{font-family:inherit;outline:none;}
 .dash-name{font-family:var(--font-display);font-size:30px;font-weight:700;letter-spacing:.02em;line-height:1;}
 .dash-ring-wrap{display:flex;flex-direction:column;align-items:center;gap:2px;}
 .dash-ring-label{font-size:10px;opacity:.7;font-weight:600;}
-.dash-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px;position:relative;z-index:1;}
 .dash-stat{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:11px 8px;text-align:center;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:transform .15s;}
 .dash-stat-v{font-family:var(--font-display);font-size:24px;font-weight:700;line-height:1;}
 .dash-stat-l{font-size:9px;color:rgba(255,255,255,.65);margin-top:3px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;}
-.dash-meta{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:14px;padding:11px 14px;display:flex;align-items:center;gap:12px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);position:relative;z-index:1;}
-.dash-meta-info{flex:1;}
-.dash-meta-title{font-family:var(--font-display);font-size:11px;font-weight:600;color:rgba(255,255,255,.7);letter-spacing:.16em;margin-bottom:5px;}
-.dash-meta-bar{height:6px;background:rgba(255,255,255,.18);border-radius:3px;overflow:hidden;}
-.dash-meta-fill{height:100%;background:var(--fire-line);border-radius:3px;transition:width .4s ease;}
-.dash-meta-count{font-family:var(--font-display);font-size:17px;font-weight:700;font-variant-numeric:tabular-nums;}
 /* S30: hero com anel de meta */
 .dash-sub{font-size:11px;color:rgba(255,255,255,.55);margin-top:5px;font-weight:600;letter-spacing:.02em;}
 .dash-statline{display:flex;align-items:stretch;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:12px 4px;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);position:relative;z-index:1;}
@@ -370,9 +369,6 @@ input,select,textarea{font-family:inherit;outline:none;}
 .area-row-pct{font-family:var(--font-display);font-size:16px;font-weight:700;font-variant-numeric:tabular-nums;}
 .erro-mode-btn{width:100%;padding:14px;background:var(--surface);border:1.5px solid var(--red);color:var(--red);border-radius:14px;font-size:14px;font-weight:700;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:var(--shadow);}
 
-.prob-alta{background:var(--red-light);color:var(--red-dark);}
-.prob-media{background:var(--amber-light);color:var(--amber);}
-.prob-baixa{background:var(--green-light);color:var(--green);}
 
 /* ═══ CARDS ═══ */
 .cards-header{background:linear-gradient(160deg,var(--navy-2),var(--navy));padding:16px;color:white;position:relative;}
@@ -531,12 +527,10 @@ input,select,textarea{font-family:inherit;outline:none;}
 .header-dropdown button:active{background:var(--red-light);}
 
 /* Streak pill no hero */
-.dash-streak-pill{background:rgba(240,136,60,.14);border:1px solid rgba(240,136,60,.32);border-radius:20px;padding:6px 12px;font-size:13px;font-weight:700;color:var(--ember);display:flex;align-items:center;gap:4px;backdrop-filter:blur(8px);font-variant-numeric:tabular-nums;}
 
 /* Quiz intercalado — cor consistente */
 .btn-intercalado{width:100%;padding:14px;background:var(--navy);color:white;border-radius:16px;font-size:14px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;border:none;transition:all .2s var(--ease-out);box-shadow:0 6px 18px rgba(16,27,61,.25);}
 .btn-intercalado:active{transform:scale(.97);}
-.mt8{margin-top:8px;}
 .mt14{margin-top:14px;}
 
 /* Info button */
@@ -555,7 +549,6 @@ input,select,textarea{font-family:inherit;outline:none;}
 .dominio-badge{font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;}
 
 /* Dash meta sem cursor */
-.dash-meta{cursor:default;}
 
 /* ═══ CONFIGURAÇÕES MODAL ═══ */
 .config-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--line-soft);}
@@ -565,13 +558,10 @@ input,select,textarea{font-family:inherit;outline:none;}
 .config-input{border:1.5px solid var(--border);border-radius:10px;padding:8px 12px;font-size:14px;font-weight:700;color:var(--text);background:var(--surface);width:160px;text-align:center;}
 .config-input:focus{border-color:var(--navy);}
 .btn-config-reset{background:var(--red-light);color:var(--red);border-radius:10px;padding:8px 14px;font-size:12px;font-weight:700;}
-.btn-config-save{background:var(--red);color:white;border-radius:10px;padding:8px 14px;font-size:12px;font-weight:700;}
 
 /* ═══ ÍNDICE DE DOMÍNIO ═══ */
 .dominio-card{background:var(--surface);border:1px solid var(--line-soft);border-radius:16px;padding:16px;box-shadow:var(--shadow);margin-bottom:16px;}
-.dominio-titulo{font-size:13px;font-weight:800;color:var(--text);margin-bottom:4px;}
 .dominio-geral-wrap{display:flex;align-items:center;gap:14px;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--line-soft);}
-.dominio-geral-ring{flex-shrink:0;}
 .dominio-geral-info{flex:1;}
 .dominio-geral-pct{font-family:var(--font-display);font-size:34px;font-weight:700;color:var(--text);line-height:1;}
 .dominio-geral-label{font-size:11px;color:var(--text2);margin-top:2px;}
@@ -2323,23 +2313,23 @@ Escala de Coma de Glasgow (etapa D):
 // PADRÕES DAS PROVAS
 // ═══════════════════════════════
 const PADROES=[
-{tipo:"INCORRETA / EXCETO",pct:38,cor:"#FDECEA",corT:"#C0392B",
+{tipo:"INCORRETA / EXCETO",pct:38,corT:"var(--red)",
 dica:"Procure a alternativa que TROCA um número, palavra ou conceito. Geralmente a pegadinha é sutil — 'ÚTEIS' vs 'CORRIDOS', 'STJ' vs 'STM', 'VEDADO' vs 'FACULTADO'.",
 estrategia:"Leia cada alternativa assumindo que está errada. Identifique o elemento incorreto antes de marcar. Cuidado com sinônimos falsos.",
 exemplo:"a1_07"},
-{tipo:"Apenas I, II, III...",pct:22,cor:"#FEF5E7",corT:"#E67E22",
+{tipo:"Apenas I, II, III...",pct:22,corT:"var(--amber)",
 dica:"Analise CADA item individualmente, não o conjunto. Um único item errado elimina a alternativa.",
 estrategia:"Avalie item por item. Se encontrar um errado, riscando mentalmente, já elimina todas as alternativas que o incluem.",
 exemplo:"a1_13"},
-{tipo:"V/F Sequencial",pct:18,cor:"#EBF5FB",corT:"#2980B9",
+{tipo:"V/F Sequencial",pct:18,corT:"var(--at3)",
 dica:"Um único item errado na sequência invalida várias alternativas de uma vez. Comece pelos que você tem certeza.",
 estrategia:"Identifique os itens mais fáceis primeiro. Use eliminação progressiva. Um F certo ou V certo já reduz as opções.",
 exemplo:"a3_09"},
-{tipo:"Correspondência Ordenada",pct:12,cor:"#F4ECF7",corT:"#8E44AD",
+{tipo:"Correspondência Ordenada",pct:12,corT:"var(--at4)",
 dica:"Decoreba pura de sequências e conceitos. Foco nos atos de movimentação, rotinas e protocolos em ordem.",
 estrategia:"Monte um mnemônico para a sequência. Ex: POP Salvamento = 'Ação-Dim-Ger-Esta-Ace-Av-Tri-Des-Ext-AvS-Trans-Enc'",
 exemplo:"a3_14"},
-{tipo:"Alternativa Direta",pct:10,cor:"#E8F8F0",corT:"#27AE60",
+{tipo:"Alternativa Direta",pct:10,corT:"var(--green)",
 dica:"Questão objetiva, sem armadilha. Confia no conhecimento básico. Não complique.",
 estrategia:"Responda pelo que sabe. Se duas alternativas parecem certas, a mais específica e literal geralmente é a correta.",
 exemplo:"a1_01"}
@@ -2689,7 +2679,7 @@ function animateScreenEntrance(sc){
 
 function animateBars(container){
   // Barras .area-prog-fill, .area-evo-bar, .dominio-area-bar, .splash-area-bar
-  container.querySelectorAll('.area-prog-fill,.area-evo-bar,.dominio-area-bar,.dash-meta-fill').forEach(bar=>{
+  container.querySelectorAll('.area-prog-fill,.area-evo-bar,.dominio-area-bar').forEach(bar=>{
     const target=bar.style.width;
     if(!target||target==='0%')return;
     bar.style.transition='none';
@@ -2734,8 +2724,6 @@ function renderDashboard(){
   document.getElementById('dash-total').textContent=total;
   document.getElementById('dash-pct').textContent=pct+'%';
   document.getElementById('dash-cards').textContent=Object.keys(userCards).length;
-  const mf=document.getElementById('dash-meta-fill');if(mf)mf.style.width=metaPct+'%';
-  const mc=document.getElementById('dash-meta-count');if(mc)mc.textContent=todayN+'/'+meta;
   const dsk=document.getElementById('dash-streak');if(dsk)dsk.textContent=(userStats.streak||0);
   const drl=document.getElementById('dash-ring-label');if(drl)drl.textContent=todayN+'/'+meta;
   document.getElementById('quick-sub').textContent='Foco nos fracos';
@@ -2833,7 +2821,7 @@ function renderChart(){
     html+=`<div class="chart-bar-col"><div class="chart-bar${isHoje?' hoje':''}" style="height:${h}px" title="${n} questões"></div><div class="chart-bar-label">${dia}</div></div>`;
   }
   bars.innerHTML=html;
-  document.getElementById('chart-total-week').textContent=totalSemana+' essa semana';
+  document.getElementById('chart-total-week').textContent=totalSemana>0?totalSemana+' essa semana':'Comece hoje — seu progresso aparece aqui';
   renderAreaEvolution();
 }
 
@@ -2841,7 +2829,7 @@ function renderAreaEvolution(){
   const el=document.getElementById('area-evolution');
   if(!el)return;
   const ba=userStats.byArea||{};
-  const cores={AT1:'#C0392B',AT2:'#E67E22',AT3:'#2980B9',AT4:'#8E44AD',AT5:'#27AE60'};
+  const cores={AT1:'var(--at1)',AT2:'var(--at2)',AT3:'var(--at3)',AT4:'var(--at4)',AT5:'var(--at5)'};
   let html='';
   Object.entries(AI).forEach(([k,v])=>{
     const c=(ba[k]?.correct||0),w=(ba[k]?.wrong||0),t=c+w;
@@ -2853,7 +2841,7 @@ function renderAreaEvolution(){
       </div>`;
     } else {
       const pct=Math.round(c/t*100);
-      const cor=pct>=80?'#27AE60':pct>=60?'#E67E22':'#C0392B';
+      const cor=pct>=80?'var(--green)':pct>=60?'var(--amber)':'var(--red)';
       html+=`<div class="area-evo-row">
         <div class="area-evo-label">${k}</div>
         <div class="area-evo-bar-wrap"><div class="area-evo-bar" style="width:${pct}%;background:${cor}">
@@ -3618,7 +3606,7 @@ function renderPadroes(){
   const lista=document.getElementById('padroes-lista');
   lista.innerHTML=PADROES.map((p,i)=>`<div class="padrao-card" id="pad-${i}" onclick="togglePadrao(${i})">
     <div class="padrao-top">
-      <div class="padrao-pct-badge" style="background:${p.cor};color:${p.corT}">${p.pct}%</div>
+      <div class="padrao-pct-badge" style="background:color-mix(in srgb, ${p.corT} 14%, transparent);color:${p.corT}">${p.pct}%</div>
       <div class="padrao-info"><h3>${sanitize(p.tipo)}</h3><p>das questões da prova</p></div>
     </div>
     <div class="padrao-detail">
@@ -3886,10 +3874,10 @@ function renderDominio(){
   // Áreas
   const areasEl=document.getElementById('dominio-areas');
   if(!areasEl)return;
-  const cores={AT1:'#E74C3C',AT2:'#E67E22',AT3:'#2980B9',AT4:'#8E44AD',AT5:'#27AE60'};
+  const cores={AT1:'var(--at1)',AT2:'var(--at2)',AT3:'var(--at3)',AT4:'var(--at4)',AT5:'var(--at5)'};
   areasEl.innerHTML=Object.entries(AI).map(([k,a])=>{
     const d=dom[k]||{dominio:0};
-    const cor=d.dominio>=80?'#27AE60':d.dominio>=60?'#E67E22':'#C0392B';
+    const cor=d.dominio>=80?'var(--green)':d.dominio>=60?'var(--amber)':'var(--red)';
     return `<div class="dominio-area-row">
       <div class="dominio-area-icon" style="color:${a.color}">${a.icon}</div>
       <div class="dominio-area-info">
@@ -3912,7 +3900,7 @@ function renderObjetivoSemana(){
   const p=perfil[0];
   const pct=Math.round(p.pL*100);
   const a=AI[p.area]||{};
-  const cor=pct>=80?'#27AE60':pct>=60?'#E67E22':'#C0392B';
+  const cor=pct>=80?'var(--green)':pct>=60?'var(--amber)':'var(--red)';
   const bg=pct>=80?'var(--green-light)':pct>=60?'var(--amber-light)':'var(--red-light)';
   const motivo=p.n===0
     ?'Tópico ainda não praticado — comece por aqui para o sistema mapear seu domínio.'
@@ -3954,7 +3942,7 @@ function mostrarSplash(){
 
   // Domínio por área
   const dom=calcDominio();
-  const cores={AT1:'#E74C3C',AT2:'#E67E22',AT3:'#2980B9',AT4:'#8E44AD',AT5:'#27AE60'};
+  const cores={AT1:'var(--at1)',AT2:'var(--at2)',AT3:'var(--at3)',AT4:'var(--at4)',AT5:'var(--at5)'};
   const areasEl=document.getElementById('splash-areas');
   if(areasEl){
     areasEl.innerHTML=Object.entries(AI).map(([k,a])=>{
