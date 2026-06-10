@@ -32,6 +32,7 @@
   --green:#1F8A4C;--green-light:#E9F4EC;
   --amber:#C77B1D;--amber-light:#FAF1E3;
   --blue:#1F5C8B;--blue-light:#E9F1F7;
+  --at1:#E03A1B;--at2:#E8820E;--at3:#1E7BC2;--at4:#C2375E;--at5:#5C9233;
   --shadow:0 1px 2px rgba(16,27,61,.05),0 4px 14px rgba(16,27,61,.06);
   --shadow-md:0 2px 4px rgba(16,27,61,.06),0 10px 28px rgba(16,27,61,.10);
   --shadow-lg:0 8px 32px rgba(16,27,61,.18);
@@ -47,12 +48,13 @@
 /* ── S30: Modo noturno ── */
 html[data-theme="dark"]{
   --paper:#0D1322;--paper-2:#19233E;--surface:#141C33;--bg:#19233E;
-  --text:#EAECF4;--text2:#A7AEC5;--text3:#6F7794;
+  --text:#EAECF4;--text2:#A7AEC5;--text3:#7E87A8;
   --border:#283354;--line-soft:#222C49;
   --red:#F05B43;--red-dark:#FF9A86;--red-light:#3A1712;
   --green:#46C07A;--green-light:#11301F;
   --amber:#E8A04C;--amber-light:#33260F;
   --blue:#5EA5DA;--blue-light:#13273D;
+  --at1:#FF6B4A;--at2:#F0993B;--at3:#5FAAE0;--at4:#E8718F;--at5:#93C45F;
   --shadow:0 1px 2px rgba(0,0,0,.3),0 4px 14px rgba(0,0,0,.32);
   --shadow-md:0 2px 4px rgba(0,0,0,.34),0 10px 28px rgba(0,0,0,.42);
   --shadow-lg:0 8px 32px rgba(0,0,0,.55);
@@ -65,6 +67,10 @@ html[data-theme="dark"] .meta-opt.active,html[data-theme="dark"] .resumo-filtro.
 html[data-theme="dark"] .field input:focus,html[data-theme="dark"] .field select:focus,html[data-theme="dark"] .config-input:focus{border-color:var(--ember);box-shadow:0 0 0 3px rgba(240,136,60,.12);}
 html[data-theme="dark"] .diag-card{background:linear-gradient(135deg,#7E180B,#C2412C);}
 html[data-theme="dark"] .quick-btn.destaque{border-color:#4A2B1A;background:linear-gradient(180deg,#241A14,var(--surface));}
+html[data-theme="dark"] .quiz-fb-erro .fb-correta{color:var(--green);}
+html[data-theme="dark"] .quiz-ai-tip,html[data-theme="dark"] .padrao-dica{color:var(--amber);}
+html[data-theme="dark"] .badge-admin,html[data-theme="dark"] .btn-mkadmin{color:var(--amber);}
+html[data-theme="dark"] .weak-card{border-color:var(--border);}
 html,body{height:100%;font-family:-apple-system,'SF Pro Display','Helvetica Neue',Arial,sans-serif;background:var(--paper);color:var(--text);overflow-x:hidden;}
 /* Atmosfera: grão de papel técnico + luz quente sutil */
 body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
@@ -1100,11 +1106,12 @@ appCheck.activate('6Lf1nw0tAAAAABuGxbqJzesfcIuZbXOLbMZf3_GY', true);
 const auth=firebase.auth();
 const db=firebase.database();
 // ── S30: Modo noturno ──
-function lerTema(){try{return localStorage.getItem('ctsp_theme')||'claro';}catch(e){return 'claro';}}
+function lerTema(){try{return localStorage.getItem('ctsp_theme')||'escuro';}catch(e){return 'escuro';}}
 function aplicarTema(pref){
   const mq=window.matchMedia('(prefers-color-scheme: dark)');
   const dark=pref==='escuro'||(pref==='auto'&&mq.matches);
   document.documentElement.setAttribute('data-theme',dark?'dark':'light');
+  const tc=document.querySelector('meta[name="theme-color"]');if(tc)tc.setAttribute('content',dark?'#0D1322':'#101B3D');
   document.querySelectorAll('#theme-seg button').forEach(b=>b.classList.toggle('on',b.dataset.t===pref));
 }
 function setTema(p){
@@ -1268,11 +1275,11 @@ function iniciarEstudoAdaptativo(){
 // AREA INFO
 // ═══════════════════════════════
 const AI={
-  AT1:{nome:"Segurança Contra Incêndios",icon:'<svg class="ai-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 3.5V11c0 5-3.4 8.6-8 10-4.6-1.4-8-5-8-10V5.5L12 2z"/></svg>',color:"#E03A1B",bg:"color-mix(in srgb,#E03A1B 16%,transparent)",n:14},
-  AT2:{nome:"Combate a Incêndios",icon:'<svg class="ai-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c1.5 3.5 5 5.2 5 9a5 5 0 0 1-10 0c0-2 .9-3.4 1.8-4.7.4 1.2 1.2 2 2.2 2.5C10.6 6.7 11 4.4 12 2z"/></svg>',color:"#E8820E",bg:"color-mix(in srgb,#E8820E 15%,transparent)",n:8},
-  AT3:{nome:"Buscas e Salvamentos",icon:'<svg class="ai-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><line x1="5.6" y1="5.6" x2="9.2" y2="9.2"/><line x1="14.8" y1="14.8" x2="18.4" y2="18.4"/><line x1="14.8" y1="9.2" x2="18.4" y2="5.6"/><line x1="5.6" y1="18.4" x2="9.2" y2="14.8"/></svg>',color:"#1E7BC2",bg:"color-mix(in srgb,#1E7BC2 14%,transparent)",n:14},
-  AT4:{nome:"Direito Institucional",icon:'<svg class="ai-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M8 21h8M4 7h16"/><path d="M7 7l-3 6a3 3 0 0 0 6 0L7 7z"/><path d="M17 7l-3 6a3 3 0 0 0 6 0l-3-6z"/></svg>',color:"#C2375E",bg:"color-mix(in srgb,#C2375E 14%,transparent)",n:12},
-  AT5:{nome:"Normas Administrativas",icon:'<svg class="ai-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><rect x="9" y="2.5" width="6" height="3.5" rx="1"/><path d="M9 11h6M9 15h6"/></svg>',color:"#5C9233",bg:"color-mix(in srgb,#5C9233 15%,transparent)",n:12}
+  AT1:{nome:"Segurança Contra Incêndios",icon:'<svg class="ai-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 3.5V11c0 5-3.4 8.6-8 10-4.6-1.4-8-5-8-10V5.5L12 2z"/></svg>',color:"var(--at1)",bg:"color-mix(in srgb,var(--at1) 16%,transparent)",n:14},
+  AT2:{nome:"Combate a Incêndios",icon:'<svg class="ai-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c1.5 3.5 5 5.2 5 9a5 5 0 0 1-10 0c0-2 .9-3.4 1.8-4.7.4 1.2 1.2 2 2.2 2.5C10.6 6.7 11 4.4 12 2z"/></svg>',color:"var(--at2)",bg:"color-mix(in srgb,var(--at2) 15%,transparent)",n:8},
+  AT3:{nome:"Buscas e Salvamentos",icon:'<svg class="ai-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><line x1="5.6" y1="5.6" x2="9.2" y2="9.2"/><line x1="14.8" y1="14.8" x2="18.4" y2="18.4"/><line x1="14.8" y1="9.2" x2="18.4" y2="5.6"/><line x1="5.6" y1="18.4" x2="9.2" y2="14.8"/></svg>',color:"var(--at3)",bg:"color-mix(in srgb,var(--at3) 14%,transparent)",n:14},
+  AT4:{nome:"Direito Institucional",icon:'<svg class="ai-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M8 21h8M4 7h16"/><path d="M7 7l-3 6a3 3 0 0 0 6 0L7 7z"/><path d="M17 7l-3 6a3 3 0 0 0 6 0l-3-6z"/></svg>',color:"var(--at4)",bg:"color-mix(in srgb,var(--at4) 14%,transparent)",n:12},
+  AT5:{nome:"Normas Administrativas",icon:'<svg class="ai-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><rect x="9" y="2.5" width="6" height="3.5" rx="1"/><path d="M9 11h6M9 15h6"/></svg>',color:"var(--at5)",bg:"color-mix(in srgb,var(--at5) 15%,transparent)",n:12}
 };
 // F1.1 — taxonomia de tópicos (base inerte p/ Fase 2; sem lógica adaptativa)
 const TOPICOS={
