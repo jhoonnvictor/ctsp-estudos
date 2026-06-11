@@ -666,8 +666,8 @@ input,select,textarea{font-family:inherit;outline:none;}
     <div class="header-right">
       <div class="streak-badge" id="hdr-streak"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c1.5 3.5 5 5.2 5 9a5 5 0 0 1-10 0c0-2 .9-3.4 1.8-4.7.4 1.2 1.2 2 2.2 2.5C10.6 6.7 11 4.4 12 2z"/></svg><span id="hdr-streak-n">0</span></div>
       <div class="header-menu-wrap" id="header-menu-wrap">
-        <button class="btn-logout" onclick="abrirModalConfig()" title="Configurações"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34h.01a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55h.01a1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87v.01a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1z"/></svg></button>
-        <button class="btn-header-menu" onclick="toggleHeaderMenu()" title="Menu">
+        <button class="btn-logout" onclick="abrirModalConfig()" title="Configurações" aria-label="Configurações"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34h.01a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55h.01a1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87v.01a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1z"/></svg></button>
+        <button class="btn-header-menu" onclick="toggleHeaderMenu()" title="Menu" aria-label="Menu">
           <span></span><span></span><span></span>
         </button>
         <div class="header-dropdown hidden" id="header-dropdown">
@@ -743,6 +743,29 @@ input,select,textarea{font-family:inherit;outline:none;}
           </div>
           <button class="btn-weak" onclick="iniciarRevisaoDue()">Revisar</button>
         </div>
+        <!-- S35 ERR-DASH: caderno de erros visível no painel -->
+        <div id="dash-erros" class="weak-card hidden">
+          <div class="weak-icon" style="background:var(--red-light);color:var(--red)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="10" y1="8" x2="16" y2="14"/><line x1="16" y1="8" x2="10" y2="14"/></svg></div>
+          <div class="weak-info">
+            <div class="weak-title">Caderno de Erros</div>
+            <div class="weak-area" id="dash-erros-count">—</div>
+            <div class="weak-pct">Refaça até zerar — prioriza as mais erradas</div>
+          </div>
+          <button class="btn-weak" onclick="iniciarModoErro()">Refazer</button>
+        </div>
+        <!-- S35 PRONT: projeção de pontos na prova (BKT × cotas do edital) -->
+        <div id="dash-pront" class="chart-wrap hidden">
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <span style="font-size:12px;color:var(--text2);">Projeção para a prova <span class="info-btn" onclick="showInfo('prontidao')" aria-label="Mais informações">?</span></span>
+            <span style="font-size:12px;font-weight:700;color:var(--ember);" id="pront-dias"></span>
+          </div>
+          <div style="display:flex;align-items:baseline;gap:6px;margin-top:6px;">
+            <span style="font-size:30px;font-weight:800;color:var(--ember);" id="pront-num">—</span>
+            <span style="font-size:13px;color:var(--text2);">de 60 questões (estimativa)</span>
+          </div>
+          <div style="height:8px;background:var(--paper-2);border-radius:6px;overflow:hidden;margin-top:8px;"><div id="pront-bar" style="height:100%;width:0%;background:var(--fire-line);border-radius:6px;transition:width .5s;"></div></div>
+          <div style="font-size:11px;color:var(--text3);margin-top:6px;" id="pront-detalhe"></div>
+        </div>
         <!-- Quick actions -->
         <div class="sec-title">Estudar agora</div>
         <div class="adapt-btn" onclick="iniciarEstudoAdaptativo()">
@@ -767,7 +790,7 @@ input,select,textarea{font-family:inherit;outline:none;}
           </div>
         </div>
         <!-- Progresso por área -->
-        <div class="sec-title">Desempenho por área <span class="info-btn" onclick="showInfo('desempenho')">?</span></div>
+        <div class="sec-title">Desempenho por área <span class="info-btn" onclick="showInfo('desempenho')" aria-label="Mais informações">?</span></div>
         <div class="area-grid" id="dash-areas"></div>
         <!-- Gráfico últimos 7 dias -->
         <div class="sec-title">Últimos 7 dias</div>
@@ -779,12 +802,12 @@ input,select,textarea{font-family:inherit;outline:none;}
           <div class="chart-bars" id="chart-bars"></div>
         </div>
         <!-- Gráfico evolução por área -->
-        <div class="sec-title">Evolução por área <span class="info-btn" onclick="showInfo('evolucao')">?</span></div>
+        <div class="sec-title">Evolução por área <span class="info-btn" onclick="showInfo('evolucao')" aria-label="Mais informações">?</span></div>
         <div class="chart-wrap" id="area-evolution-wrap">
           <div id="area-evolution"></div>
         </div>
         <!-- Índice de Domínio Real -->
-        <div class="sec-title">Índice de domínio real <span class="info-btn" onclick="showInfo('dominio')">?</span></div>
+        <div class="sec-title">Índice de domínio real <span class="info-btn" onclick="showInfo('dominio')" aria-label="Mais informações">?</span></div>
         <div class="dominio-card" id="dominio-card">
           <div class="dominio-geral-wrap">
             <div class="dominio-geral-info">
@@ -943,7 +966,7 @@ input,select,textarea{font-family:inherit;outline:none;}
         <div id="padroes-lista"></div>
         <div class="sec-title mt14">Tópicos de alta incidência</div>
         <div class="incidencia-card" id="incidencia-lista"></div>
-        <div class="sec-title mt14">Domínio por tópico <span class="info-btn" onclick="showInfo('bkt')">?</span></div>
+        <div class="sec-title mt14">Domínio por tópico <span class="info-btn" onclick="showInfo('bkt')" aria-label="Mais informações">?</span></div>
         <div class="incidencia-card" id="dominio-topicos"></div>
       </div>
     </div>
@@ -1082,6 +1105,24 @@ input,select,textarea{font-family:inherit;outline:none;}
       </div>
       <input type="number" class="config-input" id="config-meta-input" min="1" max="200" placeholder="10">
     </div>
+    <div class="config-row">
+      <div>
+        <div class="config-label">Data da prova</div>
+        <div class="config-sub">Ativa a contagem regressiva</div>
+      </div>
+      <input type="date" class="config-input" id="config-prova-input">
+    </div>
+    <div class="config-row">
+      <div>
+        <div class="config-label">Backup do progresso</div>
+        <div class="config-sub">Exportar ou restaurar (.json)</div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn-config-reset" onclick="exportarProgresso()">Exportar</button>
+        <button class="btn-config-reset" onclick="document.getElementById('import-file').click()">Importar</button>
+      </div>
+    </div>
+    <input type="file" id="import-file" accept="application/json,.json" style="display:none" onchange="importarProgresso(event)">
     <button class="btn-primary" style="margin-top:20px" onclick="salvarConfig()">Salvar</button>
   </div>
 </div>
@@ -1299,6 +1340,74 @@ function iniciarRevisaoDue(){
   document.getElementById('quiz-running-view').classList.remove('hidden');
   document.getElementById('quiz-area-tag').textContent='Revisão do dia · FSRS';
   navTo('quiz');renderQuizQ();
+}
+
+// ── S35 PRONT: projeção de pontos na prova (BKT médio por área × cota do edital) ──
+function calcProntidao(){
+  const perfil=perfilTopicos();
+  if(!perfil.some(p=>p.n>0))return null; // sem dados BKT ainda
+  const proj={};let total=0;
+  Object.entries(AI).forEach(([k,a])=>{
+    const tops=perfil.filter(p=>p.area===k&&p.nQ>0);
+    let soma=0,peso=0;
+    tops.forEach(p=>{soma+=p.pL*p.nQ;peso+=p.nQ;}); // média ponderada pelo nº de questões do tópico
+    const m=peso?soma/peso:BKT_P.L0;
+    proj[k]=a.n*m;total+=proj[k];
+  });
+  return{total,proj};
+}
+function renderProntidao(){
+  const el=document.getElementById('dash-pront');
+  if(!el)return;
+  const r=calcProntidao();
+  if(!r){el.classList.add('hidden');return;}
+  el.classList.remove('hidden');
+  document.getElementById('pront-num').textContent='~'+Math.round(r.total);
+  document.getElementById('pront-bar').style.width=Math.min(100,Math.round(r.total/60*100))+'%';
+  document.getElementById('pront-detalhe').textContent=Object.entries(r.proj).map(([k,v])=>k+' '+v.toFixed(1).replace('.',',')).join(' · ');
+  const dEl=document.getElementById('pront-dias');
+  if(dEl){
+    if(userStats.dataProva&&/^\d{4}-\d{2}-\d{2}$/.test(userStats.dataProva)){
+      const dias=Math.ceil((new Date(userStats.dataProva+'T23:59:59')-Date.now())/86400000);
+      dEl.textContent=dias>1?'Faltam '+dias+' dias':dias===1?'Falta 1 dia':dias===0?'É hoje!':'';
+    }else dEl.textContent='';
+  }
+}
+
+// ── S35 BACKUP: exportação e restauração do progresso ──
+function exportarProgresso(){
+  try{
+    const payload={app:'ctsp-estudos',versao:'v1.24',exportadoEm:new Date().toISOString(),userStats,userCards};
+    const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;a.download='ctsp_backup_'+new Date().toISOString().slice(0,10)+'.json';
+    document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),3000);
+    showToast('Backup exportado');
+  }catch(e){showToast('Falha ao exportar: '+e.message);}
+}
+async function importarProgresso(ev){
+  const file=ev.target.files&&ev.target.files[0];
+  ev.target.value='';
+  if(!file)return;
+  if(!dataLoaded){showToast('Aguarde os dados carregarem antes de importar.');return;}
+  try{
+    const obj=JSON.parse(await file.text());
+    if(!obj||obj.app!=='ctsp-estudos'||typeof obj.userStats!=='object')throw new Error('arquivo não é um backup válido');
+    const respNovo=(obj.userStats.correct||0)+(obj.userStats.wrong||0);
+    const respAtual=(userStats.correct||0)+(userStats.wrong||0);
+    const dataBkp=obj.exportadoEm?obj.exportadoEm.slice(0,10):'data desconhecida';
+    if(!confirm('Restaurar backup de '+dataBkp+'?\nBackup: '+respNovo+' respostas · Atual: '+respAtual+' respostas.\nIsto SUBSTITUI o progresso atual.'))return;
+    userStats=Object.assign({},PROG_DEFAULT,obj.userStats);
+    if(obj.userCards&&typeof obj.userCards==='object'){
+      userCards=obj.userCards;
+      if(currentUser)await db.ref('cards/'+currentUser.uid).set(userCards);
+    }
+    await saveProg();
+    renderDashboard();updateBadges();
+    showToast('Backup restaurado');
+  }catch(e){showToast('Falha ao importar: '+e.message);}
 }
 
 // ═══════════════════════════════
@@ -2786,6 +2895,9 @@ function renderDashboard(){
     if(dc)dc.textContent=due.length+(due.length===1?' questão vencida':' questões vencidas');
   }
 
+  // S35 PRONT: projeção para a prova
+  renderProntidao();
+
   // FEAT-01: card de nivelamento só enquanto não concluído
   const diagCard=document.getElementById('diag-card');
   if(diagCard)diagCard.classList.toggle('hidden', !!userStats.diagFeito);
@@ -2823,6 +2935,13 @@ function renderDashboard(){
   const erros=Object.values(allQuestoes).filter(q=>userStats.seenIds?.includes(q.id+'_E')).length;
   const erroSubEl=document.getElementById('erro-sub');
   if(erroSubEl)erroSubEl.textContent=erros>0?erros+' para revisar':'Sem erros ainda';
+  // S35 ERR-DASH: card no painel
+  const errosCard=document.getElementById('dash-erros');
+  if(errosCard){
+    errosCard.classList.toggle('hidden',erros===0);
+    const ec=document.getElementById('dash-erros-count');
+    if(ec)ec.textContent=erros+(erros===1?' questão pendente':' questões pendentes');
+  }
   updateBadges();
   renderDominio();
   renderObjetivoSemana();
@@ -2997,14 +3116,13 @@ function iniciarEstudoRapido(){
 function iniciarModoErro(){
   const erradas=Object.values(allQuestoes).filter(q=>(userStats.seenIds||[]).includes(q.id+'_E'));
   if(!erradas.length){showToast('Sem erros para revisar!');return;}
-  // Ordenar por erro mais recente primeiro
+  // S35: prioriza as mais erradas (count desc), depois mais recentes; intercala tópicos
   const hist=userStats.erroHistorico||{};
   erradas.sort((a,b)=>{
-    const la=hist[a.id]?.last||0;
-    const lb=hist[b.id]?.last||0;
-    return lb-la;
+    const ha=hist[a.id]||{},hb=hist[b.id]||{};
+    return ((hb.count||0)-(ha.count||0))||((hb.last||0)-(ha.last||0));
   });
-  quizQueue=erradas;quizArea='ERRO';quizModoErro=true;quizIdx=0;quizSessao={c:0,t:0};
+  quizQueue=interleavePorTopico(erradas);quizArea='ERRO';quizModoErro=true;quizIdx=0;quizSessao={c:0,t:0};
   document.getElementById('quiz-home-view').classList.add('hidden');
   document.getElementById('quiz-running-view').classList.remove('hidden');
   document.getElementById('quiz-area-tag').textContent='Modo Erro';
@@ -4058,6 +4176,8 @@ function abrirModalConfig(){
   document.getElementById('config-streak-info').textContent=(userStats.streak||0)+' dias acumulados';
   const metaInp=document.getElementById('config-meta-input');
   if(metaInp)metaInp.value=userStats.metaDiaria||10;
+  const provaInp=document.getElementById('config-prova-input');
+  if(provaInp)provaInp.value=userStats.dataProva||'';
   document.getElementById('modal-config').classList.remove('hidden');
 }
 
@@ -4077,11 +4197,14 @@ async function salvarConfig(){
   }
   const metaInp=document.getElementById('config-meta-input');
   const metaVal=metaInp?parseInt(metaInp.value)||0:0;
-  if(metaVal>=1&&metaVal<=200){
-    userStats.metaDiaria=metaVal;
-    await saveProg();
-    renderDashboard();
-  }
+  if(metaVal>=1&&metaVal<=200)userStats.metaDiaria=metaVal;
+  // S35: data da prova (contagem regressiva)
+  const provaInp=document.getElementById('config-prova-input');
+  const provaVal=provaInp?provaInp.value.trim():'';
+  if(/^\d{4}-\d{2}-\d{2}$/.test(provaVal))userStats.dataProva=provaVal;
+  else if(!provaVal&&userStats.dataProva)delete userStats.dataProva;
+  await saveProg();
+  renderDashboard();
   document.getElementById('modal-config').classList.add('hidden');
   showToast('Configurações salvas');
 }
@@ -4125,9 +4248,10 @@ function showInfo(tipo){
     desempenho:'Percentual de acertos por área. Calculado dividindo respostas corretas pelo total respondido naquela área.',
     evolucao:'Progressão do seu desempenho por área ao longo do tempo, baseada no seu histórico de respostas.',
     dominio:'Índice composto: Quiz vale 50% do cálculo, Cards 30% e Resumos 20%. Mede o domínio real do conteúdo, não só o treino.',
-    bkt:'Probabilidade de você dominar cada tópico (modelo BKT). A cada resposta o sistema ajusta a estimativa considerando acerto por sorte (~20%) e erro por descuido (~10%). O Modo Adaptativo prioriza os tópicos com menor domínio.'
+    bkt:'Probabilidade de você dominar cada tópico (modelo BKT). A cada resposta o sistema ajusta a estimativa considerando acerto por sorte (~20%) e erro por descuido (~10%). O Modo Adaptativo prioriza os tópicos com menor domínio.',
+    prontidao:'Estimativa de quantas das 60 questões você acertaria hoje: domínio BKT médio de cada área multiplicado pela cota do edital (AT1 14 · AT2 8 · AT3 14 · AT4 12 · AT5 12). É uma projeção estatística, não uma garantia — quanto mais você responde, mais precisa ela fica. Defina a data da prova em Configurações para ver a contagem regressiva.'
   };
-  const titulos={desempenho:'Desempenho por Área',evolucao:'Evolução por Área',dominio:'Índice de Domínio Real',bkt:'Domínio por Tópico (BKT)'};
+  const titulos={desempenho:'Desempenho por Área',evolucao:'Evolução por Área',dominio:'Índice de Domínio Real',bkt:'Domínio por Tópico (BKT)',prontidao:'Projeção para a Prova'};
   let box=document.getElementById('info-tooltip');
   if(!box){
     box=document.createElement('div');
@@ -4155,11 +4279,30 @@ function showToast(msg){
   setTimeout(()=>t.classList.remove('show'),2500);
 }
 
-// Teclado Enter no login
+// S35 A11Y — Atalhos de teclado: Enter no login · 1–5 responde o quiz · Enter avança
 document.addEventListener('keydown',e=>{
+  const tag=(e.target&&e.target.tagName||'').toLowerCase();
+  if(tag==='input'||tag==='textarea'||tag==='select'){
+    if(e.key==='Enter'){
+      const tl=document.getElementById('tab-login');
+      if(tl&&!tl.classList.contains('hidden'))doLogin();
+    }
+    return; // digitando em campo: não interceptar
+  }
+  if(document.querySelector('.modal-overlay:not(.hidden)'))return; // modal aberto: não interceptar
   if(e.key==='Enter'){
     const tl=document.getElementById('tab-login');
-    if(tl&&!tl.classList.contains('hidden'))doLogin();
+    if(tl&&!tl.classList.contains('hidden')){doLogin();return;}
+    const nb=document.getElementById('quiz-next-btn');
+    if(nb&&nb.classList.contains('show')){nextQuiz();return;}
+  }
+  if(/^[1-5]$/.test(e.key)&&!quizAnswered){
+    const qv=document.getElementById('quiz-running-view');
+    const optsBox=document.getElementById('quiz-opts');
+    if(qv&&!qv.classList.contains('hidden')&&optsBox&&optsBox.style.display!=='none'){
+      const ops=document.querySelectorAll('#quiz-opts .quiz-opt');
+      if(ops.length>=+e.key)responderQuiz(+e.key-1);
+    }
   }
 });
 </script>
