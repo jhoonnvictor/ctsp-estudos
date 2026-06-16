@@ -587,6 +587,25 @@ input,select,textarea{font-family:inherit;outline:none;}
 /* Botão voltar quiz */
 .btn-voltar-quiz{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);color:white;border-radius:8px;padding:5px 10px;font-size:12px;font-weight:700;display:flex;align-items:center;gap:4px;}
 .btn-voltar-quiz:active{opacity:.7;}
+
+/* PAINEL DO DIA + selo salvo */
+.hoje-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:14px 16px;margin:0 14px 12px;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+.hoje-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.hoje-titulo{font-size:13px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--ember);}
+.hoje-data{font-size:12px;color:var(--text3);font-variant-numeric:tabular-nums;}
+.hoje-stats{display:flex;align-items:center;justify-content:space-between;}
+.hoje-stat{flex:1;text-align:center;}
+.hoje-stat-v{font-size:22px;font-weight:800;color:var(--text);font-variant-numeric:tabular-nums;line-height:1.1;}
+.hoje-stat-l{font-size:11px;color:var(--text2);margin-top:2px;}
+.hoje-sep{width:1px;height:28px;background:var(--border);}
+.hoje-meta{display:flex;align-items:center;gap:8px;margin-top:12px;}
+.hoje-meta-bar{flex:1;height:6px;background:var(--paper-2);border-radius:4px;overflow:hidden;}
+.hoje-meta-fill{height:100%;width:0;background:linear-gradient(90deg,var(--ember),var(--red));border-radius:4px;transition:width .4s ease;}
+.hoje-meta-txt{font-size:11px;color:var(--text2);white-space:nowrap;font-variant-numeric:tabular-nums;}
+.fb-caderno{margin-top:8px;font-size:12px;font-weight:600;color:var(--ember-deep);}
+html[data-theme="dark"] .fb-caderno{color:var(--ember);}
+#save-flash{position:fixed;left:50%;bottom:80px;transform:translateX(-50%) translateY(8px);background:var(--green);color:#fff;font-size:12px;font-weight:700;padding:6px 14px;border-radius:20px;box-shadow:0 4px 12px rgba(0,0,0,.18);opacity:0;pointer-events:none;transition:opacity .25s ease,transform .25s ease;z-index:9999;}
+#save-flash.show{opacity:1;transform:translateX(-50%) translateY(0);}
 </style>
 </head>
 <body>
@@ -714,6 +733,20 @@ input,select,textarea{font-family:inherit;outline:none;}
         <button onclick="location.reload()" style="background:var(--red);color:white;border:none;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;">Recarregar</button>
       </div>
       <div class="dash-body">
+        <!-- PAINEL DO DIA -->
+        <div class="hoje-card" id="hoje-card">
+          <div class="hoje-head"><span class="hoje-titulo">Hoje</span><span class="hoje-data" id="hoje-data"></span></div>
+          <div class="hoje-stats">
+            <div class="hoje-stat"><div class="hoje-stat-v" id="hoje-q">0</div><div class="hoje-stat-l">Questões</div></div>
+            <div class="hoje-sep"></div>
+            <div class="hoje-stat"><div class="hoje-stat-v" id="hoje-acertos" style="color:var(--green)">0</div><div class="hoje-stat-l">Acertos</div></div>
+            <div class="hoje-sep"></div>
+            <div class="hoje-stat"><div class="hoje-stat-v" id="hoje-erros" style="color:var(--red)">0</div><div class="hoje-stat-l">Erros</div></div>
+            <div class="hoje-sep"></div>
+            <div class="hoje-stat"><div class="hoje-stat-v" id="hoje-pct">—</div><div class="hoje-stat-l">Aproveit.</div></div>
+          </div>
+          <div class="hoje-meta"><div class="hoje-meta-bar"><div class="hoje-meta-fill" id="hoje-meta-fill"></div></div><span class="hoje-meta-txt" id="hoje-meta-txt"></span></div>
+        </div>
         <!-- FEAT-01: Simulado de nivelamento (onboarding) -->
         <div id="diag-card" class="diag-card hidden" onclick="iniciarDiagnostico()">
           <div class="diag-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.2 7.8 14.3 14.3 7.8 16.2 9.7 9.7 16.2 7.8"/></svg></div>
@@ -875,7 +908,7 @@ input,select,textarea{font-family:inherit;outline:none;}
     <div class="screen" id="screen-cards">
       <div class="cards-header">
         <div class="cards-h-title">Flashcards</div>
-        <div class="cards-h-sub">Revisão espaçada com algoritmo SM-2</div>
+        <div class="cards-h-sub">Revisão espaçada (FSRS)</div>
         <div class="cards-h-stats">
           <div class="cards-h-stat"><div class="cards-h-stat-v" id="cards-due">0</div><div class="cards-h-stat-l">Para hoje</div></div>
           <div class="cards-h-stat"><div class="cards-h-stat-v" id="cards-total-n">0</div><div class="cards-h-stat-l">Total</div></div>
@@ -1213,6 +1246,25 @@ function sm2Update(card,q){
   return{interval,reps,ef,next:Date.now()+interval*86400000};
 }
 function sm2Resumo(card,dif){const q=dif==='dif'?1:dif==='med'?3:5;return sm2Update(card,q);}
+// ── FSRS-lite para flashcards (graus Difícil/Médio/Fácil); migra cards SM-2 antigos ──
+function fsrsCardUpdate(card,dif){
+  const now=Date.now();card=card||{};
+  const grau=dif==='dif'?1:dif==='fac'?3:2; // 1=lapso, 2=ok, 3=fácil
+  let S=card.S,D=(card.D!=null?card.D:5),reps=card.reps||0,last=card.last||now;
+  if(S==null){ S=(reps>0&&card.interval)?Math.max(1,card.interval):0; } // herda do SM-2 legado
+  if(!reps||S<=0){
+    S=grau===1?0.8:grau===2?2.2:4;
+    D=grau===1?7:grau===2?5.5:4.5;
+  }else{
+    const R=Math.pow(1+(now-last)/86400000/(9*S),-1);
+    D=Math.min(10,Math.max(1,D-0.7*(grau-2)));
+    D=D+0.06*(5-D);
+    if(grau===1){ S=Math.max(0.5,S*0.5*(1-(D-1)/22)); }
+    else{ const inc=Math.max(1.1,1+(11-D)*0.09*(1-R)*(grau===3?1.35:1)); S=Math.max(S*inc,S+0.5); }
+  }
+  const interval=Math.max(1,Math.round(S));
+  return{S:+S.toFixed(3),D:+D.toFixed(2),reps:reps+1,last:now,next:now+interval*86400000,interval};
+}
 function shuffle(a){const r=[...a];for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]];}return r;}
 
 // ═══════════════════════════════
@@ -1459,7 +1511,7 @@ AT1:[
 {id:"a1_11",topico:"T1.2",e:"Conforme a RT CBMRS nº 05 Parte 1.1/2016, qual alternativa está CORRETA?",ops:["A fase de vistoria consiste na verificação documental do PPCI.","Após a vistoria com conformidade, será emitido o APPCI.","A renovação do APPCI deve ser protocolada com no mínimo 1 mês de antecedência.","Na vistoria ordinária, poderão ser exigidos documentos complementares aos laudos técnicos.","Para edificações com APPCI, alteração de layout exige FAL mesmo com supressão de medidas."],g:1,doc:"RT CBMRS nº 05 Parte 1.1/2016 · Caderno CTSP p.4",exp:"'Após a vistoria, constatado que a edificação atende ao previsto, será emitido o APPCI' — transcrição literal."},
 {id:"a1_12",topico:"T1.2",e:"A RT CBMRS nº 05 Parte 06/2025 configura iminente risco à vida nas divisões F-6 e F-7 com inexistência/inoperância de:",ops:["Detecção, alarme, saídas, sinalização, iluminação, controle de acabamento.","Extintores, detecção, alarme, saídas, sinalização, iluminação, controle de acabamento.","Apenas em F-6 e F-7: detecção, alarme, saídas, sinalização, iluminação.","Apenas em F-6 e F-7: extintores + todos os demais sistemas.","Em F-6, F-7, F-11 e F-12: extintores + todos os demais sistemas."],g:0,doc:"RT CBMRS nº 05 Parte 06/2025, item 7.2 · Caderno CTSP p.5",exp:"Pelo item 7.2 da RT 05 Parte 06/2025, nas divisões F-6 e F-7 o iminente risco decorre da inexistência/inoperância de: detecção, alarme, saídas de emergência, sinalização, iluminação e controle de materiais de acabamento — SEM extintores (termo que não consta na norma). A alternativa A reproduz exatamente essa lista; a C é incompleta (omite o controle de acabamento)."},
 {id:"a1_13",topico:"T1.1",e:"Segundo a Lei Federal nº 13.425/2017, quais assertivas estão corretas? I-CBM planeja, vistoria e fiscaliza; II-Municípios sem CBM podem criar serviços independentemente; III-Curso obrigatório para setores técnicos do CBM; IV-Cursos de Engenharia incluirão conteúdo de prevenção.",ops:["Apenas I e III","Apenas II, III e IV","Apenas I, III e IV","Apenas II e III","I, II, III e IV"],g:2,doc:"Lei Federal 13.425/2017",exp:"I, III e IV corretas. II está errada: municípios sem CBM SOMENTE podem criar serviços mediante convênio."},
-{id:"a1_14",topico:"T1.1",e:"O PPCI, conforme LC Estadual 14.376/2013, é o projeto técnico que:",ops:["Apenas estabelece as plantas e memoriais descritivos.","Contém medidas para prevenir, permitir abandono seguro, dificultar propagação, controlar e extinguir incêndio e permitir acesso ao CBM.","É aplicável somente a edificações de risco alto.","Substitui o PSPCI para edificações acima de 750 m².","É emitido pelo proprietário sem necessidade de responsável técnico."],g:1,doc:"LC 14.376/2013",exp:"Definição literal do PPCI: projeto técnico completo com todas as medidas."}
+{id:"a1_14",topico:"T1.1",e:"O PrPCI, conforme LC Estadual 14.376/2013, é o projeto técnico que:",ops:["Apenas estabelece as plantas e memoriais descritivos.","Contém medidas para prevenir, permitir abandono seguro, dificultar propagação, controlar e extinguir incêndio e permitir acesso ao CBM.","É aplicável somente a edificações de risco alto.","Substitui o PSPCI para edificações acima de 750 m².","É emitido pelo proprietário sem necessidade de responsável técnico."],g:1,doc:"LC 14.376/2013, art. 6º, XXXII",exp:"Pela LC 14.376/2013 (art. 6º, XXXII), o PrPCI — Projeto de Prevenção e Proteção Contra Incêndio — é o projeto técnico, constante do PPCI, que contém o conjunto de medidas para prevenir o incêndio, permitir o abandono seguro, dificultar a propagação, controlar/extinguir o fogo e permitir o acesso ao CBM. Não confundir com o PPCI (inc. XXXI), que é o processo que reúne os elementos formais a encaminhar ao CBMRS."}
 ],
 AT2:[
 {id:"a2_01",topico:"T2.2",e:"Sobre mangueiras de combate a incêndio (Manual CBMMG 2020), qual alternativa está CORRETA?",ops:["Diâmetros 1½\" e 2½\", pressão mínima de TRABALHO de 28 kgf/cm².","Apenas diâmetro 2½\", pressão de trabalho 42 kgf/cm².","Mangueiras de 1½\" e 2½\" resistem a pressão mínima de PROVA de 42 kgf/cm².","Pressão mínima de prova 14 kgf/cm², ruptura 28 kgf/cm².","Testadas por estanqueidade; ruptura mínima de 42 kgf/cm²."],g:4,doc:"Manual Combate a Incêndio Urbano CBMMG Cap.3 · Caderno CTSP p.6",exp:"MABOM Cap.3 (Mangueiras): pressões mínimas — trabalho 14, prova 28, ruptura 42 kgf/cm². Correta é E (testadas por estanqueidade; ruptura mínima 42). Atenção: 42 é a RUPTURA, não a prova (28)."},
@@ -1522,8 +1574,8 @@ AT5:[
 {id:"a5_12",topico:"T5.3",e:"Numa parte de acidente de serviço (Caderno Temático ABM 2023), qual informação NÃO deve constar?",ops:["Dia, data e horário; militares envolvidos.","Testemunhas, relato do acontecimento e repercussões imediatas.","Medidas saneadoras; viaturas despachadas e empregadas.","Comentários ou opiniões pessoais; custeio das despesas.","Dados do atendimento médico (hospital, hora, etc.)."],g:3,doc:"Caderno Temático ABM 2023 · Caderno CTSP p.20",exp:"Comentários pessoais e custeio de despesas NÃO devem constar na parte de acidente de serviço."}
 ],
 AT1B:[
-{id:"b1_01",topico:"T1.3",e:"Segundo o Decreto Estadual nº 51.803/2014, ao aplicar a pena de ADVERTÊNCIA, a autoridade competente concederá, para sanar a irregularidade, o prazo de:",ops:["15 dias corridos.","30 dias corridos.","20 dias úteis.","10 dias úteis.","60 dias corridos."],g:1,doc:"Decreto 51.803/2014, art. 13 (red. Dec. 57.103/2023)",exp:"Ao aplicar a advertência, a autoridade concede prazo de 30 dias consecutivos para sanar a irregularidade (art. 13, red. Dec. 57.103/2023). Após o auto de infração, o prazo para sanar é fixado pela autoridade, até 90 dias."},
-{id:"b1_02",topico:"T1.1",e:"Conforme a LC 14.376/2013, a altura de uma edificação é medida a partir do:",ops:["Nível da rua até o teto do último pavimento habitável.","Ponto mais baixo do terreno até o último pavimento.","Nível de descarga até o piso do último pavimento habitável utilizado como saída de emergência.","Nível do piso térreo até o último pavimento.","Ponto de maior altitude do terreno até o telhado."],g:2,doc:"LC 14.376/2013 art.6º",exp:"Altura = nível de descarga até o piso do último pavimento habitável utilizado como saída de emergência."},
+{id:"b1_01",topico:"T1.3",e:"Segundo o Decreto Estadual nº 51.803/2014, ao aplicar a pena de ADVERTÊNCIA, a autoridade competente concederá, para sanar a irregularidade, o prazo de:",ops:["15 dias corridos.","30 dias corridos.","20 dias úteis.","10 dias úteis.","60 dias corridos."],g:1,doc:"Decreto 51.803/2014, art. 13, parágrafo único",exp:"Ao aplicar a pena de advertência, a autoridade competente concederá prazo de 30 dias consecutivos para que seja sanada a irregularidade constatada (art. 13, parágrafo único)."},
+{id:"b1_02",topico:"T1.1",e:"Conforme a LC 14.376/2013, a altura de uma edificação é medida a partir do:",ops:["Nível da rua até o teto do último pavimento habitável.","Ponto mais baixo do terreno até o último pavimento.","Nível de descarga até o piso do último pavimento habitável utilizado como saída de emergência.","Nível do piso térreo até o último pavimento.","Ponto de maior altitude do terreno até o telhado."],g:2,doc:"LC 14.376/2013, art. 6º, II, 'b'",exp:"Altura (descendente) = medida do ponto que caracteriza a saída ao nível da descarga até o piso do último pavimento (LC 14.376/2013, art. 6º, II, 'b'). A altura ascendente, por sua vez, é medida até o pavimento mais baixo (alínea 'a')."},
 {id:"b1_03",topico:"T1.1",e:"Na classificação das edificações quanto à ocupação/uso (Tabela 1 do Anexo A do Decreto 51.803/2014, que regulamenta a LC 14.376/2013), qual associação GRUPO → ocupação está CORRETA?",ops:["Grupo A: Residencial; Grupo E: Educacional e cultura física; Grupo F: Local de reunião de público; Grupo H: Serviço de saúde e institucional.","Grupo A: Local de reunião de público; Grupo E: Residencial; Grupo F: Educacional; Grupo H: Comercial.","Grupo F-1: Residencial unifamiliar; Grupo F-2: Residencial coletivo; Grupo F-3: Serviços profissionais.","Grupo C: Educacional; Grupo E: Serviço de saúde; Grupo F: Industrial; Grupo H: Residencial.","Grupo A: Industrial; Grupo E: Depósito; Grupo F: Comercial; Grupo H: Educacional."],g:0,doc:"LC 14.376/2013 / Decreto 51.803/2014 - Anexo A, Tabela 1",exp:"A ocupação é classificada por GRUPOS designados por LETRA: A=Residencial, B=Hospedagem, C=Comercial, D=Serviço profissional, E=Educacional e cultura física, F=Local de reunião de público, G=Serviço automotivo, H=Saúde/institucional, I=Industrial, J=Depósito, L=Explosivos, M=Especial. As divisões F-1, F-2, F-5, F-6, F-7... pertencem TODAS ao grupo F (local de reunião de público) - não são grupos distintos."},
 {id:"b1_04",topico:"T1.4",e:"Segundo a RT CBMRS nº 14/2016 (Extintores de Incêndio), para fins de seleção do agente extintor, as classes de fogo expressamente classificadas e reconhecidas pela norma são:",ops:["A, B, C, D e K.","A, B e C.","A, B, C e D.","B, C e K.","Somente A e B."],g:1,doc:"RT CBMRS nº 14/2016, item 5.1.1",exp:"Pelo item 5.1.1 da RT 14/2016, os extintores são classificados para uso nas classes A, B e C (Classe A: sólidos; Classe B: líquidos/gases inflamáveis; Classe C: equipamentos energizados). A norma do CBMRS não institui as classes D (metais pirofóricos) nem K (óleos e gorduras de cozinha) como classes próprias — por isso as demais alternativas estão erradas."},
 {id:"b1_05",topico:"T1.2",e:"O PSPCI (RT CBMRS nº 05 Parte 03/2025) pode ser utilizado para edificações F-11 e F-12 com área de até:",ops:["500 m².","750 m².","1.000 m².","1.500 m².","2.000 m²."],g:3,doc:"RT CBMRS nº 05 Parte 03/2025",exp:"PSPCI para F-11 e F-12: área entre 750 e 1.500 m² (até 1.500 m²)."},
@@ -1550,7 +1602,7 @@ AT1B:[
 {id:"b1_20",topico:"T1.2",e:"Conforme o art. 6º da LC nº 14.376/2013, MEZANINO será considerado 'outro pavimento', para fins de prevenção, quando exceder:",ops:["150 m² ou 1/5 da área do piso","200 m² ou 1/3 da área do piso","250 m² ou a terça parte (1/3) da área do piso de pavimento","300 m² ou a metade da área do piso","100 m² ou 1/4 da área do piso"],g:2,doc:"LC Estadual nº 14.376/2013, art. 6º, inc. XXII · Caderno CTSP p.2",exp:"Mezanino vira 'outro pavimento' quando excede 250 m² OU a terça parte (1/3) da área do piso do pavimento — limite considerado por unidade autônoma."},
 {id:"a1_21",topico:"T1.2",e:"Sobre o Plano Simplificado de Prevenção e Proteção Contra Incêndio (PSPCI), assinale a afirmativa CORRETA:",ops:["Pode ser utilizado por edificações que ainda não instalaram as medidas de segurança exigidas","Exige sempre a apresentação de plantas baixas e croquis para análise","Edificações F-11 e F-12 com área superior a 750 m² até 1.500 m² podem ser licenciadas por PSPCI","Exige sempre a inclusão das áreas de armazenamento de GLP na área construída","Veda qualquer medida de segurança adicional"],g:2,doc:"RT CBMRS nº 05 Parte 03/2025, itens 2.1.1, 5.5, 5.6 e 6.3.1.1 — PSPCI",exp:"Correta (C): edificações F-11 e F-12 entre 750 m² e 1.500 m² podem ser licenciadas por PSPCI (item 2.1.1). As demais são falsas: o PSPCI exige as medidas já instaladas e em pleno funcionamento no protocolo (item 5.5); dispensa plantas baixas e croquis (item 6.3.1.1); não abrange as áreas de armazenamento de GLP; e admite medidas adicionais, que porém NÃO integram o PSPCI (item 5.6)."},
 {id:"b1_21",topico:"T1.2",e:"Segundo a RT CBMRS nº 05, Parte 06/2025 (Fiscalização), a renovação do APPCI deve ser encaminhada ao CBMRS com antecedência mínima de:",ops:["1 (um) mês","3 (três) meses","2 (dois) meses","12 (doze) meses","Não há prazo definido"],g:2,doc:"RT CBMRS nº 05 Parte 06/2025 (Fiscalização) · Dec. 51.803/2014 art. 18",exp:"A renovação do APPCI deve ser encaminhada com antecedência mínima de DOIS meses — prazo fixado na RT CBMRS nº 05, Parte 06/2025 (Fiscalização), e referido no art. 18, §2º, do Dec. 51.803/2014. Descumprir o prazo regulamentar de renovação é infração de natureza MÉDIA (Dec. 51.803/2014, art. 18, II, 'a')."},
-{id:"a1_22",topico:"T1.3",e:"Conforme o Decreto Estadual nº 51.803/2014, a VISTORIA EXTRAORDINÁRIA consiste na:",ops:["Verificação documental do PPCI sem ida ao local","Verificação in loco da edificação ou área de risco, para constatar infração às normas de SCI ou situação de iminente risco","Renovação automática do APPCI","Emissão de novo alvará sem análise","Cobrança de taxa de licenciamento"],g:1,doc:"Decreto Estadual nº 51.803/2014",exp:"A vistoria extraordinária é a verificação in loco da edificação/área de risco, para constatar eventual infração às normas de SCI ou a existência de iminente risco à vida, integridade física ou ao funcionamento da edificação. O CBMRS pode realizá-la a qualquer momento."},
+{id:"a1_22",topico:"T1.3",e:"Conforme a RT CBMRS nº 05 (Parte 1.1/2016), a VISTORIA EXTRAORDINÁRIA consiste na:",ops:["Verificação documental do PPCI sem ida ao local","Verificação in loco da edificação ou área de risco, para constatar infração às normas de SCI ou situação de iminente risco","Renovação automática do APPCI","Emissão de novo alvará sem análise","Cobrança de taxa de licenciamento"],g:1,doc:"RT CBMRS nº 05 Parte 1.1/2016, item 6.7",exp:"Pela RT CBMRS nº 05 Parte 1.1/2016 (item 6.7), o CBMRS poderá, a qualquer momento, realizar vistoria extraordinária — verificação in loco para constatar se a edificação ou área de risco permanece atendendo ao PPCI aprovado e à legislação, regulamentação e normas técnicas aplicáveis, ou diante de iminente risco."},
 {id:"b1_22",topico:"T1.4",e:"As classes de incêndio relacionam-se ao material combustível. Em uma edificação, um incêndio em equipamentos elétricos ENERGIZADos classifica-se como:",ops:["Classe A","Classe B","Classe C","Classe D","Classe K"],g:2,doc:"Classificação de incêndios — NBR/normas técnicas",exp:"Classe C: equipamentos elétricos energizados (risco de choque — usar agente não condutor, ex.: CO₂/pó). Uma vez desenergizado, o incêndio pode ser reclassificado conforme o material residual."},
 {id:"a1_23",topico:"T1.2",e:"Para edificações ou áreas de risco com APPCI que sofram alteração de LAYOUT, sem supressão/acréscimo de medidas de SCI e sem alteração que implique novo PPCI, deverá ser encaminhado:",ops:["Novo PPCI integral","Formulário de Alteração de Layout (FAL)","Pedido de demolição","Auto de infração","Pedido de interdição voluntária"],g:1,doc:"RT CBMRS nº 05, Parte 1.1/2016",exp:"Alterações de layout que não impliquem supressão/acréscimo de medidas nem novo PPCI são tratadas pelo Formulário de Alteração de Layout (FAL), sem necessidade de novo plano completo."},
 {id:"a1_24",topico:"T1.3",e:"O art. 7º, II, do Decreto Estadual nº 51.803/2014 (atualizado até o Dec. 57.967/2024) permite que, comprovada por laudo de profissional habilitado a inviabilidade técnica de instalar as medidas de segurança exigidas em edificações EXISTENTES, seja apresentada proposta alternativa com medidas compensatórias. O dispositivo, porém, prevê exceção — ocupação(ões) que NÃO permite(m) alegar inviabilidade técnica. Assinale a alternativa que contempla apenas a(s) divisão(ões) excepcionalizada(s):",ops:["F-5, F-6, F-11 e F-12","F-11 e F-12","F-6, F-11 e F-12","F-6","Divisões do grupo M com grau de risco de incêndio alto e F-6"],g:3,doc:"Dec. 51.803/2014, art. 7º, II · Caderno CTSP p.1 · Gabarito definitivo Aditamento 10 (Q1)",exp:"A exceção do art. 7º, II, alcança apenas a divisão F-6 (boates, casas noturnas e assemelhados — locais de reunião de público com alta concentração): para ela NÃO se admite alegação de inviabilidade técnica. Gabarito oficial: D."},
@@ -1595,17 +1647,17 @@ AT3B:[
 {id:"b3_14",topico:"T3.2",e:"Sobre hemorragia externa grave no protocolo X do XABCDE, a conduta CORRETA é:",ops:["Aguardar acesso venoso antes de qualquer intervenção.","Aplicar torniquete imediatamente em qualquer hemorragia de membro.","Controle por pressão direta, curativo compressivo ou torniquete em hemorragias de membros com risco de morte.","Aplicar gelo para vasoconstrição antes do curativo.","Elevar o membro e aguardar hemostasia espontânea."],g:2,doc:"ITO 23 CBMMG - X do XABCDE",exp:"X = controle de hemorragia exsanguinante: pressão direta → curativo compressivo → torniquete (em membros, quando necessário)."},
 {id:"a3_15",topico:"T3.2",e:"No atendimento pré-hospitalar a paciente inconsciente com suspeita de TCE, qual ação é INCORRETA?",ops:["Imobilizar a coluna cervical com colar cervical adequado.","Monitorar continuamente o nível de consciência pela Escala de Coma de Glasgow.","Realizar hiperventilação agressiva de rotina para reduzir a PIC.","Manter vias aéreas pérvias com cânula orofaríngea se Glasgow ≤ 8.","Posicionar em decúbito dorsal com plano rígido na suspeita de lesão espinhal."],g:2,doc:"ITO 23 CBMMG — TCE",exp:"Hiperventilação agressiva de rotina está CONTRAINDICADA no TCE pré-hospitalar — causa vasoconstrição cerebral e piora a isquemia. Só utilizada em herniação iminente."},
 {id:"b3_15",topico:"T3.1",e:"Segundo o ITO 23, a indicação CORRETA de desfibrilação com DEA em lactente é:",ops:["Nunca utilizar DEA em lactentes — apenas RCP.","Utilizar DEA com pás adultas posicionadas na posição anteroposterior.","Utilizar DEA com pás pediátricas (ou atenuador de dose) para menores de 8 anos ou menos de 25 kg.","Aplicar choque apenas se a frequência cardíaca for confirmada como zero.","Aguardar UTI para desfibrilação em pacientes pediátricos."],g:2,doc:"ITO 23 CBMMG — DEA",exp:"Para menores de 8 anos ou menos de 25 kg: usar pás pediátricas ou atenuador de dose. Na ausência, pás adultas em posição anteroposterior são segunda opção. Nunca negar desfibrilação."},
-{id:"a3_16",topico:"T3.4",e:"Sobre o uso da tala de tração de fêmur (MABOM-APH), qual afirmativa está CORRETA?",ops:["É indicada em fraturas abertas de fêmur com sangramento ativo.","É contraindicada em suspeita de lesão no joelho ou em fraturas abertas do fêmur.","Deve ser aplicada em qualquer fratura de fêmur, aberta ou fechada.","É indicada em fraturas de pelve associadas a fêmur.","Pode ser usada em crianças menores de 8 anos sem restrições."],g:1,doc:"MABOM-APH CBMRS",exp:"A tala de tração de fêmur é CONTRAINDICADA em suspeita de lesão no joelho ou em fraturas abertas do fêmur."},
-{id:"b3_16",topico:"T3.4",e:"De acordo com o MABOM-APH, são sinais de queimadura de vias aéreas, EXCETO:",ops:["Dificuldade respiratória e dor ao respirar.","Pelos nasais chamuscados.","Queimadura na face.","Cianose de extremidades e bradicardia intensa.","Rouquidão e escarro com fuligem."],g:3,doc:"MABOM-APH CBMRS — Queimaduras",exp:"Cianose de extremidades e bradicardia não são sinais específicos de queimadura de vias aéreas. Os sinais clássicos são: dificuldade respiratória, dor ao respirar, queimadura na face, pelos nasais chamuscados, rouquidão e escarro com fuligem."},
-{id:"a3_17",topico:"T3.4",e:"Sobre objetos encravados e empalados (MABOM-APH), qual afirmativa está CORRETA?",ops:["Objetos empalados rompem a pele e se fixam por orifícios não naturais.","Objetos encravados penetram por orifícios naturais do corpo.","Objetos encravados rompem a pele e se fixam por orifícios não naturais; objetos empalados penetram por orifícios naturais.","Ambos devem ser removidos antes do transporte para evitar agravamento.","Não há diferença clínica entre encravado e empalado no protocolo MABOM."],g:2,doc:"MABOM-APH CBMRS — Ferimentos",exp:"Encravado: rompe a pele e se fixa por orifício não natural (ex: objeto perfurando abdômen). Empalado: penetra por orifício natural (ex: objeto no ouvido). Nenhum deve ser removido no pré-hospitalar."},
-{id:"b3_17",topico:"T3.1",e:"Sobre o DEA em deslocamento da Unidade de Resgate, qual conduta está CORRETA conforme o MABOM-APH?",ops:["Parar a viatura, manter RCP e aplicar choque se indicado.","Não parar a viatura, cessar a RCP e aplicar o choque indicado.","Não parar a viatura, não cessar a RCP para análise, e não ministrar o choque mesmo se indicado — manter pás conectadas.","Parar a viatura somente se o choque for indicado pelo DEA.","Ministrar o choque durante o deslocamento, sem interromper a viagem."],g:2,doc:"MABOM-APH CBMRS — DEA em deslocamento",exp:"Em deslocamento com RCP em andamento: NÃO parar a viatura, NÃO cessar a RCP para análise do DEA e NÃO ministrar o choque. Manter pás conectadas e continuar RCP até chegar ao hospital."},
-{id:"a3_18",topico:"T3.1",e:"Na PCR pediátrica (criança de 7 anos) sem DEA disponível, a guarnição deve transportar ao hospital de referência após, EXCETO:",ops:["Imediatamente, se o SAV não estiver disponível ou a caminho.","Após retorno espontâneo da circulação, se SAV não disponível.","Após 6 a 9 choques separados por 2 minutos de RCP, sem SAV disponível.","Após 3 mensagens consecutivas do DEA de 'choque não indicado', separadas por 2 minutos de RCP.","Após o primeiro ciclo de RCP sem resposta, independentemente da disponibilidade do SAV."],g:4,doc:"MABOM-APH CBMRS — PCR Pediátrica",exp:"Transportar imediatamente após: ausência de SAV, retorno espontâneo da circulação, 6-9 choques ou 3 mensagens consecutivas de 'choque não indicado'. Não há previsão de transporte após o 'primeiro ciclo'."},
-{id:"b3_18",topico:"T3.1",e:"Sobre RCP em adultos (MABOM-APH), qual alternativa está INCORRETA?",ops:["Ciclos de 30 compressões por 2 ventilações.","Trocar compressor a cada 2 minutos ou 5 ciclos, com interrupção máxima de 5 segundos.","Se em deslocamento com PCR iniciada na cena e DEA com 3 mensagens de 'choque não indicado', transportar ao hospital.","Se a PCR iniciar no interior da viatura, parar, desligar a viatura e iniciar RCP.","A ventilação a quatro mãos deve ser evitada mesmo quando dois socorristas estiverem disponíveis."],g:4,doc:"MABOM-APH CBMRS — RCP Adulto",exp:"A ventilação a quatro mãos (socorrista 2 veda a máscara com duas mãos; socorrista 1 aperta o BVM) deve ser realizada SEMPRE que possível com dois socorristas — não evitada."},
-{id:"a3_19",topico:"T3.4",e:"Sobre o uso do torniquete (MABOM-APH), qual alternativa NÃO está correta?",ops:["Colocar 5 cm proximal ao local da lesão.","Anotar o horário de aplicação e informar à equipe hospitalar.","Para uso do esfigmomanômetro como torniquete: inflar até ausência de pulso distal e acrescentar mais 30 mmHg.","Utilizar apenas quando a pressão direta for ineficiente para hemorragias graves em membros.","Remover o torniquete assim que a hemorragia aparentar ter cessado, para preservar o membro."],g:4,doc:"MABOM-APH CBMRS — Torniquete",exp:"O torniquete NUNCA deve ser removido no pré-hospitalar após aplicação. A remoção inadequada pode causar embolia e choque. A decisão de remover cabe à equipe hospitalar."},
-{id:"b3_19",topico:"T3.4",e:"Em caso de evisceração (MABOM-APH), qual procedimento está INCORRETO?",ops:["Cobrir as vísceras com campo operatório umedecido com soro fisiológico.","Não tentar recolocar as vísceras na cavidade abdominal.","O curativo deve ser oclusivo e compressivo para conter hemorragia.","Cobrir com manta aluminizada ou plástico estéril, fechando os quatro lados.","Aplicar curativo úmido, não compressivo, para proteger as vísceras sem comprimir."],g:2,doc:"MABOM-APH CBMRS — Evisceração",exp:"O curativo em evisceração deve ser oclusivo, mas NÃO compressivo — a compressão pode agravar a lesão nas vísceras expostas. Cobrir com campo úmido e manta aluminizada sem comprimir."},
-{id:"a3_20",topico:"T3.2",e:"Na avaliação do paciente pelo XABCDE (MABOM-APH), o Bombeiro NÃO deve:",ops:["Na etapa B, avaliar profundidade, frequência, esforço e bilateralidade da ventilação.","Na etapa A, no paciente irresponsivo, abrir a boca e inspecionar as vias aéreas superiores.","Na etapa C, avaliar pulso, perfusão capilar e pele simultaneamente nos dois membros superiores.","Na etapa D, avaliar as pupilas como parte da disfunção neurológica.","Na etapa D, realizar Escala de Glasgow apenas nos pacientes responsivos."],g:4,doc:"MABOM-APH CBMRS — Avaliação Primária",exp:"A Escala de Coma de Glasgow deve ser aplicada em TODOS os pacientes na etapa D, responsivos ou não — inclusive para quantificar o grau de irresponsividade."},
-{id:"b3_20",topico:"T3.4",e:"Segundo o MABOM-APH, em fraturas expostas a conduta correta é:",ops:["Imobilizar o membro e depois controlar a hemorragia.","Controlar a hemorragia com compressão direta e depois imobilizar.","Reposicionar os fragmentos ósseos antes da imobilização.","Aplicar torniquete imediatamente em qualquer fratura exposta, sem tentar compressão direta.","Elevar o membro fraturado acima do nível do coração antes de qualquer outro procedimento."],g:1,doc:"MABOM-APH CBMRS — Fraturas Expostas",exp:"Em fraturas expostas: primeiro controlar a hemorragia (compressão direta), depois imobilizar. Nunca reposicionar fragmentos. Torniquete apenas se compressão for ineficaz."},
-{id:"a3_21",topico:"T3.3",e:"Sobre a mensuração do colar cervical (MABOM-APH), qual referência anatômica é utilizada?",ops:["Distância entre o mento e o processo mastoide.","Distância entre o occipital e a clavícula.","Distância entre o mento e o ombro do paciente.","Distância entre a orelha e o ombro do paciente.","Distância entre o mento e o processo xifóide."],g:2,doc:"MABOM-APH CBMRS — Colar Cervical",exp:"A mensuração do colar cervical usa como referência a distância entre uma linha imaginária do mento e uma linha imaginária do ombro do paciente."},
+{id:"a3_16",topico:"T3.4",e:"Sobre o uso da tala de tração de fêmur (MABOM-APH), qual afirmativa está CORRETA?",ops:["É indicada em fraturas abertas de fêmur com sangramento ativo.","É contraindicada em suspeita de lesão no joelho ou em fraturas abertas do fêmur.","Deve ser aplicada em qualquer fratura de fêmur, aberta ou fechada.","É indicada em fraturas de pelve associadas a fêmur.","Pode ser usada em crianças menores de 8 anos sem restrições."],g:1,doc:"ITO 23 — APH (CBMMG)",exp:"A tala de tração de fêmur é CONTRAINDICADA em suspeita de lesão no joelho ou em fraturas abertas do fêmur."},
+{id:"b3_16",topico:"T3.4",e:"De acordo com o MABOM-APH, são sinais de queimadura de vias aéreas, EXCETO:",ops:["Dificuldade respiratória e dor ao respirar.","Pelos nasais chamuscados.","Queimadura na face.","Cianose de extremidades e bradicardia intensa.","Rouquidão e escarro com fuligem."],g:3,doc:"ITO 23 — APH (CBMMG) — Queimaduras",exp:"Cianose de extremidades e bradicardia não são sinais específicos de queimadura de vias aéreas. Os sinais clássicos são: dificuldade respiratória, dor ao respirar, queimadura na face, pelos nasais chamuscados, rouquidão e escarro com fuligem."},
+{id:"a3_17",topico:"T3.4",e:"Sobre objetos encravados e empalados (MABOM-APH), qual afirmativa está CORRETA?",ops:["Objetos empalados rompem a pele e se fixam por orifícios não naturais.","Objetos encravados penetram por orifícios naturais do corpo.","Objetos encravados rompem a pele e se fixam por orifícios não naturais; objetos empalados penetram por orifícios naturais.","Ambos devem ser removidos antes do transporte para evitar agravamento.","Não há diferença clínica entre encravado e empalado no protocolo MABOM."],g:2,doc:"ITO 23 — APH (CBMMG) — Ferimentos",exp:"Encravado: rompe a pele e se fixa por orifício não natural (ex: objeto perfurando abdômen). Empalado: penetra por orifício natural (ex: objeto no ouvido). Nenhum deve ser removido no pré-hospitalar."},
+{id:"b3_17",topico:"T3.1",e:"Sobre o DEA em deslocamento da Unidade de Resgate, qual conduta está CORRETA conforme o MABOM-APH?",ops:["Parar a viatura, manter RCP e aplicar choque se indicado.","Não parar a viatura, cessar a RCP e aplicar o choque indicado.","Não parar a viatura, não cessar a RCP para análise, e não ministrar o choque mesmo se indicado — manter pás conectadas.","Parar a viatura somente se o choque for indicado pelo DEA.","Ministrar o choque durante o deslocamento, sem interromper a viagem."],g:2,doc:"ITO 23 — APH (CBMMG) — DEA em deslocamento",exp:"Em deslocamento com RCP em andamento: NÃO parar a viatura, NÃO cessar a RCP para análise do DEA e NÃO ministrar o choque. Manter pás conectadas e continuar RCP até chegar ao hospital."},
+{id:"a3_18",topico:"T3.1",e:"Na PCR pediátrica (criança de 7 anos) sem DEA disponível, a guarnição deve transportar ao hospital de referência após, EXCETO:",ops:["Imediatamente, se o SAV não estiver disponível ou a caminho.","Após retorno espontâneo da circulação, se SAV não disponível.","Após 6 a 9 choques separados por 2 minutos de RCP, sem SAV disponível.","Após 3 mensagens consecutivas do DEA de 'choque não indicado', separadas por 2 minutos de RCP.","Após o primeiro ciclo de RCP sem resposta, independentemente da disponibilidade do SAV."],g:4,doc:"ITO 23 — APH (CBMMG) — PCR Pediátrica",exp:"Transportar imediatamente após: ausência de SAV, retorno espontâneo da circulação, 6-9 choques ou 3 mensagens consecutivas de 'choque não indicado'. Não há previsão de transporte após o 'primeiro ciclo'."},
+{id:"b3_18",topico:"T3.1",e:"Sobre RCP em adultos (MABOM-APH), qual alternativa está INCORRETA?",ops:["Ciclos de 30 compressões por 2 ventilações.","Trocar compressor a cada 2 minutos ou 5 ciclos, com interrupção máxima de 5 segundos.","Se em deslocamento com PCR iniciada na cena e DEA com 3 mensagens de 'choque não indicado', transportar ao hospital.","Se a PCR iniciar no interior da viatura, parar, desligar a viatura e iniciar RCP.","A ventilação a quatro mãos deve ser evitada mesmo quando dois socorristas estiverem disponíveis."],g:4,doc:"ITO 23 — APH (CBMMG) — RCP Adulto",exp:"A ventilação a quatro mãos (socorrista 2 veda a máscara com duas mãos; socorrista 1 aperta o BVM) deve ser realizada SEMPRE que possível com dois socorristas — não evitada."},
+{id:"a3_19",topico:"T3.4",e:"Sobre o uso do torniquete (MABOM-APH), qual alternativa NÃO está correta?",ops:["Colocar 5 cm proximal ao local da lesão.","Anotar o horário de aplicação e informar à equipe hospitalar.","Para uso do esfigmomanômetro como torniquete: inflar até ausência de pulso distal e acrescentar mais 30 mmHg.","Utilizar apenas quando a pressão direta for ineficiente para hemorragias graves em membros.","Remover o torniquete assim que a hemorragia aparentar ter cessado, para preservar o membro."],g:4,doc:"ITO 23 — APH (CBMMG) — Torniquete",exp:"O torniquete NUNCA deve ser removido no pré-hospitalar após aplicação. A remoção inadequada pode causar embolia e choque. A decisão de remover cabe à equipe hospitalar."},
+{id:"b3_19",topico:"T3.4",e:"Em caso de evisceração (MABOM-APH), qual procedimento está INCORRETO?",ops:["Cobrir as vísceras com campo operatório umedecido com soro fisiológico.","Não tentar recolocar as vísceras na cavidade abdominal.","O curativo deve ser oclusivo e compressivo para conter hemorragia.","Cobrir com manta aluminizada ou plástico estéril, fechando os quatro lados.","Aplicar curativo úmido, não compressivo, para proteger as vísceras sem comprimir."],g:2,doc:"ITO 23 — APH (CBMMG) — Evisceração",exp:"O curativo em evisceração deve ser oclusivo, mas NÃO compressivo — a compressão pode agravar a lesão nas vísceras expostas. Cobrir com campo úmido e manta aluminizada sem comprimir."},
+{id:"a3_20",topico:"T3.2",e:"Na avaliação do paciente pelo XABCDE (MABOM-APH), o Bombeiro NÃO deve:",ops:["Na etapa B, avaliar profundidade, frequência, esforço e bilateralidade da ventilação.","Na etapa A, no paciente irresponsivo, abrir a boca e inspecionar as vias aéreas superiores.","Na etapa C, avaliar pulso, perfusão capilar e pele simultaneamente nos dois membros superiores.","Na etapa D, avaliar as pupilas como parte da disfunção neurológica.","Na etapa D, realizar Escala de Glasgow apenas nos pacientes responsivos."],g:4,doc:"ITO 23 — APH (CBMMG) — Avaliação Primária",exp:"A Escala de Coma de Glasgow deve ser aplicada em TODOS os pacientes na etapa D, responsivos ou não — inclusive para quantificar o grau de irresponsividade."},
+{id:"b3_20",topico:"T3.4",e:"Segundo o MABOM-APH, em fraturas expostas a conduta correta é:",ops:["Imobilizar o membro e depois controlar a hemorragia.","Controlar a hemorragia com compressão direta e depois imobilizar.","Reposicionar os fragmentos ósseos antes da imobilização.","Aplicar torniquete imediatamente em qualquer fratura exposta, sem tentar compressão direta.","Elevar o membro fraturado acima do nível do coração antes de qualquer outro procedimento."],g:1,doc:"ITO 23 — APH (CBMMG) — Fraturas Expostas",exp:"Em fraturas expostas: primeiro controlar a hemorragia (compressão direta), depois imobilizar. Nunca reposicionar fragmentos. Torniquete apenas se compressão for ineficaz."},
+{id:"a3_21",topico:"T3.3",e:"Sobre a mensuração do colar cervical (MABOM-APH), qual referência anatômica é utilizada?",ops:["Distância entre o mento e o processo mastoide.","Distância entre o occipital e a clavícula.","Distância entre o mento e o ombro do paciente.","Distância entre a orelha e o ombro do paciente.","Distância entre o mento e o processo xifóide."],g:2,doc:"ITO 23 — APH (CBMMG) — Colar Cervical",exp:"A mensuração do colar cervical usa como referência a distância entre uma linha imaginária do mento e uma linha imaginária do ombro do paciente."},
 {id:"b3_21",topico:"T3.2",e:"Sobre a Escala de Coma de Glasgow (ITO 23 — 3ª edição), qual alternativa está INCORRETA?",ops:["A pontuação varia de 3 a 15 pontos.","Na resposta verbal, palavras isoladas inteligíveis recebem 3 pontos.","Apenas o escore total deve ser anotado, dispensando-se o registro dos parâmetros individuais.","Ausência persistente de abertura ocular, sem fatores de interferência, recebe 1 ponto.","A resposta motora é o parâmetro mais preditivo da ECG."],g:2,doc:"ITO 23 — Escala de Coma de Glasgow",exp:"A INCORRETA é a alternativa C: os scores individuais de cada parâmetro (abertura ocular, resposta verbal e motora) DEVEM ser anotados e repassados à equipe — não apenas o total. As demais estão corretas: ECG de 3 a 15; palavras isoladas inteligíveis = 3 na resposta verbal; ausência de abertura ocular = 1; e a resposta motora é a mais preditiva."},
 {id:"a3_22",topico:"T3.4",e:"Segundo a 'regra dos nove' (ITO 23), qual correspondência está INCORRETA?",ops:["Em adulto, cada membro superior corresponde a 9%.","Em adulto, a cabeça corresponde a 9%.","Em adulto, cada membro inferior corresponde a 18%.","Em lactente, o tronco corresponde a 36%.","Em crianças, os membros inferiores juntos correspondem a 33%."],g:4,doc:"ITO 23 — Regra dos Nove (pediátrica)",exp:"As alternativas A a D estão corretas (adulto: membro superior 9%, cabeça 9%, membro inferior 18%; lactente: tronco 36%). A INCORRETA é a E: na criança/lactente a cabeça é proporcionalmente maior (~18%) e os membros inferiores, menores — juntos cerca de 26 a 28% (~13-14% cada), não 33%."},
 {id:"b3_22",topico:"T3.4",e:"Uma vítima adulta teve queimadura completa na perna e no braço esquerdos e em toda a face anterior do tronco. Pela 'regra dos nove', qual é a extensão da queimadura?",ops:["27% do corpo.","36% do corpo.","45% do corpo.","18% do corpo.","54% do corpo."],g:2,doc:"ITO 23 — Regra dos Nove",exp:"Perna esquerda = 18% | Braço esquerdo = 9% | Face anterior do tronco = 18%. Total = 45%."},
@@ -2449,7 +2501,7 @@ Valências do documento oficial:
 • O grau de sigilosidade é definido conforme o CONTEÚDO do documento e as normas legais.
 • Linguagem coloquial e expressões pessoais são INCOMPATÍVEIS com a impessoalidade do documento oficial.`},
 {id:"r_at3_11",area:"AT3",titulo:"Avaliação do Paciente — XABCDE e Glasgow (T3.2)",prob:"alta",
-texto:`Protocolo XABCDE (ITO 23 CBMMG / MABOM-APH CBMRS):
+texto:`Protocolo XABCDE (ITO 23 — APH (CBMMG)):
 • X = controle da hemorragia eXsanguinante (vem ANTES do A): pressão direta → curativo compressivo → torniquete (em membros).
 • A = Airway (vias aéreas com controle cervical).
 • B = Breathing — avaliar FR, expansibilidade torácica, ausculta e SpO₂.
@@ -2711,7 +2763,7 @@ async function saveProg(){
     if(progressoLocalOk)savePendente=true; // estado confiável deste aparelho → sincroniza depois
     return; // S30 BUG-DATA: jamais gravar no servidor antes da leitura confirmada
   }
-  try{await db.ref('progresso/'+currentUser.uid).set(userStats);}
+  try{await db.ref('progresso/'+currentUser.uid).set(userStats);flashSalvo();}
   catch(e){
     console.warn('saveProg 1ª tentativa:',e.message);
     try{await db.ref('progresso/'+currentUser.uid).set(userStats);}
@@ -2719,6 +2771,21 @@ async function saveProg(){
   }
 }
 async function saveCard(id,data){userCards[id]=data;await db.ref('cards/'+currentUser.uid+'/'+id).set(data);}
+
+// Indicador discreto de progresso salvo
+function flashSalvo(){
+  try{
+    let el=document.getElementById('save-flash');
+    if(!el){el=document.createElement('div');el.id='save-flash';el.textContent='\u2713 salvo';document.body.appendChild(el);}
+    el.classList.add('show');clearTimeout(el._t);
+    el._t=setTimeout(()=>el.classList.remove('show'),1100);
+  }catch(e){}
+}
+// Robustez iOS: ao minimizar/fechar, garante espelho local + tenta sincronizar
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='hidden'&&currentUser){try{gravarEspelho();}catch(e){}if(dataLoaded)saveProg();}
+});
+window.addEventListener('pagehide',()=>{try{if(currentUser)gravarEspelho();}catch(e){}});
 
 // Timeout wrapper para chamadas Firebase (evita travamento por App Check no iOS)
 function withTimeout(promise,ms=12000){
@@ -2786,12 +2853,14 @@ function updateStreak(){
   document.getElementById('hdr-streak-n').textContent=(userStats.streak||0);
 }
 
-function registrarAtividade(){
+function registrarAtividade(acertou){
   const today=new Date().toISOString().slice(0,10);
   const hist=userStats.history||[];
-  const todayEntry=hist.find(h=>h.date===today);
-  if(todayEntry)todayEntry.n=(todayEntry.n||0)+1;
-  else hist.push({date:today,n:1});
+  let todayEntry=hist.find(h=>h.date===today);
+  if(!todayEntry){todayEntry={date:today,n:0,c:0,w:0};hist.push(todayEntry);}
+  todayEntry.n=(todayEntry.n||0)+1;
+  if(acertou===true)todayEntry.c=(todayEntry.c||0)+1;
+  else if(acertou===false)todayEntry.w=(todayEntry.w||0)+1;
   userStats.history=hist.slice(-60);
   document.getElementById('hdr-streak-n').textContent=(userStats.streak||0);
 }
@@ -2861,7 +2930,23 @@ function animateBars(container){
 // ═══════════════════════════════
 // DASHBOARD
 // ═══════════════════════════════
+function renderHoje(){
+  const today=new Date().toISOString().slice(0,10);
+  const h=(userStats.history||[]).find(e=>e.date===today)||{n:0,c:0,w:0};
+  const n=h.n||0,c=h.c||0,w=h.w||0,res=c+w;
+  const pct=res>0?Math.round(c/res*100):null;
+  const meta=userStats.metaDiaria||10;
+  const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
+  set('hoje-q',n);set('hoje-acertos',c);set('hoje-erros',w);set('hoje-pct',pct===null?'—':pct+'%');
+  const dt=document.getElementById('hoje-data');
+  if(dt)dt.textContent=new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});
+  const fill=document.getElementById('hoje-meta-fill');
+  if(fill)fill.style.width=Math.min(100,Math.round(n/meta*100))+'%';
+  const mt=document.getElementById('hoje-meta-txt');
+  if(mt)mt.textContent=n>=meta?('Meta do dia batida \u00b7 '+n+'/'+meta):(n+'/'+meta+' da meta di\u00e1ria');
+}
 function renderDashboard(){
+  renderHoje();
   const total=(userStats.correct||0)+(userStats.wrong||0);
   const pct=total>0?Math.round((userStats.correct||0)/total*100):0;
   const meta=userStats.metaDiaria||10;
@@ -3302,7 +3387,7 @@ async function responderQuiz(idx){
     }
   }
 
-  registrarAtividade();
+  registrarAtividade(acertou);
 
   // SM-2 por questão
   if(!userStats.questoesSM2)userStats.questoesSM2={};
@@ -3329,7 +3414,8 @@ async function responderQuiz(idx){
     if(!acertou){
       erroEl.style.display='flex';
       erroEl.innerHTML=`<div class="fb-linha fb-marcada"><span class="fb-rotulo">Você marcou</span>${sanitize(escolhidaTxt)}</div>`+
-        `<div class="fb-linha fb-correta"><span class="fb-rotulo">Resposta correta</span>${sanitize(corretaTxt)}</div>`;
+        `<div class="fb-linha fb-correta"><span class="fb-rotulo">Resposta correta</span>${sanitize(corretaTxt)}</div>`+
+        `<div class="fb-caderno">Salva no Caderno de Erros \u2014 refa\u00e7a quando quiser</div>`;
     } else { erroEl.style.display='none'; erroEl.innerHTML=''; }
   }
   const contErros=!acertou&&userStats.erroHistorico?.[q.id]?.count||0;
@@ -3455,7 +3541,7 @@ function flipCard(){
 async function avaliarCard(dif){
   const fc=cardQueue[cardIdx];
   const existing=userCards[fc.id]||{};
-  const updated=sm2Resumo(existing,dif);
+  const updated=fsrsCardUpdate(existing,dif);
   await saveCard(fc.id,updated);
   if(dif==='fac'){userStats.cardStreak=(userStats.cardStreak||0)+1;}
   else userStats.cardStreak=0;
@@ -3720,7 +3806,7 @@ async function encerrarSimulado(){
       const eh=userStats.erroHistorico[q.id]||{count:0,last:0};
       userStats.erroHistorico[q.id]={count:eh.count+1,last:Date.now()};
     }else if(userStats.erroHistorico&&userStats.erroHistorico[q.id]){delete userStats.erroHistorico[q.id];}
-    registrarAtividade();
+    registrarAtividade(ac);
   });
   const pct=Math.round(correct/simQuestoes.length*100);
   document.getElementById('sim-home-view').classList.add('hidden');
