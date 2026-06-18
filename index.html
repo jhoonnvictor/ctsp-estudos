@@ -606,6 +606,44 @@ input,select,textarea{font-family:inherit;outline:none;}
 html[data-theme="dark"] .fb-caderno{color:var(--ember);}
 #save-flash{position:fixed;left:50%;bottom:80px;transform:translateX(-50%) translateY(8px);background:var(--green);color:#fff;font-size:12px;font-weight:700;padding:6px 14px;border-radius:20px;box-shadow:0 4px 12px rgba(0,0,0,.18);opacity:0;pointer-events:none;transition:opacity .25s ease,transform .25s ease;z-index:9999;}
 #save-flash.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* ── V1 Bento grid (cards de ação) ── */
+.acoes-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.acoes-grid .weak-card{flex-direction:column;align-items:flex-start;gap:8px;margin-bottom:0;}
+.acoes-grid .weak-card.hidden{display:none;}
+.acoes-grid .weak-info{width:100%;}
+.acoes-grid .btn-weak{width:100%;text-align:center;}
+@media(max-width:360px){.acoes-grid{grid-template-columns:1fr;}}
+/* ── Reporte de erros ── */
+.rep-link{display:inline-flex;align-items:center;gap:5px;margin-top:10px;background:none;border:none;color:var(--text3);font-size:11.5px;font-weight:600;cursor:pointer;padding:4px 0;text-decoration:underline;text-underline-offset:2px;}
+.rep-link:hover{color:var(--red);}
+.rep-overlay{position:fixed;inset:0;background:rgba(11,20,48,.55);display:flex;align-items:flex-end;justify-content:center;z-index:1000;opacity:0;pointer-events:none;transition:opacity .2s;}
+.rep-overlay.show{opacity:1;pointer-events:auto;}
+.rep-sheet{background:var(--surface);width:100%;max-width:480px;border-radius:20px 20px 0 0;padding:20px 18px calc(18px + env(safe-area-inset-bottom));box-shadow:0 -8px 32px rgba(16,27,61,.22);transform:translateY(20px);transition:transform .25s var(--ease-out);max-height:86vh;overflow-y:auto;}
+.rep-overlay.show .rep-sheet{transform:translateY(0);}
+.rep-sheet h3{font-family:var(--font-display);font-size:21px;font-weight:700;color:var(--text);letter-spacing:.02em;}
+.rep-ctx{font-size:12px;color:var(--text2);background:var(--bg);border-radius:10px;padding:9px 11px;margin:8px 0 14px;line-height:1.4;border-left:3px solid var(--ember);}
+.rep-cats{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px;}
+.rep-cat{padding:7px 12px;border:1px solid var(--line-soft);border-radius:18px;background:var(--surface);font-size:12px;font-weight:600;color:var(--text2);cursor:pointer;}
+.rep-cat.on{background:var(--navy);color:#fff;border-color:var(--navy);}
+.rep-sheet textarea{width:100%;min-height:90px;border:1px solid var(--border);border-radius:12px;padding:11px;font-size:13px;font-family:inherit;resize:vertical;background:var(--surface);color:var(--text);box-sizing:border-box;}
+.rep-actions{display:flex;gap:8px;margin-top:14px;}
+.rep-actions button{flex:1;padding:12px;border-radius:12px;font-size:13px;font-weight:700;border:none;cursor:pointer;}
+.rep-cancel{background:var(--bg);color:var(--text2);}
+.rep-send{background:var(--red);color:#fff;box-shadow:0 4px 14px rgba(211,36,18,.28);}
+.rep-send:disabled{opacity:.5;cursor:default;box-shadow:none;}
+.rep-badge{display:inline-flex;min-width:17px;height:17px;padding:0 4px;align-items:center;justify-content:center;background:var(--red);color:#fff;border-radius:9px;font-size:10px;font-weight:800;margin-left:5px;}
+.rep-item{background:var(--surface);border:1px solid var(--line-soft);border-left:4px solid var(--ember);border-radius:12px;padding:12px;margin-bottom:10px;box-shadow:var(--shadow);}
+.rep-item-top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px;}
+.rep-item-cat{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--ember-deep);background:var(--amber-light);padding:3px 8px;border-radius:7px;}
+.rep-item-id{font-size:11px;color:var(--text3);font-weight:700;}
+.rep-item-ctx{font-size:12px;color:var(--text2);margin-bottom:6px;line-height:1.4;}
+.rep-item-desc{font-size:13px;color:var(--text);line-height:1.45;margin-bottom:8px;}
+.rep-item-meta{font-size:10.5px;color:var(--text3);margin-bottom:8px;}
+.rep-item-acts{display:flex;gap:7px;}
+.rep-item-acts button{padding:7px 12px;border-radius:9px;font-size:11.5px;font-weight:700;border:none;cursor:pointer;}
+.rep-resolve{background:var(--green);color:#fff;}
+.rep-copy{background:var(--bg);color:var(--text2);}
 </style>
 </head>
 <body>
@@ -757,6 +795,7 @@ html[data-theme="dark"] .fb-caderno{color:var(--ember);}
           </div>
           <div class="adapt-btn-arrow">→</div>
         </div>
+        <div class="acoes-grid">
         <!-- Ponto fraco -->
         <div id="dash-weak" class="weak-card hidden">
           <div class="weak-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
@@ -785,6 +824,7 @@ html[data-theme="dark"] .fb-caderno{color:var(--ember);}
             <div class="weak-pct">Refaça até zerar — prioriza as mais erradas</div>
           </div>
           <button class="btn-weak" onclick="iniciarModoErro()">Refazer</button>
+        </div>
         </div>
         <!-- S35 PRONT: projeção de pontos na prova (BKT × cotas do edital) -->
         <div id="dash-pront" class="chart-wrap hidden">
@@ -897,6 +937,7 @@ html[data-theme="dark"] .fb-caderno{color:var(--ember);}
             <div class="quiz-fb-erro" id="quiz-fb-erro" style="display:none"></div>
             <div class="quiz-feedback-text" id="quiz-fb-text"></div>
             <div class="quiz-ai-tip" id="quiz-ai-tip" style="display:none"><strong>Dica IA:</strong> <span id="quiz-ai-tip-text"></span></div>
+            <button class="rep-link" onclick="abrirReporte('questao',questaoAtualId)">⚐ Reportar erro nesta questão</button>
           </div>
           <button class="quiz-next-btn" id="quiz-next-btn" onclick="nextQuiz()">Próxima →</button>
         </div>
@@ -1017,6 +1058,7 @@ html[data-theme="dark"] .fb-caderno{color:var(--ember);}
           <button class="admin-tab active" onclick="setAdminTab('usuarios',this)">Usuários</button>
           <button class="admin-tab" onclick="setAdminTab('questao',this)">+ Questão</button>
           <button class="admin-tab" onclick="setAdminTab('flashcard',this)">+ Flashcard</button>
+          <button class="admin-tab" onclick="setAdminTab('reportes',this)">⚐ Reportes<span class="rep-badge" id="rep-badge-tab" style="display:none">0</span></button>
         </div>
         <div class="admin-section active" id="admin-usuarios">
           <div id="admin-users-list"><p style="color:var(--text2);font-size:13px;">Carregando...</p></div>
@@ -1045,6 +1087,9 @@ html[data-theme="dark"] .fb-caderno{color:var(--ember);}
           <div class="field"><label>Verso (resposta)</label><textarea id="fc-v" rows="2"></textarea></div>
           <button class="btn-primary" onclick="addFlashcard()">Salvar flashcard</button>
           <p class="auth-msg" id="fc-msg"></p>
+        </div>
+        <div class="admin-section" id="admin-reportes">
+          <div id="admin-reportes-list"><p style="color:var(--text2);font-size:13px;">Carregando...</p></div>
         </div>
       </div>
     </div>
@@ -1156,6 +1201,13 @@ html[data-theme="dark"] .fb-caderno{color:var(--ember);}
       </div>
     </div>
     <input type="file" id="import-file" accept="application/json,.json" style="display:none" onchange="importarProgresso(event)">
+    <div class="config-row" style="border-top:1px solid var(--border);margin-top:8px;padding-top:14px;">
+      <div>
+        <div class="config-label" style="color:var(--red)">Reiniciar do zero</div>
+        <div class="config-sub">Apaga TODO o progresso (questões, cards, histórico, revisões)</div>
+      </div>
+      <button class="btn-config-reset" style="color:var(--red);border-color:var(--red)" onclick="reiniciarEstudos()">Reiniciar</button>
+    </div>
     <button class="btn-primary" style="margin-top:20px" onclick="salvarConfig()">Salvar</button>
   </div>
 </div>
@@ -1511,7 +1563,7 @@ AT1:[
 {id:"a1_11",topico:"T1.2",e:"Conforme a RT CBMRS nº 05 Parte 1.1/2016, qual alternativa está CORRETA?",ops:["A fase de vistoria consiste na verificação documental do PPCI.","Após a vistoria com conformidade, será emitido o APPCI.","A renovação do APPCI deve ser protocolada com no mínimo 1 mês de antecedência.","Na vistoria ordinária, poderão ser exigidos documentos complementares aos laudos técnicos.","Para edificações com APPCI, alteração de layout exige FAL mesmo com supressão de medidas."],g:1,doc:"RT CBMRS nº 05 Parte 1.1/2016 · Caderno CTSP p.4",exp:"'Após a vistoria, constatado que a edificação atende ao previsto, será emitido o APPCI' — transcrição literal."},
 {id:"a1_12",topico:"T1.2",e:"A RT CBMRS nº 05 Parte 06/2025 configura iminente risco à vida nas divisões F-6 e F-7 com inexistência/inoperância de:",ops:["Detecção, alarme, saídas, sinalização, iluminação, controle de acabamento.","Extintores, detecção, alarme, saídas, sinalização, iluminação, controle de acabamento.","Apenas em F-6 e F-7: detecção, alarme, saídas, sinalização, iluminação.","Apenas em F-6 e F-7: extintores + todos os demais sistemas.","Em F-6, F-7, F-11 e F-12: extintores + todos os demais sistemas."],g:0,doc:"RT CBMRS nº 05 Parte 06/2025, item 7.2 · Caderno CTSP p.5",exp:"Pelo item 7.2 da RT 05 Parte 06/2025, nas divisões F-6 e F-7 o iminente risco decorre da inexistência/inoperância de: detecção, alarme, saídas de emergência, sinalização, iluminação e controle de materiais de acabamento — SEM extintores (termo que não consta na norma). A alternativa A reproduz exatamente essa lista; a C é incompleta (omite o controle de acabamento)."},
 {id:"a1_13",topico:"T1.1",e:"Segundo a Lei Federal nº 13.425/2017, quais assertivas estão corretas? I-CBM planeja, vistoria e fiscaliza; II-Municípios sem CBM podem criar serviços independentemente; III-Curso obrigatório para setores técnicos do CBM; IV-Cursos de Engenharia incluirão conteúdo de prevenção.",ops:["Apenas I e III","Apenas II, III e IV","Apenas I, III e IV","Apenas II e III","I, II, III e IV"],g:2,doc:"Lei Federal 13.425/2017",exp:"I, III e IV corretas. II está errada: municípios sem CBM SOMENTE podem criar serviços mediante convênio."},
-{id:"a1_14",topico:"T1.1",e:"O PrPCI, conforme LC Estadual 14.376/2013, é o projeto técnico que:",ops:["Apenas estabelece as plantas e memoriais descritivos.","Contém medidas para prevenir, permitir abandono seguro, dificultar propagação, controlar e extinguir incêndio e permitir acesso ao CBM.","É aplicável somente a edificações de risco alto.","Substitui o PSPCI para edificações acima de 750 m².","É emitido pelo proprietário sem necessidade de responsável técnico."],g:1,doc:"LC 14.376/2013, art. 6º, XXXII",exp:"Pela LC 14.376/2013 (art. 6º, XXXII), o PrPCI — Projeto de Prevenção e Proteção Contra Incêndio — é o projeto técnico, constante do PPCI, que contém o conjunto de medidas para prevenir o incêndio, permitir o abandono seguro, dificultar a propagação, controlar/extinguir o fogo e permitir o acesso ao CBM. Não confundir com o PPCI (inc. XXXI), que é o processo que reúne os elementos formais a encaminhar ao CBMRS."}
+{id:"a1_14",topico:"T1.1",e:"O PrPCI, conforme LC Estadual 14.376/2013, é o projeto técnico que:",ops:["Apenas estabelece as plantas e memoriais descritivos.","Contém medidas para prevenir, permitir abandono seguro, dificultar propagação, controlar e extinguir incêndio e permitir acesso ao CBM.","É aplicável somente a edificações de risco alto.","Substitui o PSPCI para edificações acima de 750 m².","É emitido pelo proprietário sem necessidade de responsável técnico."],g:1,doc:"LC 14.376/2013, art. 6º, XXXIII",exp:"Pela LC 14.376/2013 (art. 6º, XXXIII), o PrPCI — Projeto de Prevenção e Proteção Contra Incêndio — é o projeto técnico, constante do PPCI, que contém o conjunto de medidas para prevenir o incêndio, permitir o abandono seguro, dificultar a propagação, controlar/extinguir o fogo e permitir o acesso ao CBM. Não confundir com o PPCI (inc. XXXI), que é o processo que reúne os elementos formais a encaminhar ao CBMRS."}
 ],
 AT2:[
 {id:"a2_01",topico:"T2.2",e:"Sobre mangueiras de combate a incêndio (Manual CBMMG 2020), qual alternativa está CORRETA?",ops:["Diâmetros 1½\" e 2½\", pressão mínima de TRABALHO de 28 kgf/cm².","Apenas diâmetro 2½\", pressão de trabalho 42 kgf/cm².","Mangueiras de 1½\" e 2½\" resistem a pressão mínima de PROVA de 42 kgf/cm².","Pressão mínima de prova 14 kgf/cm², ruptura 28 kgf/cm².","Testadas por estanqueidade; ruptura mínima de 42 kgf/cm²."],g:4,doc:"Manual Combate a Incêndio Urbano CBMMG Cap.3 · Caderno CTSP p.6",exp:"MABOM Cap.3 (Mangueiras): pressões mínimas — trabalho 14, prova 28, ruptura 42 kgf/cm². Correta é E (testadas por estanqueidade; ruptura mínima 42). Atenção: 42 é a RUPTURA, não a prova (28)."},
@@ -1647,17 +1699,17 @@ AT3B:[
 {id:"b3_14",topico:"T3.2",e:"Sobre hemorragia externa grave no protocolo X do XABCDE, a conduta CORRETA é:",ops:["Aguardar acesso venoso antes de qualquer intervenção.","Aplicar torniquete imediatamente em qualquer hemorragia de membro.","Controle por pressão direta, curativo compressivo ou torniquete em hemorragias de membros com risco de morte.","Aplicar gelo para vasoconstrição antes do curativo.","Elevar o membro e aguardar hemostasia espontânea."],g:2,doc:"ITO 23 CBMMG - X do XABCDE",exp:"X = controle de hemorragia exsanguinante: pressão direta → curativo compressivo → torniquete (em membros, quando necessário)."},
 {id:"a3_15",topico:"T3.2",e:"No atendimento pré-hospitalar a paciente inconsciente com suspeita de TCE, qual ação é INCORRETA?",ops:["Imobilizar a coluna cervical com colar cervical adequado.","Monitorar continuamente o nível de consciência pela Escala de Coma de Glasgow.","Realizar hiperventilação agressiva de rotina para reduzir a PIC.","Manter vias aéreas pérvias com cânula orofaríngea se Glasgow ≤ 8.","Posicionar em decúbito dorsal com plano rígido na suspeita de lesão espinhal."],g:2,doc:"ITO 23 CBMMG — TCE",exp:"Hiperventilação agressiva de rotina está CONTRAINDICADA no TCE pré-hospitalar — causa vasoconstrição cerebral e piora a isquemia. Só utilizada em herniação iminente."},
 {id:"b3_15",topico:"T3.1",e:"Segundo o ITO 23, a indicação CORRETA de desfibrilação com DEA em lactente é:",ops:["Nunca utilizar DEA em lactentes — apenas RCP.","Utilizar DEA com pás adultas posicionadas na posição anteroposterior.","Utilizar DEA com pás pediátricas (ou atenuador de dose) para menores de 8 anos ou menos de 25 kg.","Aplicar choque apenas se a frequência cardíaca for confirmada como zero.","Aguardar UTI para desfibrilação em pacientes pediátricos."],g:2,doc:"ITO 23 CBMMG — DEA",exp:"Para menores de 8 anos ou menos de 25 kg: usar pás pediátricas ou atenuador de dose. Na ausência, pás adultas em posição anteroposterior são segunda opção. Nunca negar desfibrilação."},
-{id:"a3_16",topico:"T3.4",e:"Sobre o uso da tala de tração de fêmur (MABOM-APH), qual afirmativa está CORRETA?",ops:["É indicada em fraturas abertas de fêmur com sangramento ativo.","É contraindicada em suspeita de lesão no joelho ou em fraturas abertas do fêmur.","Deve ser aplicada em qualquer fratura de fêmur, aberta ou fechada.","É indicada em fraturas de pelve associadas a fêmur.","Pode ser usada em crianças menores de 8 anos sem restrições."],g:1,doc:"ITO 23 — APH (CBMMG)",exp:"A tala de tração de fêmur é CONTRAINDICADA em suspeita de lesão no joelho ou em fraturas abertas do fêmur."},
-{id:"b3_16",topico:"T3.4",e:"De acordo com o MABOM-APH, são sinais de queimadura de vias aéreas, EXCETO:",ops:["Dificuldade respiratória e dor ao respirar.","Pelos nasais chamuscados.","Queimadura na face.","Cianose de extremidades e bradicardia intensa.","Rouquidão e escarro com fuligem."],g:3,doc:"ITO 23 — APH (CBMMG) — Queimaduras",exp:"Cianose de extremidades e bradicardia não são sinais específicos de queimadura de vias aéreas. Os sinais clássicos são: dificuldade respiratória, dor ao respirar, queimadura na face, pelos nasais chamuscados, rouquidão e escarro com fuligem."},
-{id:"a3_17",topico:"T3.4",e:"Sobre objetos encravados e empalados (MABOM-APH), qual afirmativa está CORRETA?",ops:["Objetos empalados rompem a pele e se fixam por orifícios não naturais.","Objetos encravados penetram por orifícios naturais do corpo.","Objetos encravados rompem a pele e se fixam por orifícios não naturais; objetos empalados penetram por orifícios naturais.","Ambos devem ser removidos antes do transporte para evitar agravamento.","Não há diferença clínica entre encravado e empalado no protocolo MABOM."],g:2,doc:"ITO 23 — APH (CBMMG) — Ferimentos",exp:"Encravado: rompe a pele e se fixa por orifício não natural (ex: objeto perfurando abdômen). Empalado: penetra por orifício natural (ex: objeto no ouvido). Nenhum deve ser removido no pré-hospitalar."},
-{id:"b3_17",topico:"T3.1",e:"Sobre o DEA em deslocamento da Unidade de Resgate, qual conduta está CORRETA conforme o MABOM-APH?",ops:["Parar a viatura, manter RCP e aplicar choque se indicado.","Não parar a viatura, cessar a RCP e aplicar o choque indicado.","Não parar a viatura, não cessar a RCP para análise, e não ministrar o choque mesmo se indicado — manter pás conectadas.","Parar a viatura somente se o choque for indicado pelo DEA.","Ministrar o choque durante o deslocamento, sem interromper a viagem."],g:2,doc:"ITO 23 — APH (CBMMG) — DEA em deslocamento",exp:"Em deslocamento com RCP em andamento: NÃO parar a viatura, NÃO cessar a RCP para análise do DEA e NÃO ministrar o choque. Manter pás conectadas e continuar RCP até chegar ao hospital."},
+{id:"a3_16",topico:"T3.4",e:"Sobre o uso da tala de tração de fêmur (ITO 23/CBMMG), qual afirmativa está CORRETA?",ops:["É indicada em fraturas abertas de fêmur com sangramento ativo.","É contraindicada em suspeita de lesão no joelho ou em fraturas abertas do fêmur.","Deve ser aplicada em qualquer fratura de fêmur, aberta ou fechada.","É indicada em fraturas de pelve associadas a fêmur.","Pode ser usada em crianças menores de 8 anos sem restrições."],g:1,doc:"ITO 23 — APH (CBMMG)",exp:"A tala de tração de fêmur é CONTRAINDICADA em suspeita de lesão no joelho ou em fraturas abertas do fêmur."},
+{id:"b3_16",topico:"T3.4",e:"De acordo com o ITO 23/CBMMG, são sinais de queimadura de vias aéreas, EXCETO:",ops:["Dificuldade respiratória e dor ao respirar.","Pelos nasais chamuscados.","Queimadura na face.","Cianose de extremidades e bradicardia intensa.","Rouquidão e escarro com fuligem."],g:3,doc:"ITO 23 — APH (CBMMG) — Queimaduras",exp:"Cianose de extremidades e bradicardia não são sinais específicos de queimadura de vias aéreas. Os sinais clássicos são: dificuldade respiratória, dor ao respirar, queimadura na face, pelos nasais chamuscados, rouquidão e escarro com fuligem."},
+{id:"a3_17",topico:"T3.4",e:"Sobre objetos encravados e empalados (ITO 23/CBMMG), qual afirmativa está CORRETA?",ops:["Objetos empalados rompem a pele e se fixam por orifícios não naturais.","Objetos encravados penetram por orifícios naturais do corpo.","Objetos encravados rompem a pele e se fixam por orifícios não naturais; objetos empalados penetram por orifícios naturais.","Ambos devem ser removidos antes do transporte para evitar agravamento.","Não há diferença clínica entre encravado e empalado no protocolo MABOM."],g:2,doc:"ITO 23 — APH (CBMMG) — Ferimentos",exp:"Encravado: rompe a pele e se fixa por orifício não natural (ex: objeto perfurando abdômen). Empalado: penetra por orifício natural (ex: objeto no ouvido). Nenhum deve ser removido no pré-hospitalar."},
+{id:"b3_17",topico:"T3.1",e:"Sobre o DEA em deslocamento da Unidade de Resgate, qual conduta está CORRETA conforme o ITO 23/CBMMG?",ops:["Parar a viatura, manter RCP e aplicar choque se indicado.","Não parar a viatura, cessar a RCP e aplicar o choque indicado.","Não parar a viatura, não cessar a RCP para análise, e não ministrar o choque mesmo se indicado — manter pás conectadas.","Parar a viatura somente se o choque for indicado pelo DEA.","Ministrar o choque durante o deslocamento, sem interromper a viagem."],g:2,doc:"ITO 23 — APH (CBMMG) — DEA em deslocamento",exp:"Em deslocamento com RCP em andamento: NÃO parar a viatura, NÃO cessar a RCP para análise do DEA e NÃO ministrar o choque. Manter pás conectadas e continuar RCP até chegar ao hospital."},
 {id:"a3_18",topico:"T3.1",e:"Na PCR pediátrica (criança de 7 anos) sem DEA disponível, a guarnição deve transportar ao hospital de referência após, EXCETO:",ops:["Imediatamente, se o SAV não estiver disponível ou a caminho.","Após retorno espontâneo da circulação, se SAV não disponível.","Após 6 a 9 choques separados por 2 minutos de RCP, sem SAV disponível.","Após 3 mensagens consecutivas do DEA de 'choque não indicado', separadas por 2 minutos de RCP.","Após o primeiro ciclo de RCP sem resposta, independentemente da disponibilidade do SAV."],g:4,doc:"ITO 23 — APH (CBMMG) — PCR Pediátrica",exp:"Transportar imediatamente após: ausência de SAV, retorno espontâneo da circulação, 6-9 choques ou 3 mensagens consecutivas de 'choque não indicado'. Não há previsão de transporte após o 'primeiro ciclo'."},
-{id:"b3_18",topico:"T3.1",e:"Sobre RCP em adultos (MABOM-APH), qual alternativa está INCORRETA?",ops:["Ciclos de 30 compressões por 2 ventilações.","Trocar compressor a cada 2 minutos ou 5 ciclos, com interrupção máxima de 5 segundos.","Se em deslocamento com PCR iniciada na cena e DEA com 3 mensagens de 'choque não indicado', transportar ao hospital.","Se a PCR iniciar no interior da viatura, parar, desligar a viatura e iniciar RCP.","A ventilação a quatro mãos deve ser evitada mesmo quando dois socorristas estiverem disponíveis."],g:4,doc:"ITO 23 — APH (CBMMG) — RCP Adulto",exp:"A ventilação a quatro mãos (socorrista 2 veda a máscara com duas mãos; socorrista 1 aperta o BVM) deve ser realizada SEMPRE que possível com dois socorristas — não evitada."},
-{id:"a3_19",topico:"T3.4",e:"Sobre o uso do torniquete (MABOM-APH), qual alternativa NÃO está correta?",ops:["Colocar 5 cm proximal ao local da lesão.","Anotar o horário de aplicação e informar à equipe hospitalar.","Para uso do esfigmomanômetro como torniquete: inflar até ausência de pulso distal e acrescentar mais 30 mmHg.","Utilizar apenas quando a pressão direta for ineficiente para hemorragias graves em membros.","Remover o torniquete assim que a hemorragia aparentar ter cessado, para preservar o membro."],g:4,doc:"ITO 23 — APH (CBMMG) — Torniquete",exp:"O torniquete NUNCA deve ser removido no pré-hospitalar após aplicação. A remoção inadequada pode causar embolia e choque. A decisão de remover cabe à equipe hospitalar."},
-{id:"b3_19",topico:"T3.4",e:"Em caso de evisceração (MABOM-APH), qual procedimento está INCORRETO?",ops:["Cobrir as vísceras com campo operatório umedecido com soro fisiológico.","Não tentar recolocar as vísceras na cavidade abdominal.","O curativo deve ser oclusivo e compressivo para conter hemorragia.","Cobrir com manta aluminizada ou plástico estéril, fechando os quatro lados.","Aplicar curativo úmido, não compressivo, para proteger as vísceras sem comprimir."],g:2,doc:"ITO 23 — APH (CBMMG) — Evisceração",exp:"O curativo em evisceração deve ser oclusivo, mas NÃO compressivo — a compressão pode agravar a lesão nas vísceras expostas. Cobrir com campo úmido e manta aluminizada sem comprimir."},
-{id:"a3_20",topico:"T3.2",e:"Na avaliação do paciente pelo XABCDE (MABOM-APH), o Bombeiro NÃO deve:",ops:["Na etapa B, avaliar profundidade, frequência, esforço e bilateralidade da ventilação.","Na etapa A, no paciente irresponsivo, abrir a boca e inspecionar as vias aéreas superiores.","Na etapa C, avaliar pulso, perfusão capilar e pele simultaneamente nos dois membros superiores.","Na etapa D, avaliar as pupilas como parte da disfunção neurológica.","Na etapa D, realizar Escala de Glasgow apenas nos pacientes responsivos."],g:4,doc:"ITO 23 — APH (CBMMG) — Avaliação Primária",exp:"A Escala de Coma de Glasgow deve ser aplicada em TODOS os pacientes na etapa D, responsivos ou não — inclusive para quantificar o grau de irresponsividade."},
-{id:"b3_20",topico:"T3.4",e:"Segundo o MABOM-APH, em fraturas expostas a conduta correta é:",ops:["Imobilizar o membro e depois controlar a hemorragia.","Controlar a hemorragia com compressão direta e depois imobilizar.","Reposicionar os fragmentos ósseos antes da imobilização.","Aplicar torniquete imediatamente em qualquer fratura exposta, sem tentar compressão direta.","Elevar o membro fraturado acima do nível do coração antes de qualquer outro procedimento."],g:1,doc:"ITO 23 — APH (CBMMG) — Fraturas Expostas",exp:"Em fraturas expostas: primeiro controlar a hemorragia (compressão direta), depois imobilizar. Nunca reposicionar fragmentos. Torniquete apenas se compressão for ineficaz."},
-{id:"a3_21",topico:"T3.3",e:"Sobre a mensuração do colar cervical (MABOM-APH), qual referência anatômica é utilizada?",ops:["Distância entre o mento e o processo mastoide.","Distância entre o occipital e a clavícula.","Distância entre o mento e o ombro do paciente.","Distância entre a orelha e o ombro do paciente.","Distância entre o mento e o processo xifóide."],g:2,doc:"ITO 23 — APH (CBMMG) — Colar Cervical",exp:"A mensuração do colar cervical usa como referência a distância entre uma linha imaginária do mento e uma linha imaginária do ombro do paciente."},
+{id:"b3_18",topico:"T3.1",e:"Sobre RCP em adultos (ITO 23/CBMMG), qual alternativa está INCORRETA?",ops:["Ciclos de 30 compressões por 2 ventilações.","Trocar compressor a cada 2 minutos ou 5 ciclos, com interrupção máxima de 5 segundos.","Se em deslocamento com PCR iniciada na cena e DEA com 3 mensagens de 'choque não indicado', transportar ao hospital.","Se a PCR iniciar no interior da viatura, parar, desligar a viatura e iniciar RCP.","A ventilação a quatro mãos deve ser evitada mesmo quando dois socorristas estiverem disponíveis."],g:4,doc:"ITO 23 — APH (CBMMG) — RCP Adulto",exp:"A ventilação a quatro mãos (socorrista 2 veda a máscara com duas mãos; socorrista 1 aperta o BVM) deve ser realizada SEMPRE que possível com dois socorristas — não evitada."},
+{id:"a3_19",topico:"T3.4",e:"Sobre o uso do torniquete (ITO 23/CBMMG), qual alternativa NÃO está correta?",ops:["Colocar 5 cm proximal ao local da lesão.","Anotar o horário de aplicação e informar à equipe hospitalar.","Para uso do esfigmomanômetro como torniquete: inflar até ausência de pulso distal e acrescentar mais 30 mmHg.","Utilizar apenas quando a pressão direta for ineficiente para hemorragias graves em membros.","Remover o torniquete assim que a hemorragia aparentar ter cessado, para preservar o membro."],g:4,doc:"ITO 23 — APH (CBMMG) — Torniquete",exp:"O torniquete NUNCA deve ser removido no pré-hospitalar após aplicação. A remoção inadequada pode causar embolia e choque. A decisão de remover cabe à equipe hospitalar."},
+{id:"b3_19",topico:"T3.4",e:"Em caso de evisceração (ITO 23/CBMMG), qual procedimento está INCORRETO?",ops:["Cobrir as vísceras com campo operatório umedecido com soro fisiológico.","Não tentar recolocar as vísceras na cavidade abdominal.","O curativo deve ser oclusivo e compressivo para conter hemorragia.","Cobrir com manta aluminizada ou plástico estéril, fechando os quatro lados.","Aplicar curativo úmido, não compressivo, para proteger as vísceras sem comprimir."],g:2,doc:"ITO 23 — APH (CBMMG) — Evisceração",exp:"O curativo em evisceração deve ser oclusivo, mas NÃO compressivo — a compressão pode agravar a lesão nas vísceras expostas. Cobrir com campo úmido e manta aluminizada sem comprimir."},
+{id:"a3_20",topico:"T3.2",e:"Na avaliação do paciente pelo XABCDE (ITO 23/CBMMG), o Bombeiro NÃO deve:",ops:["Na etapa B, avaliar profundidade, frequência, esforço e bilateralidade da ventilação.","Na etapa A, no paciente irresponsivo, abrir a boca e inspecionar as vias aéreas superiores.","Na etapa C, avaliar pulso, perfusão capilar e pele simultaneamente nos dois membros superiores.","Na etapa D, avaliar as pupilas como parte da disfunção neurológica.","Na etapa D, realizar Escala de Glasgow apenas nos pacientes responsivos."],g:4,doc:"ITO 23 — APH (CBMMG) — Avaliação Primária",exp:"A Escala de Coma de Glasgow deve ser aplicada em TODOS os pacientes na etapa D, responsivos ou não — inclusive para quantificar o grau de irresponsividade."},
+{id:"b3_20",topico:"T3.4",e:"Segundo o ITO 23/CBMMG, em fraturas expostas a conduta correta é:",ops:["Imobilizar o membro e depois controlar a hemorragia.","Controlar a hemorragia com compressão direta e depois imobilizar.","Reposicionar os fragmentos ósseos antes da imobilização.","Aplicar torniquete imediatamente em qualquer fratura exposta, sem tentar compressão direta.","Elevar o membro fraturado acima do nível do coração antes de qualquer outro procedimento."],g:1,doc:"ITO 23 — APH (CBMMG) — Fraturas Expostas",exp:"Em fraturas expostas: primeiro controlar a hemorragia (compressão direta), depois imobilizar. Nunca reposicionar fragmentos. Torniquete apenas se compressão for ineficaz."},
+{id:"a3_21",topico:"T3.3",e:"Sobre a mensuração do colar cervical (ITO 23/CBMMG), qual referência anatômica é utilizada?",ops:["Distância entre o mento e o processo mastoide.","Distância entre o occipital e a clavícula.","Distância entre o mento e o ombro do paciente.","Distância entre a orelha e o ombro do paciente.","Distância entre o mento e o processo xifóide."],g:2,doc:"ITO 23 — APH (CBMMG) — Colar Cervical",exp:"A mensuração do colar cervical usa como referência a distância entre uma linha imaginária do mento e uma linha imaginária do ombro do paciente."},
 {id:"b3_21",topico:"T3.2",e:"Sobre a Escala de Coma de Glasgow (ITO 23 — 3ª edição), qual alternativa está INCORRETA?",ops:["A pontuação varia de 3 a 15 pontos.","Na resposta verbal, palavras isoladas inteligíveis recebem 3 pontos.","Apenas o escore total deve ser anotado, dispensando-se o registro dos parâmetros individuais.","Ausência persistente de abertura ocular, sem fatores de interferência, recebe 1 ponto.","A resposta motora é o parâmetro mais preditivo da ECG."],g:2,doc:"ITO 23 — Escala de Coma de Glasgow",exp:"A INCORRETA é a alternativa C: os scores individuais de cada parâmetro (abertura ocular, resposta verbal e motora) DEVEM ser anotados e repassados à equipe — não apenas o total. As demais estão corretas: ECG de 3 a 15; palavras isoladas inteligíveis = 3 na resposta verbal; ausência de abertura ocular = 1; e a resposta motora é a mais preditiva."},
 {id:"a3_22",topico:"T3.4",e:"Segundo a 'regra dos nove' (ITO 23), qual correspondência está INCORRETA?",ops:["Em adulto, cada membro superior corresponde a 9%.","Em adulto, a cabeça corresponde a 9%.","Em adulto, cada membro inferior corresponde a 18%.","Em lactente, o tronco corresponde a 36%.","Em crianças, os membros inferiores juntos correspondem a 33%."],g:4,doc:"ITO 23 — Regra dos Nove (pediátrica)",exp:"As alternativas A a D estão corretas (adulto: membro superior 9%, cabeça 9%, membro inferior 18%; lactente: tronco 36%). A INCORRETA é a E: na criança/lactente a cabeça é proporcionalmente maior (~18%) e os membros inferiores, menores — juntos cerca de 26 a 28% (~13-14% cada), não 33%."},
 {id:"b3_22",topico:"T3.4",e:"Uma vítima adulta teve queimadura completa na perna e no braço esquerdos e em toda a face anterior do tronco. Pela 'regra dos nove', qual é a extensão da queimadura?",ops:["27% do corpo.","36% do corpo.","45% do corpo.","18% do corpo.","54% do corpo."],g:2,doc:"ITO 23 — Regra dos Nove",exp:"Perna esquerda = 18% | Braço esquerdo = 9% | Face anterior do tronco = 18%. Total = 45%."},
@@ -2881,7 +2933,7 @@ function navTo(s){
   if(s==='cards'){renderCards();}
   if(s==='resumos'){renderResumos();updateBadges();}
   if(s==='padroes'){renderPadroes();}
-  if(s==='admin'&&isAdmin()){loadAdminUsers();}
+  if(s==='admin'&&isAdmin()){loadAdminUsers();loadReportes();}
 }
 
 function animateScreenEntrance(sc){
@@ -2937,7 +2989,8 @@ function renderHoje(){
   const pct=res>0?Math.round(c/res*100):null;
   const meta=userStats.metaDiaria||10;
   const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
-  set('hoje-q',n);set('hoje-acertos',c);set('hoje-erros',w);set('hoje-pct',pct===null?'—':pct+'%');
+  animateCount(document.getElementById('hoje-q'),n);animateCount(document.getElementById('hoje-acertos'),c);animateCount(document.getElementById('hoje-erros'),w);
+  const pe=document.getElementById('hoje-pct');if(pe){pe.textContent=pct===null?'—':pct+'%';pe.style.color=pct===null?'':(pct>=70?'var(--green)':pct>=50?'var(--amber)':'var(--red)');}
   const dt=document.getElementById('hoje-data');
   if(dt)dt.textContent=new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});
   const fill=document.getElementById('hoje-meta-fill');
@@ -2961,9 +3014,9 @@ function renderDashboard(){
   const hh=new Date().getHours();
   const gEl=document.getElementById('dash-greeting');
   if(gEl)gEl.textContent=(hh<5?'Boa madrugada':hh<12?'Bom dia':hh<18?'Boa tarde':'Boa noite')+',';
-  document.getElementById('dash-total').textContent=total;
+  animateCount(document.getElementById('dash-total'),total);
   document.getElementById('dash-pct').textContent=pct+'%';
-  document.getElementById('dash-cards').textContent=Object.keys(userCards).length;
+  animateCount(document.getElementById('dash-cards'),Object.keys(userCards).length);
   const dsk=document.getElementById('dash-streak');if(dsk)dsk.textContent=(userStats.streak||0);
   const drl=document.getElementById('dash-ring-label');if(drl)drl.textContent=todayN+'/'+meta;
   document.getElementById('quick-sub').textContent='Foco nos fracos';
@@ -3315,7 +3368,7 @@ function renderQuizQ(){
   const tot=quizQueue.length;
   document.getElementById('quiz-q-num').textContent=`Questão ${quizIdx+1} de ${tot}`;
   document.getElementById('quiz-q-text').textContent=q.e;
-  document.getElementById('quiz-q-doc').textContent=q.doc||'';
+  document.getElementById('quiz-q-doc').textContent=q.doc||'';questaoAtualId=q.id;
   document.getElementById('quiz-prog-fill').style.width=(quizIdx/tot*100)+'%';
   document.getElementById('quiz-score-v').textContent=quizSessao.c+'/'+quizSessao.t;
   const opts=document.getElementById('quiz-opts');
@@ -3529,7 +3582,8 @@ function renderCard(){
       <button class="card-btn dif" onclick="avaliarCard('dif')">Difícil</button>
       <button class="card-btn med" onclick="avaliarCard('med')">Médio</button>
       <button class="card-btn fac" onclick="avaliarCard('fac')">Fácil</button>
-    </div>`;
+    </div>
+    <div style="text-align:center"><button class="rep-link" onclick="abrirReporte('flashcard','${fc.id}')">⚐ Reportar erro neste card</button></div>`;
 }
 
 function flipCard(){
@@ -3652,6 +3706,7 @@ function mostrarResumoDirecto(id){
           <button class="resumo-btn fac" onclick="avaliarResumo('fac')">Fácil</button>
         </div>
       </div>
+      <button class="rep-link" onclick="abrirReporte('resumo','${r.id}')">⚐ Reportar erro neste resumo</button>
       <button onclick="renderResumos()" style="width:100%;margin-top:12px;padding:10px;background:var(--bg);border-radius:10px;font-size:13px;font-weight:600;color:var(--text2);">← Voltar à fila</button>
     </div>`;
 }
@@ -3662,12 +3717,12 @@ async function avaliarResumo(dif){
   if(!r)return;
   const key='resumo_'+resumoAtualId;
   const existing=userStats[key]||{};
-  const updated=sm2Resumo(existing,dif);
+  const updated=fsrsCardUpdate(existing,dif);
   userStats[key]=updated;
   saveProg();
   renderResumos();
   updateBadges();
-  showToast(dif==='dif'?'Revisão em breve':dif==='med'?'Revisão em 3 dias':'Revisão em '+updated.interval+' dias');
+  showToast('Revisão em '+updated.interval+(updated.interval===1?' dia':' dias'));
 }
 
 function ouvirResumo(id){
@@ -3945,6 +4000,7 @@ function setAdminTab(t,btn){
   document.querySelectorAll('.admin-section').forEach(s=>s.classList.remove('active'));
   btn.classList.add('active');
   document.getElementById('admin-'+t).classList.add('active');
+  if(t==='reportes')loadReportes();
 }
 
 async function loadAdminUsers(){
@@ -4311,6 +4367,39 @@ async function resetarStreak(){
   showToast('Contagem zerada.');
 }
 
+// ── Reiniciar estudos do zero (reset completo, à prova de quebra) ──
+async function reiniciarEstudos(){
+  if(!currentUser){showToast('Você precisa estar logado.');return;}
+  if(!dataLoaded){showToast('Aguarde os dados carregarem antes de reiniciar.');return;}
+  const c=prompt('Isso vai APAGAR TODO o seu progresso — questões, flashcards, histórico, streak e revisões. Esta ação NÃO pode ser desfeita.\n\nDica: dá para exportar um backup antes (botão Exportar).\n\nPara confirmar, digite REINICIAR:');
+  if(c===null)return;
+  if((c||'').trim().toUpperCase()!=='REINICIAR'){showToast('Confirmação incorreta — nada foi apagado.');return;}
+  try{
+    showToast('Reiniciando...');
+    await db.ref('progresso/'+currentUser.uid).remove();
+    await db.ref('cards/'+currentUser.uid).remove();
+    // memória local vira "conta nova" (dataLoaded permanece true: o listener não re-sobrescreve)
+    userStats={...PROG_DEFAULT};
+    userCards={};
+    try{localStorage.removeItem(chaveEspelho());}catch(e){}
+    gravarEspelho();
+    // re-render defensivo
+    if(typeof renderDashboard==='function')renderDashboard();
+    if(typeof renderHoje==='function')renderHoje();
+    if(typeof updateBadges==='function')updateBadges();
+    if(typeof renderCards==='function')renderCards();
+    if(typeof renderResumos==='function')renderResumos();
+    const hsn=document.getElementById('hdr-streak-n');if(hsn)hsn.textContent='0';
+    const csi=document.getElementById('config-streak-info');if(csi)csi.textContent='0 dias acumulados';
+    fecharModalConfig();
+    if(typeof setScreen==='function')setScreen('inicio');
+    showToast('Tudo zerado — bons estudos! 🚒');
+  }catch(e){
+    console.error('reiniciarEstudos:',e);
+    showToast('Falha ao reiniciar. Tente de novo.');
+  }
+}
+
 // ═══════════════════════════════
 // UTILS
 // ═══════════════════════════════
@@ -4365,6 +4454,124 @@ function showInfo(tipo){
   document.getElementById('info-t-text').textContent=textos[tipo]||'';
   box.classList.remove('hidden');
 }
+
+// ═══════════════════════════════
+// REPORTE DE ERROS + count-up (Blocos B/C)
+// ═══════════════════════════════
+let questaoAtualId=null;
+let repCtx={tipo:null,id:null,cat:null};
+let repRL={n:0,reset:Date.now()};
+function checkReporteRL(){const now=Date.now();if(now-repRL.reset>30000){repRL.n=0;repRL.reset=now;}if(repRL.n>=1)return false;repRL.n++;return true;}
+const REP_CATS=[['gabarito','Gabarito errado'],['fonte','Fonte/citação errada'],['digitacao','Erro de digitação'],['desatualizado','Desatualizado'],['outro','Outro']];
+const REP_CAT_LBL=Object.fromEntries(REP_CATS);
+function repPreview(tipo,id){
+  try{
+    if(tipo==='questao'){const q=allQuestoes[id];return q?('Q '+id+': '+(q.e||'')):('Questão '+id);}
+    if(tipo==='resumo'){const r=RESUMOS_BANCO.find(x=>x.id===id);return r?('Resumo: '+(r.titulo||id)):('Resumo '+id);}
+    if(tipo==='flashcard'){const c=(typeof FCI!=='undefined'?FCI.find(x=>x.id===id):null)||(allFlashcards&&allFlashcards[id]);return c?('Card: '+(c.f||id)):('Flashcard '+id);}
+  }catch(e){}
+  return tipo+' '+id;
+}
+function abrirReporte(tipo,id){
+  if(!id){showToast('Item não identificado');return;}
+  repCtx={tipo,id,cat:null};
+  let ov=document.getElementById('rep-overlay');
+  if(!ov){
+    ov=document.createElement('div');ov.id='rep-overlay';ov.className='rep-overlay';
+    ov.innerHTML='<div class="rep-sheet">'
+      +'<h3>Reportar erro</h3>'
+      +'<div class="rep-ctx" id="rep-ctx"></div>'
+      +'<div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:7px;">Qual o problema?</div>'
+      +'<div class="rep-cats" id="rep-cats"></div>'
+      +'<textarea id="rep-desc" maxlength="1000" placeholder="Descreva o que está errado (ex: o gabarito deveria ser a letra C porque...)"></textarea>'
+      +'<div class="rep-actions"><button class="rep-cancel" onclick="fecharReporte()">Cancelar</button><button class="rep-send" id="rep-send" onclick="enviarReporte()" disabled>Enviar</button></div>'
+      +'</div>';
+    ov.onclick=function(e){if(e.target===ov)fecharReporte();};
+    document.body.appendChild(ov);
+  }
+  document.getElementById('rep-ctx').textContent=repPreview(tipo,id);
+  const cats=document.getElementById('rep-cats');cats.innerHTML='';
+  REP_CATS.forEach(function(pair){
+    const b=document.createElement('button');b.className='rep-cat';b.textContent=pair[1];
+    b.onclick=function(){repCtx.cat=pair[0];cats.querySelectorAll('.rep-cat').forEach(x=>x.classList.remove('on'));b.classList.add('on');document.getElementById('rep-send').disabled=false;};
+    cats.appendChild(b);
+  });
+  document.getElementById('rep-desc').value='';
+  document.getElementById('rep-send').disabled=true;
+  requestAnimationFrame(()=>ov.classList.add('show'));
+}
+function fecharReporte(){const ov=document.getElementById('rep-overlay');if(ov)ov.classList.remove('show');}
+async function enviarReporte(){
+  if(!repCtx.cat){showToast('Escolha a categoria');return;}
+  if(!checkReporteRL()){showToast('Aguarde um momento antes de reportar de novo');return;}
+  const desc=(document.getElementById('rep-desc').value||'').trim().slice(0,1000);
+  const btn=document.getElementById('rep-send');if(btn)btn.disabled=true;
+  const rep={tipo:repCtx.tipo,itemId:repCtx.id,categoria:repCtx.cat,descricao:desc,
+    preview:repPreview(repCtx.tipo,repCtx.id).slice(0,300),
+    uid:currentUser?currentUser.uid:'anon',
+    nome:(userProfile&&userProfile.nome)||(currentUser&&currentUser.email)||'anônimo',
+    criadoEm:Date.now(),status:'aberto'};
+  try{await db.ref('reportes').push(rep);fecharReporte();showToast('Reporte enviado — obrigado!');}
+  catch(e){console.error('reporte erro:',e);showToast('Falha ao enviar. Tente novamente.');if(btn)btn.disabled=false;}
+}
+async function loadReportes(){
+  if(!isAdmin())return;
+  const el=document.getElementById('admin-reportes-list');if(!el)return;
+  el.innerHTML='<p style="color:var(--text2);font-size:13px">Carregando...</p>';
+  try{
+    const snap=await withTimeout(db.ref('reportes').get(),8000);
+    if(!snap||!snap.exists()){el.innerHTML='<p style="color:var(--text2);font-size:13px">Nenhum reporte.</p>';atualizarBadgeReportes(0);return;}
+    const all=snap.val();window.__repCache=all;
+    const abertos=Object.entries(all).filter(e=>e[1]&&e[1].status!=='resolvido');
+    atualizarBadgeReportes(abertos.length);
+    if(!abertos.length){el.innerHTML='<p style="color:var(--text2);font-size:13px">Nenhum reporte aberto. 🎉</p>';return;}
+    abertos.sort((a,b)=>(b[1].criadoEm||0)-(a[1].criadoEm||0));
+    let html='';
+    abertos.forEach(function(e){
+      const key=e[0],r=e[1];
+      const data=new Date(r.criadoEm||0).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+      html+='<div class="rep-item">'
+        +'<div class="rep-item-top"><span class="rep-item-cat">'+sanitize(REP_CAT_LBL[r.categoria]||r.categoria||'?')+'</span><span class="rep-item-id">'+sanitize(r.tipo||'')+' · '+sanitize(r.itemId||'')+'</span></div>'
+        +'<div class="rep-item-ctx">'+sanitize(r.preview||'')+'</div>'
+        +(r.descricao?'<div class="rep-item-desc">'+sanitize(r.descricao)+'</div>':'')
+        +'<div class="rep-item-meta">'+sanitize(r.nome||'anônimo')+' · '+data+'</div>'
+        +'<div class="rep-item-acts"><button class="rep-resolve" onclick="resolverReporte(\''+sanitize(key)+'\')">Resolver</button><button class="rep-copy" onclick="copiarReporte(\''+sanitize(key)+'\')">Copiar</button></div>'
+        +'</div>';
+    });
+    el.innerHTML=html;
+  }catch(err){
+    el.innerHTML='<p style="color:var(--red);font-size:13px">Erro: '+sanitize(err.message)+'</p><button onclick="loadReportes()" style="margin-top:8px;padding:10px 16px;background:var(--red);color:#fff;border-radius:10px;font-size:13px;font-weight:700;border:none;cursor:pointer;">Tentar novamente</button>';
+  }
+}
+async function resolverReporte(key){
+  if(!isAdmin())return;
+  try{await db.ref('reportes/'+key).update({status:'resolvido',resolvidoEm:Date.now()});showToast('Reporte resolvido');loadReportes();}
+  catch(e){showToast('Erro ao resolver');}
+}
+function copiarReporte(key){
+  const all=window.__repCache||{};const r=all[key];if(!r)return;
+  const txt='[REPORTE CTSP]\n'+'Tipo: '+r.tipo+' ('+r.itemId+')\n'+'Categoria: '+(REP_CAT_LBL[r.categoria]||r.categoria)+'\n'+'Item: '+(r.preview||'')+'\n'+'Queixa: '+(r.descricao||'(sem descrição)')+'\n'+'Por: '+(r.nome||'anônimo');
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(()=>showToast('Copiado!'),()=>showToast('Não foi possível copiar'));}
+  else showToast('Cópia não suportada');
+}
+function atualizarBadgeReportes(n){
+  const b=document.getElementById('rep-badge-tab');
+  if(b){if(n>0){b.textContent=n;b.style.display='inline-flex';}else b.style.display='none';}
+}
+function animateCount(el,target){
+  if(!el)return;target=+target||0;
+  const start=+(el.getAttribute('data-cv')||0);
+  if(start===target){el.textContent=target;el.setAttribute('data-cv',target);return;}
+  const dur=500,t0=performance.now();
+  function step(now){
+    const p=Math.min(1,(now-t0)/dur);
+    const v=Math.round(start+(target-start)*(1-Math.pow(1-p,3)));
+    el.textContent=v;
+    if(p<1)requestAnimationFrame(step);else{el.textContent=target;el.setAttribute('data-cv',target);}
+  }
+  el.setAttribute('data-cv',target);requestAnimationFrame(step);
+}
+
 function showToast(msg){
   const t=document.getElementById('toast');
   t.textContent=msg;t.classList.add('show');
