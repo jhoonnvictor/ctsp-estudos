@@ -98,6 +98,17 @@ input,select,textarea{font-family:inherit;outline:none;}
 
 /* SPLASH SCREEN pós-login — painel de quartel */
 #splash-screen{position:fixed;inset:0;background:linear-gradient(170deg,var(--navy-2) 0%,var(--navy-deep) 70%);z-index:9990;display:none;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:24px;}
+/* S47: gate de onboarding */
+#onboard-gate{position:fixed;inset:0;z-index:9995;display:none;align-items:center;justify-content:center;padding:24px;background:linear-gradient(170deg,var(--navy-2) 0%,var(--navy-deep) 70%);}
+#onboard-gate.active{display:flex;}
+.onboard-box{max-width:420px;width:100%;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:28px 22px;text-align:center;box-shadow:0 12px 40px rgba(0,0,0,.3);}
+.onboard-logo{width:52px;height:52px;margin:0 auto 14px;color:var(--ember);}
+.onboard-logo svg{width:100%;height:100%;}
+.onboard-title{font-size:20px;font-weight:800;color:var(--text);margin-bottom:8px;}
+.onboard-sub{font-size:14px;line-height:1.5;color:var(--text2);margin-bottom:20px;}
+.onboard-btn{width:100%;padding:14px;background:var(--red);color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;}
+.onboard-btn:active{transform:scale(.98);}
+.onboard-foot{font-size:11px;color:var(--text3);margin-top:12px;}
 #splash-screen::before{content:'';position:absolute;inset:0;background:radial-gradient(560px 320px at 82% 18%,rgba(240,136,60,.05),transparent 70%);pointer-events:none;}
 #splash-screen.active{display:flex;}
 #splash-screen.fade-out{opacity:0;transition:opacity .4s ease;}
@@ -602,6 +613,14 @@ input,select,textarea{font-family:inherit;outline:none;}
 .hoje-meta-bar{flex:1;height:6px;background:var(--paper-2);border-radius:4px;overflow:hidden;}
 .hoje-meta-fill{height:100%;width:0;background:linear-gradient(90deg,var(--ember),var(--red));border-radius:4px;transition:width .4s ease;}
 .hoje-meta-txt{font-size:11px;color:var(--text2);white-space:nowrap;font-variant-numeric:tabular-nums;}
+/* S47: selos de status da questão */
+.q-badge{display:inline-block;margin-left:8px;padding:2px 8px;border-radius:999px;font-size:10px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;vertical-align:middle;}
+.badge-nova{background:var(--green-light);color:var(--green);}
+.badge-erro{background:var(--red-light);color:var(--red);}
+.badge-rev{background:var(--amber-light);color:var(--amber);}
+.badge-dom{background:var(--paper-2);color:var(--text2);}
+/* S47: contador novas/revisar no card de área */
+.area-card-counts{font-size:10px;color:var(--text3);margin-top:4px;font-variant-numeric:tabular-nums;}
 .fb-caderno{margin-top:8px;font-size:12px;font-weight:600;color:var(--ember-deep);}
 html[data-theme="dark"] .fb-caderno{color:var(--ember);}
 #save-flash{position:fixed;left:50%;bottom:80px;transform:translateX(-50%) translateY(8px);background:var(--green);color:#fff;font-size:12px;font-weight:700;padding:6px 14px;border-radius:20px;box-shadow:0 4px 12px rgba(0,0,0,.18);opacity:0;pointer-events:none;transition:opacity .25s ease,transform .25s ease;z-index:9999;}
@@ -656,6 +675,16 @@ html[data-theme="dark"] .fb-caderno{color:var(--ember);}
 </div>
 
 <!-- SPLASH SCREEN pós-login -->
+<!-- S47: gate de onboarding obrigatório (1º acesso) -->
+<div id="onboard-gate">
+  <div class="onboard-box">
+    <div class="onboard-logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.2 7.8 14.3 14.3 7.8 16.2 9.7 9.7 16.2 7.8"/></svg></div>
+    <div class="onboard-title">Bem-vindo, Bombeiro!</div>
+    <div class="onboard-sub">Antes de começar, faça o <b>simulado de nivelamento</b>: 15 questões pelas 5 áreas do edital. Ele mede seu domínio inicial e faz a plataforma adaptar os estudos ao seu nível.</div>
+    <button class="onboard-btn" onclick="iniciarOnboardDiagnostico()">Começar nivelamento →</button>
+    <div class="onboard-foot">Leva poucos minutos · aparece só uma vez</div>
+  </div>
+</div>
 <div id="splash-screen">
   <div class="splash-dias animate" id="splash-dias">0</div>
   <div class="splash-dias-label">dias de estudo</div>
@@ -783,7 +812,6 @@ html[data-theme="dark"] .fb-caderno{color:var(--ember);}
             <div class="hoje-sep"></div>
             <div class="hoje-stat"><div class="hoje-stat-v" id="hoje-pct">—</div><div class="hoje-stat-l">Aproveit.</div></div>
           </div>
-          <div class="hoje-meta"><div class="hoje-meta-bar"><div class="hoje-meta-fill" id="hoje-meta-fill"></div></div><span class="hoje-meta-txt" id="hoje-meta-txt"></span></div>
         </div>
         <!-- FEAT-01: Simulado de nivelamento (onboarding) -->
         <div id="diag-card" class="diag-card hidden" onclick="iniciarDiagnostico()">
@@ -1264,9 +1292,9 @@ function checkRateLimit(){const now=Date.now();if(now-loginAttempts.lastReset>60
 // STATE
 // ═══════════════════════════════
 let currentUser=null,userProfile=null;
-let userStats={correct:0,wrong:0,byArea:{},seenIds:[],history:[],streak:0,lastStudyDate:'',metaDiaria:10};
+let userStats={correct:0,wrong:0,byArea:{},seenIds:[],history:[],streak:0,lastStudyDate:'',metaDiaria:10,rev:0,updatedAt:0};
 // ── S30 BUG-DATA: proteção de persistência ──
-const PROG_DEFAULT={correct:0,wrong:0,byArea:{},seenIds:[],history:[],streak:0,lastStudyDate:'',metaDiaria:10};
+const PROG_DEFAULT={correct:0,wrong:0,byArea:{},seenIds:[],history:[],streak:0,lastStudyDate:'',metaDiaria:10,rev:0,updatedAt:0};
 let dataLoaded=false;        // leitura do Firebase confirmada nesta sessão
 let progressoLocalOk=false;  // userStats veio do espelho local (último estado bom deste aparelho)
 let savePendente=false;      // progresso aguardando sincronização
@@ -1274,6 +1302,24 @@ let alertaConexao=false;
 function chaveEspelho(){return 'ctsp_prog_'+(currentUser?currentUser.uid:'anon');}
 function gravarEspelho(){try{localStorage.setItem(chaveEspelho(),JSON.stringify(userStats));}catch(e){}}
 function lerEspelho(){try{const r=localStorage.getItem(chaveEspelho());return r?JSON.parse(r):null;}catch(e){return null;}}
+// ── S47 RECONCILIAÇÃO: nunca sobrescrever progresso bom com um estado defasado ──
+// Mede "quão avançado" está um snapshot. rev é a chave primária (monotônica);
+// updatedAt desempata; o volume de dados é fallback p/ snapshots legados sem rev.
+function progScore(s){
+  if(!s||typeof s!=='object')return {rev:-1,upd:-1,vol:-1};
+  const num=v=>(typeof v==='number'&&isFinite(v))?v:0;
+  const len=v=>Array.isArray(v)?v.length:0;
+  return {rev:num(s.rev),upd:num(s.updatedAt),vol:num(s.correct)+num(s.wrong)+len(s.seenIds)+len(s.history)};
+}
+// Retorna o snapshot mais avançado entre a e b (devolve a própria referência recebida).
+// Em empate absoluto prefere b (por convenção, o remoto é passado como b).
+function progMaisAvancado(a,b){
+  const sa=progScore(a),sb=progScore(b);
+  if(sa.rev!==sb.rev)return sa.rev>sb.rev?a:b;
+  if(sa.upd!==sb.upd)return sa.upd>sb.upd?a:b;
+  if(sa.vol!==sb.vol)return sa.vol>sb.vol?a:b;
+  return b;
+}
 function mostrarAlertaConexao(on){
   alertaConexao=on;
   const el=document.getElementById('dash-reload-alert');if(!el)return;
@@ -1481,7 +1527,7 @@ function renderProntidao(){
 // ── S35 BACKUP: exportação e restauração do progresso ──
 function exportarProgresso(){
   try{
-    const payload={app:'ctsp-estudos',versao:'v1.24',exportadoEm:new Date().toISOString(),userStats,userCards};
+    const payload={app:'ctsp-estudos',versao:'v1.35',exportadoEm:new Date().toISOString(),userStats,userCards};
     const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
     const url=URL.createObjectURL(blob);
     const a=document.createElement('a');
@@ -2761,8 +2807,9 @@ async function initApp(){
   if(userProfile.admin||currentUser.email===ADMIN_EMAIL)loadAdminUsers();
   // Animação inicial do dashboard
   setTimeout(()=>{const sc=document.getElementById('screen-inicio');if(sc)animateBars(sc);},600);
-  // Mostrar splash screen
-  mostrarSplash();
+  // S47: 1º acesso → nivelamento obrigatório (gera domínio); senão, splash normal
+  if(!userStats.diagFeito){mostrarOnboard();}
+  else{mostrarSplash();}
 }
 
 // ═══════════════════════════════
@@ -2773,8 +2820,19 @@ async function loadUserData(){
   for(let attempt=1;attempt<=3;attempt++){
     try{
       const snap=await withTimeout(db.ref('progresso/'+currentUser.uid).get(),attempt*8000);
-      if(snap.exists())userStats={...PROG_DEFAULT,...snap.val()};
+      // S47: reconciliar Firebase × espelho local — o snapshot mais avançado vence
+      const remoto=snap.exists()?{...PROG_DEFAULT,...snap.val()}:null;
+      const espLocal=lerEspelho();
+      const local=espLocal?{...PROG_DEFAULT,...espLocal}:null;
+      let escolhido;
+      if(remoto&&local)escolhido=progMaisAvancado(remoto,local);
+      else escolhido=remoto||local||{...PROG_DEFAULT};
+      userStats=escolhido;
       dataLoaded=true;gravarEspelho(); // S30: leitura confirmada — gravações liberadas
+      // S47: se o espelho local venceu o servidor (ex.: quiz de hoje vs Firebase defasado), empurrar de volta
+      if(local&&escolhido===local&&remoto!==local){
+        try{await db.ref('progresso/'+currentUser.uid).set(userStats);}catch(e){}
+      }
       const cs=await withTimeout(db.ref('cards/'+currentUser.uid).get(),attempt*8000);
       if(cs.exists())userCards=cs.val();
       break; // sucesso
@@ -2798,7 +2856,19 @@ async function loadUserData(){
       saveProg();showToast('Conexão restabelecida — progresso sincronizado');
       renderDashboard();updateBadges();return;
     }
-    if(s.exists())userStats={...PROG_DEFAULT,...s.val()};
+    if(s.exists()||lerEspelho()){
+      // S47: reconciliar em vez de sobrescrever
+      const remoto=s.exists()?{...PROG_DEFAULT,...s.val()}:null;
+      const espLocal=lerEspelho();
+      const local=espLocal?{...PROG_DEFAULT,...espLocal}:null;
+      let escolhido;
+      if(remoto&&local)escolhido=progMaisAvancado(remoto,local);
+      else escolhido=remoto||local||{...PROG_DEFAULT};
+      userStats=escolhido;
+      dataLoaded=true;gravarEspelho();mostrarAlertaConexao(false);
+      if(local&&escolhido===local&&remoto!==local){saveProg();}
+      renderDashboard();updateBadges();return;
+    }
     dataLoaded=true;gravarEspelho();mostrarAlertaConexao(false);
     renderDashboard();updateBadges();
   });
@@ -2810,6 +2880,8 @@ async function loadUserData(){
 }
 
 async function saveProg(){
+  userStats.rev=(userStats.rev||0)+1;       // S47: carimbo monotônico p/ reconciliação
+  userStats.updatedAt=Date.now();
   gravarEspelho(); // espelho local sempre, mesmo offline
   if(!dataLoaded){
     if(progressoLocalOk)savePendente=true; // estado confiável deste aparelho → sincroniza depois
@@ -3053,6 +3125,7 @@ function renderDashboard(){
     const ba=userStats.byArea||{};
     const c=(ba[k]?.correct||0),w=(ba[k]?.wrong||0),t=c+w;
     const p=t>0?Math.round(c/t*100):0;
+    const ca=contagemArea(k); // S47: novas vs a revisar
     grid.innerHTML+=`<div class="area-card" onclick="iniciarQuiz('${k}')" style="--ac:${a.color};background:${a.bg};cursor:pointer">
       <div class="area-card-top">
         <div class="area-icon" style="background:${a.bg};color:${a.color}">${a.icon}</div>
@@ -3063,6 +3136,7 @@ function renderDashboard(){
         <span style="font-size:11px;color:var(--text2)">${t} questões</span>
         <span class="area-prog-pct" style="color:${a.color}">${p}%</span>
       </div>
+      <div class="area-card-counts">${ca.novas} nova${ca.novas!==1?'s':''} · ${ca.rev} a revisar</div>
     </div>`;
   });
 
@@ -3220,16 +3294,45 @@ function renderAreaList(){
   });
 }
 
+// ── S47 CLASSIFICAÇÃO DE MATERIAL: novo / errado / revisar / dominado ──
+function classeQuestao(q){
+  const seen=userStats.seenIds||[];
+  if(seen.includes(q.id+'_E'))return 'errado';                 // marcada errada e ainda não corrigida
+  const sm2=(userStats.questoesSM2||{})[q.id];
+  const visto=!!sm2||seen.includes(q.id+'_C')||seen.includes(q.id+'_E');
+  if(!visto)return 'novo';                                     // nunca respondida
+  if(!sm2)return 'revisar';                                    // respondida mas sem agendamento → revisar
+  if((sm2.next||0)<=Date.now())return 'revisar';               // vista, revisão vencida
+  return 'dominado';                                           // vista, revisão no futuro
+}
+// Monta fila ~60% novas + 40% revisão (erros primeiro, depois vencidas), dedup e corte em n.
+function montarFilaEstudo(qs,n){
+  const g={novo:[],errado:[],revisar:[],dominado:[]};
+  (qs||[]).forEach(q=>{(g[classeQuestao(q)]||g.novo).push(q);});
+  const novos=shuffle(g.novo),erros=shuffle(g.errado),revisar=shuffle(g.revisar),dominado=shuffle(g.dominado);
+  const nNovo=Math.round(n*0.6);
+  const fila=[];
+  fila.push(...novos.slice(0,nNovo));                          // 60% novas
+  fila.push(...erros,...revisar);                             // 40% revisão: erros primeiro, depois vencidas
+  if(fila.length<n)fila.push(...novos.slice(nNovo));           // completa com mais novas
+  if(fila.length<n)fila.push(...dominado);                     // por fim, dominadas
+  const seen=new Set(),out=[];
+  for(const q of fila){if(!seen.has(q.id)){seen.add(q.id);out.push(q);}if(out.length>=n)break;}
+  return out;
+}
+// Contagem por área para os cards do dashboard (novas vs a revisar)
+function contagemArea(area){
+  let novas=0,rev=0;
+  Object.values(allQuestoes).filter(q=>q.area===area).forEach(q=>{
+    const cl=classeQuestao(q);
+    if(cl==='novo')novas++;else if(cl==='errado'||cl==='revisar')rev++;
+  });
+  return {novas,rev};
+}
 function iniciarQuiz(area){
   quizArea=area;quizModoErro=false;
-  const agora=Date.now();
-  const sm2=userStats.questoesSM2||{};
   const qs=Object.values(allQuestoes).filter(q=>area==='TODAS'||q.area===area);
-  // Priorizar questões vencidas (next <= agora) ou nunca vistas
-  const vencidas=qs.filter(q=>!sm2[q.id]||sm2[q.id].next<=agora);
-  const restantes=qs.filter(q=>sm2[q.id]&&sm2[q.id].next>agora);
-  const pool=[...shuffle(vencidas),...shuffle(restantes)];
-  quizQueue=pool.slice(0,20);
+  quizQueue=montarFilaEstudo(qs,20);   // S47: fila inteligente (novas + revisão), sem repetição
   quizIdx=0;quizSessao={c:0,t:0};
   document.getElementById('quiz-home-view').classList.add('hidden');
   document.getElementById('quiz-running-view').classList.remove('hidden');
@@ -3239,17 +3342,8 @@ function iniciarQuiz(area){
 }
 
 function iniciarEstudoRapido(){
-  // Peso nos pontos fracos
-  const ba=userStats.byArea||{};
-  let pool=[];
-  Object.entries(AI).forEach(([k])=>{
-    const c=(ba[k]?.correct||0),w=(ba[k]?.wrong||0),t=c+w;
-    const p=t>0?c/t:0.5;
-    const peso=p<0.5?3:p<0.7?2:1;
-    const qs=Object.values(allQuestoes).filter(q=>q.area===k);
-    for(let i=0;i<peso;i++)pool.push(...qs);
-  });
-  quizQueue=shuffle(pool).slice(0,10);
+  // S47: fila inteligente sobre todo o banco (novas + revisão; erros e vencidas priorizados).
+  quizQueue=montarFilaEstudo(Object.values(allQuestoes),10);
   quizArea='RAPIDO';quizModoErro=false;quizIdx=0;quizSessao={c:0,t:0};
   document.getElementById('quiz-home-view').classList.add('hidden');
   document.getElementById('quiz-running-view').classList.remove('hidden');
@@ -3274,16 +3368,9 @@ function iniciarModoErro(){
 }
 
 function iniciarSimuladoInteligente(){
-  const ba=userStats.byArea||{};
-  let pool=[];
-  Object.entries(AI).forEach(([k])=>{
-    const c=(ba[k]?.correct||0),w=(ba[k]?.wrong||0),t=c+w;
-    const p=t>0?c/t:0.5;
-    const peso=p<0.5?4:p<0.7?2:1;
-    const qs=Object.values(allQuestoes).filter(q=>q.area===k);
-    for(let i=0;i<peso;i++)pool.push(...qs);
-  });
-  quizQueue=shuffle(pool).slice(0,15);quizArea='INTELIGENTE';quizModoErro=false;quizIdx=0;quizSessao={c:0,t:0};
+  // S47: fila inteligente sobre todo o banco, 15 questões (novas + revisão).
+  quizQueue=montarFilaEstudo(Object.values(allQuestoes),15);
+  quizArea='INTELIGENTE';quizModoErro=false;quizIdx=0;quizSessao={c:0,t:0};
   document.getElementById('quiz-home-view').classList.add('hidden');
   document.getElementById('quiz-running-view').classList.remove('hidden');
   document.getElementById('quiz-area-tag').textContent='Simulado IA';
@@ -3361,12 +3448,28 @@ function iniciarInterleaving(){
   navTo('quiz');renderQuizQ();
 }
 
+// S47: selo de status na questão (Nova / Você já errou esta / Revisão / Reforço). Oculto no nivelamento.
+function renderQuizBadge(q){
+  let b=document.getElementById('quiz-status-badge');
+  const num=document.getElementById('quiz-q-num');
+  if(!b&&num&&num.parentNode){
+    b=document.createElement('span');b.id='quiz-status-badge';
+    num.parentNode.insertBefore(b,num.nextSibling);
+  }
+  if(!b)return;
+  if(quizArea==='DIAGNOSTICO'){b.style.display='none';return;}
+  const map={novo:['NOVA','badge-nova'],errado:['VOCÊ JÁ ERROU ESTA','badge-erro'],revisar:['REVISÃO','badge-rev'],dominado:['REFORÇO','badge-dom']};
+  const [txt,cls]=map[classeQuestao(q)]||map.novo;
+  b.textContent=txt;b.className='q-badge '+cls;b.style.display='inline-block';
+}
+
 function renderQuizQ(){
   if(quizIdx>=quizQueue.length){finishQuiz();return;}
   const q=quizQueue[quizIdx];
   quizAnswered=false;
   const tot=quizQueue.length;
   document.getElementById('quiz-q-num').textContent=`Questão ${quizIdx+1} de ${tot}`;
+  renderQuizBadge(q);  // S47: selo de status
   document.getElementById('quiz-q-text').textContent=q.e;
   document.getElementById('quiz-q-doc').textContent=q.doc||'';questaoAtualId=q.id;
   document.getElementById('quiz-prog-fill').style.width=(quizIdx/tot*100)+'%';
@@ -3519,6 +3622,8 @@ function finishQuiz(){
     userStats.diagFeito=true;
     userStats.diagData=Date.now();
     saveProg();
+    esconderOnboard();        // S47: libera o app após o nivelamento
+    renderDashboard();        // reflete o domínio recém-gerado
     navTo('inicio');
     showToast(`✅ Nivelamento concluído: ${quizSessao.c}/${quizSessao.t}. Seu perfil de domínio está pronto!`);
     return;
@@ -3533,10 +3638,11 @@ function finishQuiz(){
 let cardQueue=[],cardIdx=0;
 function renderCards(){
   const now=Date.now();
-  cardQueue=Object.values(allFlashcards).filter(fc=>{
-    const uc=userCards[fc.id];
-    return !uc||!uc.next||uc.next<=now;
-  });
+  const todos=Object.values(allFlashcards);
+  // S47: vencidos (já revisados e com prazo vencido) primeiro; novos limitados a 12 por sessão
+  const vencidos=todos.filter(fc=>{const uc=userCards[fc.id];return uc&&uc.reps>0&&uc.next&&uc.next<=now;});
+  const novos=todos.filter(fc=>{const uc=userCards[fc.id];return !uc||!uc.reps;});
+  cardQueue=[...shuffle(vencidos),...shuffle(novos).slice(0,12)];
   const body=document.getElementById('cards-body');
   const streak=userStats.cardStreak||0;
   document.getElementById('cards-streak-n').textContent=streak;
@@ -3557,11 +3663,13 @@ function renderCard(){
   const fc=cardQueue[cardIdx];
   const area=fc.a||fc.area||'';
   const aInfo=AI[area]||{};
+  const ucAtual=userCards[fc.id];
+  const ehNovo=!ucAtual||!ucAtual.reps; // S47: rótulo Novo/Revisão
   const body=document.getElementById('cards-body');
   const remaining=cardQueue.length-cardIdx;
   body.innerHTML=`
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-      <span style="font-size:13px;color:var(--text2)">${remaining} card${remaining!==1?'s':''} restante${remaining!==1?'s':''}</span>
+      <span style="font-size:13px;color:var(--text2)">${remaining} card${remaining!==1?'s':''} restante${remaining!==1?'s':''} <span class="q-badge ${ehNovo?'badge-nova':'badge-rev'}">${ehNovo?'NOVO':'REVISÃO'}</span></span>
       <span style="font-size:11px;font-weight:700;color:var(--text3)">Toque para virar</span>
     </div>
     <div class="card-flip-wrap">
@@ -4255,6 +4363,18 @@ function iniciarEstudoTopico(t){
 // ═══════════════════════════════
 // SPLASH SCREEN
 // ═══════════════════════════════
+// S47: gate de onboarding (nivelamento obrigatório no 1º acesso)
+function mostrarOnboard(){
+  const g=document.getElementById('onboard-gate');if(g)g.classList.add('active');
+  const sp=document.getElementById('splash-screen');if(sp)sp.classList.remove('active'); // sem splash p/ usuário novo
+}
+function esconderOnboard(){
+  const g=document.getElementById('onboard-gate');if(g)g.classList.remove('active');
+}
+function iniciarOnboardDiagnostico(){
+  esconderOnboard();   // libera a tela para o quiz do nivelamento
+  iniciarDiagnostico();
+}
 function mostrarSplash(){
   const splash=document.getElementById('splash-screen');
   splash.classList.add('active');
