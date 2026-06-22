@@ -903,7 +903,7 @@ html[data-theme="dark"] .fb-caderno{color:var(--ember);}
           <div class="chart-bars" id="chart-bars"></div>
         </div>
         <!-- Gráfico evolução por área -->
-        <div class="sec-title">Evolução por área <span class="info-btn" onclick="showInfo('evolucao')" aria-label="Mais informações">?</span></div>
+        <div class="sec-title">Desempenho por área <span class="info-btn" onclick="showInfo('evolucao')" aria-label="Mais informações">?</span></div>
         <div class="chart-wrap" id="area-evolution-wrap">
           <div id="area-evolution"></div>
         </div>
@@ -922,6 +922,12 @@ html[data-theme="dark"] .fb-caderno{color:var(--ember);}
             </div>
           </div>
           <div id="dominio-areas"></div>
+        </div>
+        <!-- Cobertura do Edital -->
+        <div class="sec-title">Cobertura do edital <span class="info-btn" onclick="showInfo('cobertura')" aria-label="Mais informações">?</span></div>
+        <div class="dominio-card">
+          <div style="font-size:11px;color:var(--text2);margin-bottom:12px;">Quanto do conteúdo de cada área você já percorreu (questões + cards + resumos).</div>
+          <div id="cobertura-areas"></div>
         </div>
         <!-- Objetivo da Semana -->
         <div class="sec-title">Objetivo da semana</div>
@@ -1527,7 +1533,7 @@ function renderProntidao(){
 // ── S35 BACKUP: exportação e restauração do progresso ──
 function exportarProgresso(){
   try{
-    const payload={app:'ctsp-estudos',versao:'v1.35',exportadoEm:new Date().toISOString(),userStats,userCards};
+    const payload={app:'ctsp-estudos',versao:'v1.36',exportadoEm:new Date().toISOString(),userStats,userCards};
     const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
     const url=URL.createObjectURL(blob);
     const a=document.createElement('a');
@@ -3211,6 +3217,9 @@ function renderChart(){
   renderAreaEvolution();
 }
 
+// Piso de confiança: nº mínimo de respostas numa área para exibir % (abaixo disso = "poucos dados").
+const MIN_RESP_CONF=5;
+
 function renderAreaEvolution(){
   const el=document.getElementById('area-evolution');
   if(!el)return;
@@ -3219,11 +3228,12 @@ function renderAreaEvolution(){
   let html='';
   Object.entries(AI).forEach(([k,v])=>{
     const c=(ba[k]?.correct||0),w=(ba[k]?.wrong||0),t=c+w;
-    if(t===0){
+    if(t<MIN_RESP_CONF){
+      // Abaixo do piso: não exibe % (amostra pequena engana). Mostra progresso até o piso.
       html+=`<div class="area-evo-row">
         <div class="area-evo-label">${k}</div>
         <div class="area-evo-bar-wrap"><div class="area-evo-bar" style="width:0%;background:${cores[k]}"></div></div>
-        <span style="font-size:11px;color:var(--text2);min-width:36px;text-align:right;">—</span>
+        <span style="font-size:10.5px;color:var(--text3);min-width:96px;text-align:right;">poucos dados (${t}/${MIN_RESP_CONF})</span>
       </div>`;
     } else {
       const pct=Math.round(c/t*100);
@@ -3233,7 +3243,7 @@ function renderAreaEvolution(){
         <div class="area-evo-bar-wrap"><div class="area-evo-bar" style="width:${pct}%;background:${cor}">
           ${pct>=20?`<span class="area-evo-pct">${pct}%</span>`:''}
         </div></div>
-        <span style="font-size:11px;font-weight:700;color:${cor};min-width:36px;text-align:right;">${pct>=20?'':pct+'%'}</span>
+        <span style="font-size:10.5px;font-weight:700;color:${cor};min-width:96px;text-align:right;">${pct>=20?'':pct+'% · '}${c}/${t} resp.</span>
       </div>`;
     }
   });
@@ -4260,23 +4270,25 @@ async function salvarMeta(){
 function calcDominio(){
   const ba=userStats.byArea||{};
   const sm2Cards=userCards||{};
-  const agora=Date.now();
   const result={};
   Object.keys(AI).forEach(k=>{
-    // Quiz: % acertos ponderada (50%)
+    // --- DESEMPENHO (qualidade): acertos / respondidas. Só conta com piso de confiança. ---
     const c=(ba[k]?.correct||0),w=(ba[k]?.wrong||0),t=c+w;
-    const quizPct=t>0?c/t:0;
+    const quizConf=t>=MIN_RESP_CONF;          // tem evidência suficiente?
+    const quizPct=quizConf?c/t:0;             // sem piso, não entra no domínio
 
-    // Flashcards: % cards revisados nessa área (30%)
+    // --- COBERTURA (progresso): itens tocados / total do banco, por tipo ---
+    // Questões vistas na área (via seenIds: id+'_C' ou id+'_E')
+    const qArea=Object.values(allQuestoes).filter(q=>q.area===k);
+    const qTotal=qArea.length;
+    const seen=userStats.seenIds||[];
+    const qVistas=qArea.filter(q=>seen.includes(q.id+'_C')||seen.includes(q.id+'_E')).length;
+
     const cardsArea=Object.values(allFlashcards).filter(fc=>fc.a===k);
     const cardsTotal=cardsArea.length;
-    const cardsRevisados=cardsArea.filter(fc=>{
-      const uc=sm2Cards[fc.id];
-      return uc&&uc.reps>0;
-    }).length;
+    const cardsRevisados=cardsArea.filter(fc=>{const uc=sm2Cards[fc.id];return uc&&uc.reps>0;}).length;
     const cardsPct=cardsTotal>0?cardsRevisados/cardsTotal:0;
 
-    // Resumos: % resumos revisados nessa área (20%)
     const resumosArea=RESUMOS_BANCO.filter(r=>r.area===k);
     const resumosTotal=resumosArea.length;
     const resumosRevisados=resumosArea.filter(r=>{
@@ -4285,32 +4297,54 @@ function calcDominio(){
     }).length;
     const resumosPct=resumosTotal>0?resumosRevisados/resumosTotal:0;
 
+    // Cobertura geral da área = itens tocados / itens existentes (questões+cards+resumos)
+    const cobTotal=qTotal+cardsTotal+resumosTotal;
+    const cobVistos=qVistas+cardsRevisados+resumosRevisados;
+    const coberturaPct=cobTotal>0?cobVistos/cobTotal:0;
+
+    // --- ÍNDICE DE DOMÍNIO (composto) — só quando há evidência de quiz (piso). ---
     const dominio=Math.round((quizPct*0.5+cardsPct*0.3+resumosPct*0.2)*100);
-    result[k]={dominio,quizPct:Math.round(quizPct*100),cardsPct:Math.round(cardsPct*100),resumosPct:Math.round(resumosPct*100)};
+
+    result[k]={
+      dominio, quizConf,
+      respondidas:t, acertos:c,
+      quizPct:Math.round(quizPct*100),
+      cardsPct:Math.round(cardsPct*100),
+      resumosPct:Math.round(resumosPct*100),
+      cobertura:Math.round(coberturaPct*100),
+      cobVistos, cobTotal
+    };
   });
   return result;
 }
 
 function renderDominio(){
   const dom=calcDominio();
-  const vals=Object.values(dom).map(d=>d.dominio);
-  const geral=vals.length>0?Math.round(vals.reduce((a,b)=>a+b,0)/vals.length):0;
+  // Geral só considera áreas COM confiança de quiz; sem nenhuma, mostra "—".
+  const comConf=Object.values(dom).filter(d=>d.quizConf);
+  const geral=comConf.length>0?Math.round(comConf.reduce((a,b)=>a+b.dominio,0)/comConf.length):null;
 
-  // Ring geral
-  const circ=169.6;
-  const offset=circ-(circ*geral/100);
-  // ring dominio removido
   const ptEl=document.getElementById('dominio-geral-pct');
   const numEl=document.getElementById('dominio-geral-num');
-  if(ptEl)ptEl.textContent=geral+'%';
-  if(numEl)numEl.textContent=geral+'% de domínio';
+  if(ptEl)ptEl.textContent=geral===null?'—':geral+'%';
+  if(numEl)numEl.textContent=geral===null?'ainda medindo':geral+'% de domínio';
 
-  // Áreas
+  // --- Barras de domínio por área (com confiança) ---
   const areasEl=document.getElementById('dominio-areas');
   if(!areasEl)return;
-  const cores={AT1:'var(--at1)',AT2:'var(--at2)',AT3:'var(--at3)',AT4:'var(--at4)',AT5:'var(--at5)'};
   areasEl.innerHTML=Object.entries(AI).map(([k,a])=>{
-    const d=dom[k]||{dominio:0};
+    const d=dom[k]||{dominio:0,quizConf:false,respondidas:0};
+    if(!d.quizConf){
+      // Sem evidência suficiente: não exibe % de domínio (evita inflar com amostra pequena).
+      return `<div class="dominio-area-row">
+        <div class="dominio-area-icon" style="color:${a.color}">${a.icon}</div>
+        <div class="dominio-area-info">
+          <div class="dominio-area-name">${k} — ${a.nome.split('—')[1]?.trim()||a.nome}</div>
+          <div class="dominio-area-bar-wrap"><div class="dominio-area-bar" style="width:0%;background:var(--line)"></div></div>
+        </div>
+        <div class="dominio-area-pct" style="color:var(--text3);font-size:10.5px;min-width:96px;">medindo (${d.respondidas}/${MIN_RESP_CONF})</div>
+      </div>`;
+    }
     const cor=d.dominio>=80?'var(--green)':d.dominio>=60?'var(--amber)':'var(--red)';
     return `<div class="dominio-area-row">
       <div class="dominio-area-icon" style="color:${a.color}">${a.icon}</div>
@@ -4321,6 +4355,23 @@ function renderDominio(){
       <div class="dominio-area-pct" style="color:${cor}">${d.dominio}%</div>
     </div>`;
   }).join('');
+
+  // --- COBERTURA DO EDITAL (leitura separada: progresso, não qualidade) ---
+  const cobEl=document.getElementById('cobertura-areas');
+  if(cobEl){
+    cobEl.innerHTML=Object.entries(AI).map(([k,a])=>{
+      const d=dom[k]||{cobertura:0,cobVistos:0,cobTotal:0};
+      const cor=d.cobertura>=80?'var(--green)':d.cobertura>=40?'var(--amber)':'var(--blue)';
+      return `<div class="dominio-area-row">
+        <div class="dominio-area-icon" style="color:${a.color}">${a.icon}</div>
+        <div class="dominio-area-info">
+          <div class="dominio-area-name">${k} — ${a.nome.split('—')[1]?.trim()||a.nome}</div>
+          <div class="dominio-area-bar-wrap"><div class="dominio-area-bar" style="width:${d.cobertura}%;background:${cor}"></div></div>
+        </div>
+        <div class="dominio-area-pct" style="color:${cor};min-width:96px;font-size:10.5px;">${d.cobertura}% · ${d.cobVistos}/${d.cobTotal}</div>
+      </div>`;
+    }).join('');
+  }
 }
 
 function renderObjetivoSemana(){
@@ -4392,30 +4443,43 @@ function mostrarSplash(){
   const areasEl=document.getElementById('splash-areas');
   if(areasEl){
     areasEl.innerHTML=Object.entries(AI).map(([k,a])=>{
-      const d=dom[k]||{dominio:0};
+      const d=dom[k]||{dominio:0,quizConf:false,respondidas:0};
+      const txt=d.quizConf?d.dominio+'%':'—';
       return `<div class="splash-area-row">
         <div class="splash-area-label">${k}</div>
         <div class="splash-area-bar-wrap"><div class="splash-area-bar" style="width:0%;background:${cores[k]}" id="splash-bar-${k}"></div></div>
-        <span style="font-size:11px;font-weight:800;color:white;min-width:32px;text-align:right;">${d.dominio}%</span>
+        <span style="font-size:11px;font-weight:800;color:white;min-width:32px;text-align:right;">${txt}</span>
       </div>`;
     }).join('');
-    // Animar barras
+    // Animar barras (só as com confiança preenchem)
     setTimeout(()=>{
       Object.entries(AI).forEach(([k])=>{
-        const d=dom[k]||{dominio:0};
+        const d=dom[k]||{dominio:0,quizConf:false};
         const bar=document.getElementById('splash-bar-'+k);
-        if(bar)bar.style.width=d.dominio+'%';
+        if(bar)bar.style.width=(d.quizConf?d.dominio:0)+'%';
       });
     },200);
   }
 
-  // Objetivo da semana
+  // Objetivo da semana: prioriza áreas COM evidência de quiz (menor domínio real).
+  // Sem nenhuma área com confiança, sugere a de menor cobertura (o que falta percorrer).
   let piorArea=null,piorVal=101;
-  Object.entries(dom).forEach(([k,d])=>{if(d.dominio<piorVal){piorVal=d.dominio;piorArea=k;}});
-  if(piorArea){
-    const a=AI[piorArea];
-    document.getElementById('splash-sug-area').textContent=a.nome;
-    document.getElementById('splash-sug-motivo').textContent='Menor domínio ('+piorVal+'%). Foque aqui esta semana.';
+  const comConf=Object.entries(dom).filter(([k,d])=>d.quizConf);
+  if(comConf.length>0){
+    comConf.forEach(([k,d])=>{if(d.dominio<piorVal){piorVal=d.dominio;piorArea=k;}});
+    if(piorArea){
+      const a=AI[piorArea];
+      document.getElementById('splash-sug-area').textContent=a.nome;
+      document.getElementById('splash-sug-motivo').textContent='Menor domínio ('+piorVal+'%). Foque aqui esta semana.';
+    }
+  } else {
+    let menorCob=101;
+    Object.entries(dom).forEach(([k,d])=>{if(d.cobertura<menorCob){menorCob=d.cobertura;piorArea=k;}});
+    if(piorArea){
+      const a=AI[piorArea];
+      document.getElementById('splash-sug-area').textContent=a.nome;
+      document.getElementById('splash-sug-motivo').textContent='Menos percorrida ('+menorCob+'% de cobertura). Comece por aqui.';
+    }
   }
 }
 
@@ -4547,12 +4611,13 @@ document.addEventListener('click',function(e){
 function showInfo(tipo){
   const textos={
     desempenho:'Percentual de acertos por área. Calculado dividindo respostas corretas pelo total respondido naquela área.',
-    evolucao:'Progressão do seu desempenho por área ao longo do tempo, baseada no seu histórico de respostas.',
-    dominio:'Índice composto: Quiz vale 50% do cálculo, Cards 30% e Resumos 20%. Mede o domínio real do conteúdo, não só o treino.',
+    evolucao:'Desempenho por área: acertos ÷ questões respondidas. Para evitar números enganosos, a porcentagem só aparece a partir de '+MIN_RESP_CONF+' respostas na área — abaixo disso mostra "poucos dados".',
+    dominio:'Índice composto: Quiz vale 50%, Cards 30% e Resumos 20%. O componente Quiz de cada área só entra no cálculo a partir de '+MIN_RESP_CONF+' respostas, para não inflar o domínio com poucas questões.',
+    cobertura:'Progresso de percurso: quantos itens (questões, cards e resumos) de cada área você já tocou, dividido pelo total que existe. Diferente do desempenho — mede o quanto você já viu, não o quanto acertou.',
     bkt:'Probabilidade de você dominar cada tópico (modelo BKT). A cada resposta o sistema ajusta a estimativa considerando acerto por sorte (~20%) e erro por descuido (~10%). O Modo Adaptativo prioriza os tópicos com menor domínio.',
     prontidao:'Estimativa de quantas das 60 questões você acertaria hoje: domínio BKT médio de cada área multiplicado pela cota do edital (AT1 14 · AT2 8 · AT3 14 · AT4 12 · AT5 12). É uma projeção estatística, não uma garantia — quanto mais você responde, mais precisa ela fica. Defina a data da prova em Configurações para ver a contagem regressiva.'
   };
-  const titulos={desempenho:'Desempenho por Área',evolucao:'Evolução por Área',dominio:'Índice de Domínio Real',bkt:'Domínio por Tópico (BKT)',prontidao:'Projeção para a Prova'};
+  const titulos={desempenho:'Desempenho por Área',evolucao:'Desempenho por Área',dominio:'Índice de Domínio Real',cobertura:'Cobertura do Edital',bkt:'Domínio por Tópico (BKT)',prontidao:'Projeção para a Prova'};
   let box=document.getElementById('info-tooltip');
   if(!box){
     box=document.createElement('div');
