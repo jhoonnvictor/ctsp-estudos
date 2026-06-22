@@ -1085,7 +1085,7 @@ html[data-theme="dark"] .fb-caderno{color:var(--ember);}
         <h2>Painel Admin</h2>
         <p>Gerencie usuários, questões e flashcards</p>
         <div id="admin-sync" style="margin-bottom:14px;">
-          <button class="btn-primary" onclick="sincronizarBanco()">Sincronizar banco (QI → Firebase)</button>
+          <button class="btn-primary" onclick="sincronizarBanco()">Sincronizar banco (QI + FCI → Firebase)</button>
           <p class="auth-msg" id="sync-msg"></p>
         </div>
         <div class="admin-tabs">
@@ -1533,7 +1533,7 @@ function renderProntidao(){
 // ── S35 BACKUP: exportação e restauração do progresso ──
 function exportarProgresso(){
   try{
-    const payload={app:'ctsp-estudos',versao:'v1.36',exportadoEm:new Date().toISOString(),userStats,userCards};
+    const payload={app:'ctsp-estudos',versao:'v1.37',exportadoEm:new Date().toISOString(),userStats,userCards};
     const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
     const url=URL.createObjectURL(blob);
     const a=document.createElement('a');
@@ -2931,17 +2931,28 @@ async function loadQuestoes(){
     });
     return toSave;
   };
+  const local=localFallback();
+  const nLocal=Object.keys(local).length;
   try{
     const snap=await withTimeout(db.ref('questoes').get());
-    if(snap.exists()){allQuestoes=snap.val();}
+    if(snap.exists()){
+      const remoto=snap.val();
+      // Reconciliação por contagem: QI (versionado no index.html) é a fonte da verdade do CONTEÚDO.
+      // Se o Firebase está defasado (MENOS questões que o QI local), o local vence: merge na memória
+      // (todos os usuários passam a ver o banco completo na hora) + re-seed não-destrutivo no Firebase
+      // (só admin tem permissão de escrita; falha em silêncio p/ não-admin).
+      if(Object.keys(remoto).length<nLocal){
+        allQuestoes={...remoto,...local};
+        try{await withTimeout(db.ref('questoes').update(local));}catch(e){console.warn('Re-seed questoes (sem permissão de escrita?):',e.message);}
+      }else{allQuestoes=remoto;}
+    }
     else{
-      const toSave=localFallback();
-      try{await withTimeout(db.ref('questoes').set(toSave));}catch(e){console.warn('Seed questoes:',e.message);}
-      allQuestoes=toSave;
+      try{await withTimeout(db.ref('questoes').set(local));}catch(e){console.warn('Seed questoes:',e.message);}
+      allQuestoes=local;
     }
   }catch(e){
     console.warn('loadQuestoes usando banco local:',e.message);
-    allQuestoes=localFallback();
+    allQuestoes=local;
   }
   // Garantir que a lista de áreas está sempre populada após carregar
   renderAreaList();
@@ -2949,17 +2960,27 @@ async function loadQuestoes(){
 
 async function loadFlashcards(){
   const localFallback=()=>{const t={};FCI.forEach(fc=>{t[fc.id]=fc;});return t;};
+  const local=localFallback();
   try{
     const snap=await withTimeout(db.ref('flashcards').get());
-    if(snap.exists()){allFlashcards=snap.val();}
+    if(snap.exists()){
+      const remoto=snap.val();
+      // Reconciliação por contagem: FCI (versionado no index.html) é a fonte da verdade do CONTEÚDO.
+      // Se o Firebase está defasado (MENOS cards que o FCI local — ex.: nó antigo travado em 24),
+      // o local vence: merge na memória (todos veem os 80 na hora) + re-seed não-destrutivo no
+      // Firebase (só admin tem permissão de escrita; falha em silêncio p/ não-admin).
+      if(Object.keys(remoto).length<FCI.length){
+        allFlashcards={...remoto,...local};
+        try{await withTimeout(db.ref('flashcards').update(local));}catch(e){console.warn('Re-seed flashcards (sem permissão de escrita?):',e.message);}
+      }else{allFlashcards=remoto;}
+    }
     else{
-      const toSave=localFallback();
-      try{await withTimeout(db.ref('flashcards').set(toSave));}catch(e){console.warn('Seed flashcards:',e.message);}
-      allFlashcards=toSave;
+      try{await withTimeout(db.ref('flashcards').set(local));}catch(e){console.warn('Seed flashcards:',e.message);}
+      allFlashcards=local;
     }
   }catch(e){
     console.warn('loadFlashcards usando banco local:',e.message);
-    allFlashcards=localFallback();
+    allFlashcards=local;
   }
   // Atualizar cards e badges após carregar
   renderCards();
@@ -4163,25 +4184,30 @@ async function approveUser(uid){if(!isAdmin())return;await db.ref('usuarios/'+ui
 async function revokeUser(uid){if(!isAdmin())return;await db.ref('usuarios/'+uid).update({aprovado:false});loadAdminUsers();showToast('Acesso revogado.');}
 async function makeAdmin(uid){if(!isAdmin())return;await db.ref('usuarios/'+uid).update({admin:true,aprovado:true});loadAdminUsers();showToast('Admin concedido!');}
 
-// Sincroniza o QI (fonte da verdade, versionado no index.html) com o nó 'questoes' do Firebase.
-// update() é merge por chave: adiciona questões novas, atualiza o campo topico/area nas existentes
-// e NUNCA apaga nada. Resolve o caso em que o seed (loadQuestoes) só roda com o nó vazio.
+// Sincroniza QI + FCI (fonte da verdade, versionados no index.html) com os nós 'questoes' e
+// 'flashcards' do Firebase. update() é merge por chave: adiciona itens novos, atualiza os campos
+// nos existentes e NUNCA apaga nada. Botão manual do admin; a reconciliação por contagem nos loads
+// já corrige o caso comum automaticamente, mas este botão força a sincronização quando preciso.
 async function sincronizarBanco(){
   if(!isAdmin())return;
-  if(!confirm('Sincronizar o banco do QI com o Firebase?\n\nAdiciona questões novas e atualiza o tópico nas existentes. Operação não-destrutiva — nada é apagado.'))return;
+  if(!confirm('Sincronizar questões (QI) e flashcards (FCI) com o Firebase?\n\nAdiciona itens novos e atualiza os existentes. Operação não-destrutiva — nada é apagado.'))return;
   const mapa={};
   Object.entries(QI).forEach(([area,qs])=>{
     const areaKey=area.replace(/B$/,'');
     qs.forEach(q=>{mapa[q.id]={...q,area:areaKey};});
   });
-  const n=Object.keys(mapa).length;
-  showMsg('sync-msg','Sincronizando '+n+' questões...');
+  const mapaFC={};
+  FCI.forEach(fc=>{mapaFC[fc.id]=fc;});
+  const n=Object.keys(mapa).length,nfc=Object.keys(mapaFC).length;
+  showMsg('sync-msg','Sincronizando '+n+' questões e '+nfc+' flashcards...');
   try{
     await withTimeout(db.ref('questoes').update(mapa));
+    await withTimeout(db.ref('flashcards').update(mapaFC));
     Object.assign(allQuestoes,mapa);
-    renderAreaList();
-    showMsg('sync-msg','Banco sincronizado: '+n+' questões (tópicos atualizados).','ok');
-    showToast('Banco sincronizado: '+n+' questões.');
+    Object.assign(allFlashcards,mapaFC);
+    renderAreaList();renderCards();updateBadges();
+    showMsg('sync-msg','Banco sincronizado: '+n+' questões + '+nfc+' flashcards.','ok');
+    showToast('Banco sincronizado: '+n+' questões + '+nfc+' flashcards.');
   }catch(err){showMsg('sync-msg','Erro: '+err.message);}
 }
 
