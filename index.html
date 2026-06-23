@@ -689,7 +689,7 @@ html[data-theme="dark"] .fb-caderno{color:var(--ember);}
 </div>
 <div id="splash-screen">
   <div class="splash-dias animate" id="splash-dias">0</div>
-  <div class="splash-dias-label">dias de estudo</div>
+  <div class="splash-dias-label">dias seguidos</div>
   <div class="splash-dominio-wrap">
     <div class="splash-sec">Domínio por área</div>
     <div id="splash-areas"></div>
@@ -894,7 +894,7 @@ html[data-theme="dark"] .fb-caderno{color:var(--ember);}
           </div>
         </div>
         <!-- Progresso por área -->
-        <div class="sec-title">Desempenho por área <span class="info-btn" onclick="showInfo('desempenho')" aria-label="Mais informações">?</span></div>
+        <div class="sec-title">Histórico de acertos por área <span class="info-btn" onclick="showInfo('desempenho')" aria-label="Mais informações">?</span></div>
         <div class="area-grid" id="dash-areas"></div>
         <!-- Gráfico últimos 7 dias -->
         <div class="sec-title">Últimos 7 dias</div>
@@ -906,7 +906,7 @@ html[data-theme="dark"] .fb-caderno{color:var(--ember);}
           <div class="chart-bars" id="chart-bars"></div>
         </div>
         <!-- Gráfico evolução por área -->
-        <div class="sec-title">Desempenho por área <span class="info-btn" onclick="showInfo('evolucao')" aria-label="Mais informações">?</span></div>
+        <div class="sec-title">Histórico de acertos por área <span class="info-btn" onclick="showInfo('evolucao')" aria-label="Mais informações">?</span></div>
         <div class="chart-wrap" id="area-evolution-wrap">
           <div id="area-evolution"></div>
         </div>
@@ -1209,7 +1209,7 @@ html[data-theme="dark"] .fb-caderno{color:var(--ember);}
     <div class="config-row">
       <div>
         <div class="config-label">Dias de estudo</div>
-        <div class="config-sub" id="config-streak-info">0 dias acumulados</div>
+        <div class="config-sub" id="config-streak-info">0 dias seguidos</div>
       </div>
       <button class="btn-config-reset" onclick="resetarStreak()">Zerar</button>
     </div>
@@ -1339,7 +1339,7 @@ function mostrarAlertaConexao(on){
 let userCards={};
 let allQuestoes={},allFlashcards={};
 let quizQueue=[],quizIdx=0,quizArea='TODAS',quizSessao={c:0,t:0},quizAnswered=false,quizModoErro=false;
-let simQuestoes=[],simRespostas={},simIdx=0,simTimer=null,simTempo=10800,simModo='completo';
+let simQuestoes=[],simRespostas={},simOrdem={},simIdx=0,simTimer=null,simTempo=10800,simModo='completo';
 let resumosQueue=[],resumoAtualIdx=0;
 
 // ═══════════════════════════════
@@ -1373,6 +1373,12 @@ function fsrsCardUpdate(card,dif){
   return{S:+S.toFixed(3),D:+D.toFixed(2),reps:reps+1,last:now,next:now+interval*86400000,interval};
 }
 function shuffle(a){const r=[...a];for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]];}return r;}
+// Diferença em dias entre duas datas 'YYYY-MM-DD' (UTC). Infinity se faltar uma.
+function diffDias(d1,d2){const a=Date.parse(d1+'T00:00:00Z'),b=Date.parse(d2+'T00:00:00Z');if(isNaN(a)||isNaN(b))return Infinity;return Math.round((b-a)/86400000);}
+// Alternativas tipo "todas/nenhuma das (alternativas/anteriores) estão corretas" / NDA — nunca embaralham, ficam por último.
+const RE_OPC_FIXA=/^\s*(todas as (alternativas|op[cç][oõ]es)( anteriores)? est[aã]o corretas|todas as anteriores|nenhuma das (alternativas|op[cç][oõ]es|anteriores)( est[aã]o corretas)?|n\s*\.?\s*d\s*\.?\s*a\s*\.?)\s*\.?\s*$/i;
+// Retorna os índices das alternativas embaralhados, mantendo as "fixas" no fim (na ordem original entre si).
+function ordemEmbaralhada(q){const ops=q.ops||[];const todos=ops.map((_,i)=>i);const fixas=todos.filter(i=>RE_OPC_FIXA.test(ops[i]));const resto=shuffle(todos.filter(i=>!fixas.includes(i)));return [...resto,...fixas];}
 
 // ═══════════════════════════════
 // FASE 2 — MOTOR ADAPTATIVO (BKT por tópico + FSRS-lite + seleção adaptativa)
@@ -1543,7 +1549,7 @@ function renderProntidao(){
 // ── S35 BACKUP: exportação e restauração do progresso ──
 function exportarProgresso(){
   try{
-    const payload={app:'ctsp-estudos',versao:'v1.39',exportadoEm:new Date().toISOString(),userStats,userCards};
+    const payload={app:'ctsp-estudos',versao:'v1.40',exportadoEm:new Date().toISOString(),userStats,userCards};
     const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
     const url=URL.createObjectURL(blob);
     const a=document.createElement('a');
@@ -3001,17 +3007,17 @@ async function loadFlashcards(){
 // STREAK — conta por acesso após meia-noite
 // ═══════════════════════════════
 function updateStreak(){
-  document.getElementById('hdr-streak-n').textContent=(userStats.streak||0);
+  const _el=document.getElementById('hdr-streak-n');if(_el)_el.textContent=(userStats.streak||0);
   if(!dataLoaded&&!progressoLocalOk)return; // S30 BUG-DATA: nunca incrementar/gravar sobre estado não carregado
   const today=new Date().toISOString().slice(0,10);
   const last=userStats.lastAccessDate||userStats.lastStudyDate||'';
   if(last!==today){
-    // Novo acesso em dia diferente — incrementa sem resetar
-    userStats.streak=(userStats.streak||0)+1;
+    // Sequência real: dia imediatamente seguinte continua; pulou 1+ dia (ou 1º acesso) reinicia em 1.
+    userStats.streak=(last&&diffDias(last,today)===1)?(userStats.streak||0)+1:1;
     userStats.lastAccessDate=today;
     saveProg();
   }
-  document.getElementById('hdr-streak-n').textContent=(userStats.streak||0);
+  if(_el)_el.textContent=(userStats.streak||0);
 }
 
 function registrarAtividade(acertou){
@@ -3517,9 +3523,8 @@ function renderQuizQ(){
   const opts=document.getElementById('quiz-opts');
   const letras=['A','B','C','D','E'];
 
-  // Embaralhar alternativas mantendo rastreio do gabarito
-  const indices=(q.ops||[]).map((_,i)=>i);
-  for(let i=indices.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[indices[i],indices[j]]=[indices[j],indices[i]];}
+  // Embaralhar alternativas mantendo rastreio do gabarito ("todas/nenhuma..." fica por último)
+  const indices=ordemEmbaralhada(q);
   const novoGabarito=indices.indexOf(q.g);
   // Salvar gabarito embaralhado para uso em responderQuiz
   quizQueue[quizIdx]._shuffledOps=indices.map(i=>q.ops[i]);
@@ -3916,7 +3921,7 @@ function renderSimHome(){
 }
 
 function iniciarSimulado(modo){
-  simModo=modo;simRespostas={};simIdx=0;
+  simModo=modo;simRespostas={};simOrdem={};simIdx=0;
   const qs=Object.values(allQuestoes);
   if(modo==='inteligente'){
     // Peso real por ponto fraco: áreas com menor acerto recebem mais questões
@@ -3978,8 +3983,10 @@ function renderSimQ(){
   document.getElementById('sim-q-doc').textContent=q.doc||'';
   const letras=['A','B','C','D','E'];
   const opts=document.getElementById('sim-opts');
-  opts.innerHTML=(q.ops||[]).map((op,i)=>`<button class="quiz-opt${simRespostas[simIdx]===i?' selected':''}" onclick="marcarSim(${i})" style="margin-bottom:0">
-    <span class="quiz-opt-letter">${letras[i]}</span><span>${sanitize(op)}</span>
+  if(!simOrdem[simIdx])simOrdem[simIdx]=ordemEmbaralhada(q);
+  const ordem=simOrdem[simIdx];
+  opts.innerHTML=ordem.map((origIdx,p)=>`<button class="quiz-opt${simRespostas[simIdx]===origIdx?' selected':''}" onclick="marcarSim(${origIdx})" style="margin-bottom:0">
+    <span class="quiz-opt-letter">${letras[p]}</span><span class="quiz-opt-text">${sanitize(q.ops[origIdx])}</span>
   </button>`).join('');
 }
 
@@ -4545,7 +4552,7 @@ function registrarVisualizacaoResumo(id){
 function abrirModalConfig(){
   const nomeAtual=userProfile.nome&&userProfile.nome!==currentUser.email?userProfile.nome.split(' ')[0]:'';
   document.getElementById('config-nome-input').value=nomeAtual;
-  document.getElementById('config-streak-info').textContent=(userStats.streak||0)+' dias acumulados';
+  document.getElementById('config-streak-info').textContent=(userStats.streak||0)+' dias seguidos';
   const metaInp=document.getElementById('config-meta-input');
   if(metaInp)metaInp.value=userStats.metaDiaria||10;
   const provaInp=document.getElementById('config-prova-input');
@@ -4587,7 +4594,7 @@ async function resetarStreak(){
   userStats.lastAccessDate='';
   await saveProg();
   document.getElementById('hdr-streak-n').textContent='0';
-  document.getElementById('config-streak-info').textContent='0 dias acumulados';
+  document.getElementById('config-streak-info').textContent='0 dias seguidos';
   showToast('Contagem zerada.');
 }
 
@@ -4614,7 +4621,7 @@ async function reiniciarEstudos(){
     if(typeof renderCards==='function')renderCards();
     if(typeof renderResumos==='function')renderResumos();
     const hsn=document.getElementById('hdr-streak-n');if(hsn)hsn.textContent='0';
-    const csi=document.getElementById('config-streak-info');if(csi)csi.textContent='0 dias acumulados';
+    const csi=document.getElementById('config-streak-info');if(csi)csi.textContent='0 dias seguidos';
     fecharModalConfig();
     if(typeof setScreen==='function')setScreen('inicio');
     showToast('Tudo zerado — bons estudos! 🚒');
@@ -4650,14 +4657,14 @@ document.addEventListener('click',function(e){
 
 function showInfo(tipo){
   const textos={
-    desempenho:'Percentual de acertos por área. Calculado dividindo respostas corretas pelo total respondido naquela área.',
-    evolucao:'Desempenho por área: acertos ÷ questões respondidas. Para evitar números enganosos, a porcentagem só aparece a partir de '+MIN_RESP_CONF+' respostas na área — abaixo disso mostra "poucos dados".',
+    desempenho:'Histórico de acertos por área: acertos ÷ total de respostas naquela área. Conta TODAS as tentativas — refazer uma questão soma de novo, e um erro continua no cálculo mesmo que você acerte depois. Para o seu nível ATUAL (não o histórico), veja o Índice de Domínio Real.',
+    evolucao:'Histórico de acertos por área: acertos ÷ questões respondidas, somando TODAS as tentativas (refazer conta de novo; um erro permanece mesmo que você acerte depois). A porcentagem só aparece a partir de '+MIN_RESP_CONF+' respostas na área — abaixo disso mostra "poucos dados". Para o nível atual, use o Índice de Domínio Real.',
     dominio:'Índice composto: Quiz vale 50%, Cards 30% e Resumos 20%. O componente Quiz de cada área só entra no cálculo a partir de '+MIN_RESP_CONF+' respostas, para não inflar o domínio com poucas questões.',
     cobertura:'Progresso de percurso: quantos itens (questões, cards e resumos) de cada área você já tocou, dividido pelo total que existe. Diferente do desempenho — mede o quanto você já viu, não o quanto acertou.',
     bkt:'Probabilidade de você dominar cada tópico (modelo BKT). A cada resposta o sistema ajusta a estimativa considerando acerto por sorte (~20%) e erro por descuido (~10%). O Modo Adaptativo prioriza os tópicos com menor domínio.',
     prontidao:'Estimativa de quantas das 60 questões você acertaria hoje: domínio BKT médio de cada área multiplicado pela cota do edital (AT1 14 · AT2 8 · AT3 14 · AT4 12 · AT5 12). É uma projeção estatística, não uma garantia. Abaixo de '+MIN_RESP_PRONT+' respostas ela é marcada como preliminar — quanto mais você responde, mais precisa fica. Defina a data da prova em Configurações para ver a contagem regressiva.'
   };
-  const titulos={desempenho:'Desempenho por Área',evolucao:'Desempenho por Área',dominio:'Índice de Domínio Real',cobertura:'Cobertura do Edital',bkt:'Domínio por Tópico (BKT)',prontidao:'Projeção para a Prova'};
+  const titulos={desempenho:'Histórico de Acertos por Área',evolucao:'Histórico de Acertos por Área',dominio:'Índice de Domínio Real',cobertura:'Cobertura do Edital',bkt:'Domínio por Tópico (BKT)',prontidao:'Projeção para a Prova'};
   let box=document.getElementById('info-tooltip');
   if(!box){
     box=document.createElement('div');
