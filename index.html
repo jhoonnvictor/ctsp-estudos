@@ -349,6 +349,7 @@ input,select,textarea{font-family:inherit;outline:none;}
 .quiz-opts{display:flex;flex-direction:column;gap:10px;}
 .btn-revelar{width:100%;padding:14px;background:var(--red);color:white;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:10px;transition:opacity .2s;box-shadow:0 4px 14px rgba(211,36,18,.22);}
 .btn-revelar:active{opacity:.8;}
+.revelar-dica{font-size:12px;color:var(--text3);line-height:1.5;text-align:center;padding:0 12px 6px;}
 .quiz-opt{background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:12px 14px;font-size:14px;color:var(--text);text-align:left;transition:all .2s;display:flex;align-items:flex-start;gap:10px;line-height:1.45;}
 .quiz-opt-letter{width:24px;height:24px;border-radius:8px;background:var(--paper-2);color:var(--text2);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:13px;font-weight:700;flex-shrink:0;margin-top:0;transition:all .2s;}
 .quiz-opt:active{transform:scale(.98);}
@@ -837,9 +838,9 @@ html[data-theme="dark"] .fb-caderno{color:var(--ember);}
         <div id="dash-due" class="weak-card hidden">
           <div class="weak-icon" style="background:var(--amber-light);color:var(--ember-deep)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><polyline points="3 4 3 9 8 9"/><polyline points="12 7 12 12 15.5 14"/></svg></div>
           <div class="weak-info">
-            <div class="weak-title">Revisões de hoje</div>
+            <div class="weak-title">Questões para revisar hoje</div>
             <div class="weak-area" id="due-count">—</div>
-            <div class="weak-pct">Repetição espaçada (FSRS)</div>
+            <div class="weak-pct">Repetição espaçada de questões</div>
           </div>
           <button class="btn-weak" onclick="iniciarRevisaoDue()">Revisar</button>
         </div>
@@ -866,14 +867,15 @@ html[data-theme="dark"] .fb-caderno{color:var(--ember);}
           </div>
           <div style="height:8px;background:var(--paper-2);border-radius:6px;overflow:hidden;margin-top:8px;"><div id="pront-bar" style="height:100%;width:0%;background:var(--fire-line);border-radius:6px;transition:width .5s;"></div></div>
           <div style="font-size:11px;color:var(--text3);margin-top:6px;" id="pront-detalhe"></div>
+          <div id="pront-aviso" style="display:none;font-size:11px;color:var(--ember-deep);background:var(--amber-light);border-radius:8px;padding:7px 9px;margin-top:8px;line-height:1.4;">⚠️ Estimativa preliminar — baseada em poucas respostas. Vai ficar mais precisa conforme você estuda.</div>
         </div>
         <!-- Quick actions -->
         <div class="sec-title">Estudar agora</div>
         <div class="adapt-btn" onclick="iniciarEstudoAdaptativo()">
           <div class="adapt-btn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/></svg></div>
           <div class="adapt-btn-info">
-            <div class="adapt-btn-title">Modo Adaptativo</div>
-            <div class="adapt-btn-sub">12 questões dos seus tópicos mais fracos (BKT)</div>
+            <div class="adapt-btn-title">Treino Adaptativo</div>
+            <div class="adapt-btn-sub">12 questões · prioriza seus tópicos mais fracos</div>
           </div>
           <div class="adapt-btn-arrow">→</div>
         </div>
@@ -881,13 +883,13 @@ html[data-theme="dark"] .fb-caderno{color:var(--ember);}
           <div class="quick-btn destaque" onclick="iniciarEstudoRapido()">
             <div class="quick-btn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
             <div class="quick-btn-title">Estudo Rápido</div>
-            <div class="quick-btn-sub" id="quick-sub">5 questões</div>
+            <div class="quick-btn-sub" id="quick-sub">5 questões soltas</div>
           </div>
 
           <div class="quick-btn" onclick="iniciarSimuladoInteligente()">
             <div class="quick-btn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none"/></svg></div>
-            <div class="quick-btn-title">Simulado IA</div>
-            <div class="quick-btn-sub">15 questões</div>
+            <div class="quick-btn-title">Treino Focado</div>
+            <div class="quick-btn-sub">15 questões · pontos fracos</div>
           </div>
         </div>
         <!-- Progresso por área -->
@@ -983,7 +985,7 @@ html[data-theme="dark"] .fb-caderno{color:var(--ember);}
     <div class="screen" id="screen-cards">
       <div class="cards-header">
         <div class="cards-h-title">Flashcards</div>
-        <div class="cards-h-sub">Revisão espaçada (FSRS)</div>
+        <div class="cards-h-sub">Memorização rápida — frente e verso</div>
         <div class="cards-h-stats">
           <div class="cards-h-stat"><div class="cards-h-stat-v" id="cards-due">0</div><div class="cards-h-stat-l">Para hoje</div></div>
           <div class="cards-h-stat"><div class="cards-h-stat-v" id="cards-total-n">0</div><div class="cards-h-stat-l">Total</div></div>
@@ -1006,7 +1008,7 @@ html[data-theme="dark"] .fb-caderno{color:var(--ember);}
             </div>
             <div class="sim-card" onclick="iniciarSimulado('inteligente')">
               <div class="sim-card-icon" style="background:var(--amber-light);color:var(--ember-deep);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none"/></svg></div>
-              <div class="sim-card-info"><h3>Simulado Inteligente</h3><p>15 questões · foco nos seus pontos fracos</p></div>
+              <div class="sim-card-info"><h3>Mini Simulado</h3><p>15 questões cronometradas · foco nos seus pontos fracos</p></div>
             </div>
           </div>
           <div class="sim-hist-title">Histórico</div>
@@ -1499,9 +1501,13 @@ function iniciarRevisaoDue(){
 }
 
 // ── S35 PRONT: projeção de pontos na prova (BKT médio por área × cota do edital) ──
+// C4: piso de respostas para a projeção da prova ser considerada confiável.
+// Mais alto que MIN_RESP_CONF (5) porque a prova cobre 5 áreas e muitos tópicos.
+const MIN_RESP_PRONT=20;
 function calcProntidao(){
   const perfil=perfilTopicos();
   if(!perfil.some(p=>p.n>0))return null; // sem dados BKT ainda
+  const nResp=perfil.reduce((s,p)=>s+(p.n||0),0); // total de respostas que alimentaram o BKT
   const proj={};let total=0;
   Object.entries(AI).forEach(([k,a])=>{
     const tops=perfil.filter(p=>p.area===k&&p.nQ>0);
@@ -1510,7 +1516,7 @@ function calcProntidao(){
     const m=peso?soma/peso:BKT_P.L0;
     proj[k]=a.n*m;total+=proj[k];
   });
-  return{total,proj};
+  return{total,proj,nResp};
 }
 function renderProntidao(){
   const el=document.getElementById('dash-pront');
@@ -1521,6 +1527,9 @@ function renderProntidao(){
   document.getElementById('pront-num').textContent='~'+Math.round(r.total);
   document.getElementById('pront-bar').style.width=Math.min(100,Math.round(r.total/60*100))+'%';
   document.getElementById('pront-detalhe').textContent=Object.entries(r.proj).map(([k,v])=>k+' '+v.toFixed(1).replace('.',',')).join(' · ');
+  // C4: aviso de baixa confiança quando a projeção vem de poucas respostas
+  const avisoEl=document.getElementById('pront-aviso');
+  if(avisoEl)avisoEl.style.display=(r.nResp<MIN_RESP_PRONT)?'block':'none';
   const dEl=document.getElementById('pront-dias');
   if(dEl){
     if(userStats.dataProva&&/^\d{4}-\d{2}-\d{2}$/.test(userStats.dataProva)){
@@ -1533,7 +1542,7 @@ function renderProntidao(){
 // ── S35 BACKUP: exportação e restauração do progresso ──
 function exportarProgresso(){
   try{
-    const payload={app:'ctsp-estudos',versao:'v1.37',exportadoEm:new Date().toISOString(),userStats,userCards};
+    const payload={app:'ctsp-estudos',versao:'v1.38',exportadoEm:new Date().toISOString(),userStats,userCards};
     const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
     const url=URL.createObjectURL(blob);
     const a=document.createElement('a');
@@ -3404,7 +3413,7 @@ function iniciarSimuladoInteligente(){
   quizArea='INTELIGENTE';quizModoErro=false;quizIdx=0;quizSessao={c:0,t:0};
   document.getElementById('quiz-home-view').classList.add('hidden');
   document.getElementById('quiz-running-view').classList.remove('hidden');
-  document.getElementById('quiz-area-tag').textContent='Simulado IA';
+  document.getElementById('quiz-area-tag').textContent='Treino Focado';
   navTo('quiz');renderQuizQ();
 }
 
@@ -3523,11 +3532,16 @@ function renderQuizQ(){
   // Ocultar alternativas — testing effect
   opts.style.display='none';
   document.querySelector('.btn-revelar')?.remove();
+  document.querySelector('.revelar-dica')?.remove();
   const btnRevelar=document.createElement('button');
   btnRevelar.className='btn-revelar';
   btnRevelar.textContent='👁 Revelar alternativas';
-  btnRevelar.onclick=()=>{opts.style.display='flex';btnRevelar.remove();};
+  const dica=document.createElement('div');
+  dica.className='revelar-dica';
+  dica.textContent='Tente responder de cabeça antes de ver as opções — lembrar sem dica fixa melhor o conteúdo.';
+  btnRevelar.onclick=()=>{opts.style.display='flex';btnRevelar.remove();dica.remove();};
   opts.parentNode.insertBefore(btnRevelar,opts);
+  opts.parentNode.insertBefore(dica,opts);
   document.getElementById('quiz-feedback').classList.remove('show');
   document.getElementById('quiz-next-btn').classList.remove('show');
   document.getElementById('quiz-ai-tip').style.display='none';
@@ -3891,7 +3905,7 @@ function ouvirResumo(id){
 function renderSimHome(){
   const hist=(userStats.simHistorico||[]).slice(-5).reverse();
   const el=document.getElementById('sim-hist');
-  if(!hist.length){el.innerHTML='<p style="font-size:13px;color:var(--text2)">Nenhum simulado realizado.</p>';return;}
+  if(!hist.length){el.innerHTML='<div style="text-align:center;padding:18px 12px;"><p style="font-size:13px;color:var(--text2);margin-bottom:12px;">Você ainda não fez nenhum simulado.<br>Faça o primeiro para medir seu desempenho.</p><button onclick="iniciarSimulado(\'completo\')" style="padding:11px 20px;background:var(--red);color:white;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(211,36,18,.22);">Começar Simulado Real</button></div>';return;}
   el.innerHTML=hist.map(h=>`<div class="sim-hist-item">
     <div>
       <div class="sim-hist-date">${new Date(h.data).toLocaleDateString('pt-BR')} · ${h.modo||'Completo'}</div>
@@ -4641,7 +4655,7 @@ function showInfo(tipo){
     dominio:'Índice composto: Quiz vale 50%, Cards 30% e Resumos 20%. O componente Quiz de cada área só entra no cálculo a partir de '+MIN_RESP_CONF+' respostas, para não inflar o domínio com poucas questões.',
     cobertura:'Progresso de percurso: quantos itens (questões, cards e resumos) de cada área você já tocou, dividido pelo total que existe. Diferente do desempenho — mede o quanto você já viu, não o quanto acertou.',
     bkt:'Probabilidade de você dominar cada tópico (modelo BKT). A cada resposta o sistema ajusta a estimativa considerando acerto por sorte (~20%) e erro por descuido (~10%). O Modo Adaptativo prioriza os tópicos com menor domínio.',
-    prontidao:'Estimativa de quantas das 60 questões você acertaria hoje: domínio BKT médio de cada área multiplicado pela cota do edital (AT1 14 · AT2 8 · AT3 14 · AT4 12 · AT5 12). É uma projeção estatística, não uma garantia — quanto mais você responde, mais precisa ela fica. Defina a data da prova em Configurações para ver a contagem regressiva.'
+    prontidao:'Estimativa de quantas das 60 questões você acertaria hoje: domínio BKT médio de cada área multiplicado pela cota do edital (AT1 14 · AT2 8 · AT3 14 · AT4 12 · AT5 12). É uma projeção estatística, não uma garantia. Abaixo de '+MIN_RESP_PRONT+' respostas ela é marcada como preliminar — quanto mais você responde, mais precisa fica. Defina a data da prova em Configurações para ver a contagem regressiva.'
   };
   const titulos={desempenho:'Desempenho por Área',evolucao:'Desempenho por Área',dominio:'Índice de Domínio Real',cobertura:'Cobertura do Edital',bkt:'Domínio por Tópico (BKT)',prontidao:'Projeção para a Prova'};
   let box=document.getElementById('info-tooltip');
