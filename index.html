@@ -352,6 +352,7 @@ input,select,textarea{font-family:inherit;outline:none;}
 .revelar-dica{font-size:12px;color:var(--text3);line-height:1.5;text-align:center;padding:0 12px 6px;}
 .quiz-opt{background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:12px 14px;font-size:14px;color:var(--text);text-align:left;transition:all .2s;display:flex;align-items:flex-start;gap:10px;line-height:1.45;}
 .quiz-opt-letter{width:24px;height:24px;border-radius:8px;background:var(--paper-2);color:var(--text2);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:13px;font-weight:700;flex-shrink:0;margin-top:0;transition:all .2s;}
+    .quiz-opt-text{min-width:0;overflow-wrap:anywhere;}
 .quiz-opt:active{transform:scale(.98);}
 .quiz-opt.selected{border-color:var(--navy);background:#F2F4FA;}
 .quiz-opt.selected .quiz-opt-letter{background:var(--navy);color:white;}
@@ -694,7 +695,7 @@ html[data-theme="dark"] .fb-caderno{color:var(--ember);}
     <div id="splash-areas"></div>
   </div>
   <div class="splash-sugestao" id="splash-sugestao">
-    <div class="splash-sug-label">Objetivo desta semana</div>
+    <div class="splash-sug-label">Por onde começar</div>
     <div class="splash-sug-area" id="splash-sug-area">—</div>
     <div class="splash-sug-motivo" id="splash-sug-motivo"></div>
   </div>
@@ -942,7 +943,7 @@ html[data-theme="dark"] .fb-caderno{color:var(--ember);}
       <div id="quiz-home-view">
         <div class="quiz-home">
           <div class="quiz-home-title">Quiz</div>
-          <div class="quiz-home-sub">Escolha uma área ou mode especial</div>
+          <div class="quiz-home-sub">Escolha uma área ou modo especial</div>
           <button class="erro-mode-btn" onclick="iniciarModoErro()">
             <div style="display:flex;flex-direction:column;align-items:flex-start;gap:2px;flex:1">
               <span>Modo Erro — Revisar questões erradas</span>
@@ -959,7 +960,7 @@ html[data-theme="dark"] .fb-caderno{color:var(--ember);}
           <div class="quiz-meta">
             <button class="btn-voltar-quiz" onclick="voltarMenuQuiz()">← Voltar</button>
             <div class="quiz-area-tag" id="quiz-area-tag">Quiz</div>
-            <div class="quiz-score-box"><div class="quiz-score-v" id="quiz-score-v">0/0</div><div class="quiz-score-l">Sessão</div></div>
+            <div class="quiz-score-box"><div class="quiz-score-v" id="quiz-score-v">0/0</div><div class="quiz-score-l">Acertos</div></div>
           </div>
           <div class="quiz-prog"><div class="quiz-prog-fill" id="quiz-prog-fill" style="width:0%"></div></div>
         </div>
@@ -1542,7 +1543,7 @@ function renderProntidao(){
 // ── S35 BACKUP: exportação e restauração do progresso ──
 function exportarProgresso(){
   try{
-    const payload={app:'ctsp-estudos',versao:'v1.38',exportadoEm:new Date().toISOString(),userStats,userCards};
+    const payload={app:'ctsp-estudos',versao:'v1.39',exportadoEm:new Date().toISOString(),userStats,userCards};
     const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
     const url=URL.createObjectURL(blob);
     const a=document.createElement('a');
@@ -1799,7 +1800,7 @@ AT4B:[
 {id:"b4_09",topico:"T4.1",e:"Segundo a LC 14.920/2016, o Conselho Superior do CBMRS é presidido pelo:",ops:["Governador do Estado.","Secretário de Segurança Pública.","Comandante-Geral do CBMRS.","Subcomandante-Geral do CBMRS.","Corregedor-Geral do CBMRS."],g:2,doc:"LC 14.920/2016 - Conselho Superior",exp:"O Conselho Superior do CBMRS é presidido pelo Comandante-Geral."},
 {id:"b4_10",topico:"T4.2",e:"Sobre acumulação de cargos públicos (art. 37, XVI, CF/1988), é PERMITIDA a acumulação de:",ops:["Dois cargos de magistratura.","Dois cargos militares estaduais de diferentes instituições.","Um cargo técnico ou científico com um cargo de magistério.","Dois cargos de professor de universidades diferentes sem limite de carga horária.","Cargo militar com cargo civil de chefia na Administração Pública."],g:2,doc:"CF/1988 art.37 XVI",exp:"É permitida a acumulação de um cargo técnico ou científico com um cargo de magistério, desde que haja compatibilidade de horários."},
 {id:"b4_11",topico:"T4.2",e:"O princípio da LEGALIDADE na Administração Pública (art. 37 CF) significa que o administrador público:",ops:["Pode fazer tudo o que não for expressamente proibido.","Só pode agir quando autorizado por lei.","Tem discricionariedade ampla para decidir o que é de interesse público.","Pode editar normas internas sem respaldo legal.","Age conforme seu julgamento pessoal em situações omissas."],g:1,doc:"CF/1988 art.37 - Princípio da Legalidade",exp:"Legalidade administrativa: o administrador só pode agir se houver autorização expressa em lei."},
-{id:"b4_12",topico:"T4.1",e:"Sobre o cargo de Soldado QPBM no CBMRS (LC 14.920/2016), é CORRETO afirmar:",ops:["Ingresso exclusivamente por transferência de outras instituições militares.","Acesso por concurso público com formação no CTSP.","Acesso mediante aprovação apenas em teste físico.","Cargo de provimento efetivo acessível a civis maiores de 30 anos.","Cargo comissionado de livre nomeação pelo Comandante-Geral."],g:1,doc:"LC 14.920/2016 - QPBM",exp:"Soldado QPBM: ingresso por concurso público com formação no CTSP."},
+{id:"b4_12",topico:"T4.1",e:"Sobre o cargo de Soldado QPBM no CBMRS (LC 14.920/2016), é CORRETO afirmar:",ops:["Ingresso exclusivamente por transferência de outras instituições militares.","Acesso por concurso público, com posterior curso de formação.","Acesso mediante aprovação apenas em teste físico.","Cargo de provimento efetivo acessível a civis maiores de 30 anos.","Cargo comissionado de livre nomeação pelo Comandante-Geral."],g:1,doc:"LC 14.920/2016 - QPBM",exp:"Soldado QPBM ingressa por concurso público, com posterior curso de formação. O CTSP é o curso de promoção a 2º Sargento, não o de ingresso do soldado."},
 {id:"a4_13",topico:"T4.3",e:"Segundo o CPM (art. 9º), é crime militar o praticado por militar em situação de atividade EXCETO quando:",ops:["Contra militar da reserva, em lugar sujeito à administração militar.","No exercício de vigilância, guarda ou patrulha.","Em lugar sujeito à administração militar, contra militar da ativa.","Praticado por militar de folga, em local civil, sem relação com o serviço, contra civil.","Em serviço ou atuando em razão da função."],g:3,doc:"CPM art.9º - Crimes Militares",exp:"Crime militar pressupõe nexo com a função militar. Ato praticado de folga, em local civil, sem relação com serviço, contra civil, não é crime militar — é crime comum."},
 {id:"b4_13",topico:"T4.3",e:"A ação penal nos crimes militares é (CPM art. 121):",ops:["Sempre privada, dependendo de queixa-crime.","Pública condicionada à representação da vítima.","Sempre pública, promovida pelo Ministério Público Militar.","Privada subsidiária da pública em caso de inércia do MP.","Pública ou privada, a critério do ofendido."],g:2,doc:"CPM art.121 - Ação Penal Militar",exp:"Nos crimes militares, a ação penal é SEMPRE pública, promovida pelo Ministério Público Militar — nunca depende de representação ou queixa."},
 {id:"a4_14",topico:"T4.4",e:"Sobre o IPM (CPPM arts. 9º a 28), qual afirmativa está CORRETA?",ops:["O IPM pode ser arquivado pela autoridade militar que o instaurou.","O encarregado do IPM pode ser de posto inferior ao do indiciado.","O IPM tem prazo de 20 dias se o indiciado estiver preso, prorrogável por mais 20 dias.","O advogado do indiciado tem direito de tomar conhecimento dos autos e fazer cópias, qualquer que seja a fase.","O IPM é iniciado por despacho do juiz militar, a pedido do MP."],g:3,doc:"CPPM arts.9º-28 - IPM",exp:"O advogado do indiciado tem direito de acesso aos autos e cópias (CPPM). Prazo: 20 dias (preso) ou 40 dias (solto). A autoridade militar NÃO pode arquivar o IPM — arquivamento é do juiz."},
@@ -3127,7 +3128,6 @@ function renderDashboard(){
   animateCount(document.getElementById('dash-cards'),Object.keys(userCards).length);
   const dsk=document.getElementById('dash-streak');if(dsk)dsk.textContent=(userStats.streak||0);
   const drl=document.getElementById('dash-ring-label');if(drl)drl.textContent=todayN+'/'+meta;
-  document.getElementById('quick-sub').textContent='Foco nos fracos';
 
   // Ring
   const circ=169.6;
@@ -3283,10 +3283,10 @@ function renderAreaEvolution(){
 function updateBadges(){
   // Cards vencidos
   const now=Date.now();
-  const due=Object.values(allFlashcards).filter(fc=>{
-    const uc=userCards[fc.id];
-    return !uc||!uc.next||uc.next<=now;
-  }).length;
+  const _todos=Object.values(allFlashcards);
+  const _venc=_todos.filter(fc=>{const uc=userCards[fc.id];return uc&&uc.reps>0&&uc.next&&uc.next<=now;}).length;
+  const _novos=_todos.filter(fc=>{const uc=userCards[fc.id];return !uc||!uc.reps;}).length;
+  const due=_venc+Math.min(_novos,12);
   const bc=document.getElementById('badge-cards');
   if(due>0){bc.classList.remove('hidden');bc.textContent=due;}else bc.classList.add('hidden');
   document.getElementById('cards-due').textContent=due;
@@ -3526,7 +3526,7 @@ function renderQuizQ(){
   quizQueue[quizIdx]._shuffledG=novoGabarito;
 
   opts.innerHTML=indices.map((origIdx,i)=>`<button class="quiz-opt" onclick="responderQuiz(${i})">
-    <span class="quiz-opt-letter">${letras[i]}</span><span>${sanitize(q.ops[origIdx])}</span>
+    <span class="quiz-opt-letter">${letras[i]}</span><span class="quiz-opt-text">${sanitize(q.ops[origIdx])}</span>
   </button>`).join('');
 
   // Ocultar alternativas — testing effect
@@ -4117,13 +4117,13 @@ function renderDominioTopicos(){
     const ai=AI[a]||{};
     html+=`<div class="topico-area-head">${ai.icon||''} ${sanitize(ai.nome||a)}</div>`;
     ts.forEach(p=>{
-      const pct=Math.round(p.pL*100);
+      const semDados=p.n===0; const pct=Math.round(p.pL*100); const pctTxt=semDados?'—':pct+'%'; const barW=semDados?0:pct; const corT=semDados?'var(--text3)':cor(pct);
       const tag=p.n===0?'<span style="font-size:10px;color:var(--text3)"> · sem dados</span>':'';
       html+=`<div class="topico-row">
         <span class="topico-code">${sanitize(p.t)}</span>
         <span class="topico-name">${sanitize(p.nome)}${tag}</span>
-        <span class="topico-bar-wrap"><span class="topico-bar" style="width:${pct}%;background:${cor(pct)}"></span></span>
-        <span class="topico-pct" style="color:${cor(pct)}">${pct}%</span>
+        <span class="topico-bar-wrap"><span class="topico-bar" style="width:${barW}%;background:${corT}"></span></span>
+        <span class="topico-pct" style="color:${corT}">${pctTxt}</span>
       </div>`;
     });
   });
@@ -4429,7 +4429,7 @@ function renderObjetivoSemana(){
   const bg=pct>=80?'var(--green-light)':pct>=60?'var(--amber-light)':'var(--red-light)';
   const motivo=p.n===0
     ?'Tópico ainda não praticado — comece por aqui para o sistema mapear seu domínio.'
-    :`Menor domínio estimado (BKT) entre seus tópicos, com base em ${p.n} resposta${p.n>1?'s':''}.`;
+    :`Menor domínio estimado (BKT) entre seus tópicos, com base em ${p.n} resposta${p.n>1?'s':''}.${p.n<3?' Estimativa preliminar — responda mais para confirmar.':''}`;
   el.innerHTML=`<div class="obj-card">
     <div class="obj-card-label">Foco da semana — sistema definiu</div>
     <div class="obj-card-area">${a.icon||''} ${sanitize(p.nome)}</div>
