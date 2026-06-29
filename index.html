@@ -1549,7 +1549,7 @@ function renderProntidao(){
 // ── S35 BACKUP: exportação e restauração do progresso ──
 function exportarProgresso(){
   try{
-    const payload={app:'ctsp-estudos',versao:'v1.40',exportadoEm:new Date().toISOString(),userStats,userCards};
+    const payload={app:'ctsp-estudos',versao:'v1.43',exportadoEm:new Date().toISOString(),userStats,userCards};
     const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
     const url=URL.createObjectURL(blob);
     const a=document.createElement('a');
@@ -1671,7 +1671,7 @@ AT3:[
 AT4:[
 {id:"a4_01",topico:"T4.2",e:"Sobre uniformes do CBM (LC 10.990/1997), qual alternativa está INCORRETA?",ops:["Modelos e descrições dos uniformes são estabelecidos na regulamentação da Brigada Militar.","É FACULTADO ao servidor militar usar uniforme em reuniões de caráter político-partidário.","O servidor militar fardado tem obrigações correspondentes ao uniforme que usa.","É vedado a civis usar uniformes ou distintivos iguais ou confundíveis com os da BM.","Militares na inatividade com conduta ofensiva podem ser definitivamente proibidos de usar uniformes."],g:1,doc:"LC 10.990/1997 - Uniformes · Caderno CTSP p.13",exp:"É VEDADO (não facultado) ao servidor militar usar uniforme em reuniões político-partidárias."},
 {id:"a4_02",topico:"T4.1",e:"Sobre a Organização Básica do CBMRS (LC 14.920/2016), qual alternativa está CORRETA?",ops:["CBMRS estrutura-se em órgãos de planejamento, organização, direção e controle.","Ao Comando-Geral, órgão de direção geral, compete a administração da Instituição.","Comandante-Geral: indicado pelo Conselho Superior e nomeado pelo Chefe do Executivo.","Subcomandante-Geral: indicado pelo Conselho Superior e nomeado pelo Comandante-Geral.","Ao Gabinete do Comandante-Geral compete a apuração de responsabilidade criminal e disciplinar."],g:1,doc:"LC 14.920/2016 · Caderno CTSP p.13",exp:"'Ao Comando-Geral, órgão de direção geral do CBMRS, compete a administração da Instituição.'"},
-{id:"a4_03",topico:"T4.1",e:"Sobre exercício de funções (LC 14.920/2016), qual afirmativa está CORRETA?",ops:["Comandante Regional: privativo de Oficiais do último e penúltimo posto QOEM.","Diretor dos Departamentos: privativo de Oficiais do penúltimo posto QOEM.","Comandante de Pelotão: privativo de Praças do QPBM.","Comandante de Companhia: privativo de Oficiais Superiores QOEM.","Comandante de Pelotão: privativo de Oficiais Subalternos da ativa QOEM."],g:4,doc:"LC 14.920/2016 - Funções · Caderno CTSP p.14",exp:"Cmt de Pelotão: privativo de Oficiais Subalternos (Tenentes) ativa QOEM. ⚠️ Não confundir: Cmt Companhia = Intermediário (Capitão)."},
+{id:"a4_03",topico:"T4.1",e:"Sobre exercício de funções (LC 14.920/2016), qual afirmativa está CORRETA?",ops:["Comandante Regional: privativo de Oficiais do último e penúltimo posto QOEM.","Diretor dos Departamentos: privativo de Oficiais do penúltimo posto QOEM.","Comandante de Pelotão: privativo de Praças do QPBM.","Comandante de Companhia: privativo de Oficiais Superiores QOEM.","Comandante de Pelotão: privativo de Oficiais Subalternos da ativa QOEM."],g:0,doc:"LC 14.920/2016 - Funções · Caderno CTSP p.14",exp:"Correta: Comandante Regional é privativo de Oficiais do último E penúltimo posto do QOEM (art. 18, § único). ⚠️ Cmt de Pelotão é privativo do QTBM (art. 21), NÃO do QOEM; Cmt de Companhia exige Oficiais da ativa do QOEM (art. 20); Diretor de Departamento é do último posto do QOEM (art. 18)."},
 {id:"a4_04",topico:"T4.2",e:"Sobre férias e afastamentos (LC 10.990/97), qual alternativa está CORRETA?",ops:["Licença para saúde prejudica as férias e anula o direito a licenças.","Férias podem acumular até 3 períodos anuais por absoluta necessidade de serviço.","A critério do Comandante-Geral ou na inatividade, férias podem ser interrompidas.","Se o militar falecer com direito a férias implementado, o valor é pago aos dependentes legais.","O exonerado não faz jus ao pagamento de férias proporcionais."],g:3,doc:"LC 10.990/1997 - Férias · Caderno CTSP p.14",exp:"Se o militar falecer com direito a férias já implementado, o valor proporcional é pago aos dependentes."},
 {id:"a4_05",topico:"T4.3",e:"Sobre o art. 144 da CF/1988, qual alternativa está INCORRETA?",ops:["Polícias civis: polícia judiciária e apuram infrações penais (exceto militares).","Polícias militares: polícia ostensiva; corpos de bombeiros: defesa civil além das atribuições legais.","Polícia rodoviária federal: patrulhamento ostensivo das rodovias federais.","Municípios podem constituir guardas municipais para proteção de bens, serviços e instalações.","Prevenir e reprimir tráfico de entorpecentes, contrabando e descaminho são atribuições das polícias civis."],g:4,doc:"CF/1988 art.144 · Caderno CTSP p.14",exp:"Tráfico de entorpecentes, contrabando e descaminho são atribuições da POLÍCIA FEDERAL, não das polícias civis."},
 {id:"a4_06",topico:"T4.3",e:"Sobre o art. 37 da CF/1988: I-Princípios incluem 'eficácia'; II-Cargos EXCLUSIVAMENTE a brasileiros; III-Aprovado em concurso tem prioridade, durante o prazo improrrogável, sobre novos concursados.",ops:["Apenas a III está correta.","Apenas I e II corretas.","Apenas I está correta.","Todas erradas.","Apenas II está correta."],g:0,doc:"CF/1988 art.37 · Caderno CTSP p.15",exp:"Apenas III correta. I errado: o princípio é EFICIÊNCIA. II errado: cargos acessíveis também a estrangeiros na forma da lei."},
@@ -1828,7 +1828,7 @@ AT4B:[
 {id:"a4_19",topico:"T4.3",e:"Nos crimes militares estaduais, compete à Justiça Militar Estadual processar e julgar, EXCETO:",ops:["Crimes militares cometidos por militares dos Estados.","Ações judiciais contra atos disciplinares militares.","Crimes dolosos contra a vida de civil, praticados por militar estadual.","Decisão sobre perda do posto e patente de oficiais.","Crimes militares cometidos por militar contra outro militar."],g:2,doc:"CF art. 125 §4º — Competência Justiça Militar Estadual",exp:"Crimes dolosos contra a vida praticados por militar estadual com vítima civil são de competência do Tribunal do Júri (Justiça Comum), não da Justiça Militar Estadual (art. 125, §4º CF)."},
 {id:"b4_19",topico:"T4.6",e:"Sobre o Inquérito Policial Militar (CPPM), qual alternativa está INCORRETA?",ops:["O IPM é a apuração sumária de fato que configure crime militar e de sua autoria.","A autoridade militar não pode arquivar o IPM.","O advogado do indiciado tem direito de tomar conhecimento dos autos e fazer cópias em qualquer fase.","O IPM só pode ser instaurado mediante requisição do Ministério Público Militar.","O IPM é sigiloso apenas quanto ao público em geral; o advogado munido de procuração tem amplo acesso."],g:3,doc:"CPPM — IPM · Caderno CTSP p.16",exp:"A INCORRETA é a D: o art. 10 do CPPM prevê VÁRIAS formas de instauração do IPM — de ofício pela autoridade militar, por delegação de superior, requisição do MP, decisão do STM, requerimento do ofendido e a partir de sindicância. Logo, não se restringe à requisição do MP."},
 {id:"a4_20",topico:"T4.5",e:"Segundo o CPM, pratica o crime de deserção o militar estadual que se ausentar de sua Unidade sem licença por mais de:",ops:["5 dias consecutivos.","6 dias consecutivos.","7 dias consecutivos.","8 dias consecutivos.","10 dias consecutivos."],g:3,doc:"CPM art. 187 — Deserção",exp:"Pratica deserção o militar que se ausentar sem licença por mais de 8 dias consecutivos (art. 187 CPM)."},
-{id:"b4_20",topico:"T4.5",e:"Sobre a ação penal nos crimes militares, é correto afirmar que:",ops:["É sempre pública condicionada à representação.","É sempre privada, de iniciativa do ofendido.","É sempre pública, podendo ser condicionada ou incondicionada conforme o crime.","É sempre pública incondicionada.","Depende da graduação do autor do crime."],g:3,doc:"CPM/CPPM — Ação Penal Militar",exp:"A ação penal nos crimes militares é sempre PÚBLICA INCONDICIONADA, promovida pelo Ministério Público Militar (ou estadual), independentemente de representação."},
+{id:"b4_20",topico:"T4.5",e:"Sobre a ação penal nos crimes militares, é correto afirmar que:",ops:["É sempre pública condicionada à representação.","É sempre privada, de iniciativa do ofendido.","É sempre pública, podendo ser condicionada ou incondicionada conforme o crime.","É sempre pública incondicionada.","Depende da graduação do autor do crime."],g:2,doc:"CPM/CPPM — Ação Penal Militar",exp:"A ação penal militar é sempre PÚBLICA (art. 121 CPM), promovida pelo MP Militar. Em REGRA é incondicionada, mas pode ser condicionada à requisição nos crimes dos arts. 136 a 141 do CPM e no caso do Comandante do Teatro de Operações — por isso é 'condicionada ou incondicionada conforme o crime'."},
 {id:"a4_21",topico:"T4.5",e:"Sobre o crime de motim (CPM), qual alternativa está CORRETA?",ops:["Basta a reunião de dois militares desarmados para configurar motim.","A reunião de militares armados recusando obediência a superior, agindo sem ordem ou praticando violência, configura motim.","O simples concerto para motim não é punível enquanto não iniciados os atos executórios.","Motim exige necessariamente o uso de material bélico de propriedade militar.","O militar presente ao motim que não participar ativamente não pode ser responsabilizado."],g:1,doc:"CPM — Crime de Motim",exp:"Motim: reunião de militares armados recusando obediência a superior, agindo sem ordem ou praticando violência (CPM). O simples concerto também é punível e o militar presente que não usar meios para impedi-lo responde como partícipe."},
 {id:"b4_21",topico:"T4.5",e:"Sobre as excludentes de ilicitude previstas no Código Penal Militar, são reconhecidas:",ops:["Apenas legítima defesa e estado de necessidade.","Apenas legítima defesa e estrito cumprimento do dever legal.","Apenas legítima defesa, estado de necessidade e estrito cumprimento do dever legal.","Legítima defesa, estado de necessidade, estrito cumprimento do dever legal e exercício regular de direito.","Legítima defesa, estado de necessidade, estrito cumprimento do dever legal, exercício regular de direito e obediência hierárquica."],g:3,doc:"CPM art. 42 — Excludentes de Ilicitude",exp:"O CPM reconhece, além das do parágrafo único do art. 42, as seguintes excludentes: legítima defesa, estado de necessidade, estrito cumprimento do dever legal e exercício regular de direito."},
 {id:"a4_22",topico:"T4.5",e:"Sobre os crimes militares (CPM), qual afirmativa está INCORRETA?",ops:["O Código Penal Militar não regula as infrações disciplinares.","O militar da reserva empregado na administração militar equipara-se ao militar da ativa para fins penais militares.","Militar estadual que causa lesões em outro militar estadual, ambos de serviço, comete crime militar.","Militar estadual que causa lesões em outro militar estadual, ambos de folga, não comete crime militar.","Militar estadual que se recusa a obedecer ordem superior sobre matéria de serviço comete crime militar."],g:3,doc:"CPM — Crimes Militares",exp:"INCORRETA: militar estadual que causa lesões em outro militar estadual, ambos de folga, PODE cometer crime militar dependendo das circunstâncias — a mera condição de folga não afasta automaticamente a tipicidade militar."},
@@ -1847,7 +1847,22 @@ AT4B:[
 {id:"b4_28",topico:"T4.6",e:"Conforme o CPPM (art. 7º), a polícia judiciária militar é exercida, em regra, por qual autoridade?",ops:["pelo Ministério Público Militar","pelas autoridades militares (comandantes/chefes), competindo-lhes a apuração das infrações penais militares","exclusivamente pelo Juiz-Auditor da Justiça Militar","pela Polícia Civil do Estado","por delegado de polícia federal designado"],g:1,doc:"CPPM (DL nº 1.002/1969), art. 7º",exp:"A polícia judiciária militar é exercida pelas autoridades militares (ex.: comandantes de unidade), a quem cabe apurar as infrações penais militares por meio do IPM. O MPM titulariza a ação penal, não a polícia judiciária."},
 {id:"a4_29",topico:"T4.3",e:"Segundo o art. 42 da Constituição Federal de 1988, os membros das Polícias Militares e Corpos de Bombeiros Militares dos Estados são denominados:",ops:["Servidores públicos civis","Militares dos Estados","Agentes políticos","Empregados públicos","Funcionários federais"],g:1,doc:"CF/1988, art. 42",exp:"O art. 42 da CF/88 define os integrantes das PM e dos CBM dos Estados como MILITARES DOS ESTADOS, distintos dos servidores civis e submetidos a regime próprio (hierarquia e disciplina)."},
 {id:"b4_29",topico:"T4.5",e:"Conforme o art. 9º do Código Penal Militar (DL 1.001/1969), os crimes militares em tempo de paz são, em regra:",ops:["Definidos exclusivamente no Código Penal comum","Apenas os praticados por civis","Definidos no CPM, observadas as circunstâncias do art. 9º (autor, local, situação e vítima)","Sempre julgados pela Justiça comum estadual","Inexistentes em tempo de paz"],g:2,doc:"CPM (DL 1.001/1969), art. 9º",exp:"O art. 9º do CPM estabelece os critérios que caracterizam o crime militar em tempo de paz (condição de militar do agente, lugar sujeito à administração militar, em serviço, contra militar/patrimônio sob administração militar etc.)."},
-{id:"a4_30",topico:"T4.6",e:"De acordo com o art. 7º do Código de Processo Penal Militar (DL 1.002/1969), a Polícia Judiciária Militar é exercida, nas respectivas jurisdições, pelos:",ops:["Delegados de polícia civil","Comandantes, Diretores e Chefes (e quem os substituir ou tiver delegação)","Promotores de Justiça","Juízes de Direito do Júri","Guardas municipais"],g:1,doc:"CPPM (DL 1.002/1969), art. 7º",exp:"O art. 7º do CPPM atribui a Polícia Judiciária Militar aos comandantes, diretores e chefes de organizações militares (e a quem os substitua ou receba delegação), no âmbito de suas jurisdições. É a base para instauração de IPM."},
+{id:"a4_30",topico:"T4.6",e:"De acordo com o art. 7º do Código de Processo Penal Militar (DL 1.002/1969), a Polícia Judiciária Militar é exercida, nas respectivas jurisdições, pelos:",ops:["Delegados de polícia civil","Comandantes, Diretores e Chefes (e quem os substituir ou tiver delegação)","Promotores de Justiça","Juízes de Direito do Júri","Guardas municipais"],g:1,doc:"CPPM (DL 1.002/1969), art. 7º",exp:"O art. 7º do CPPM atribui a Polícia Judiciária Militar aos comandantes, diretores e chefes de organizações militares (e a quem os substitua ou receba delegação), no âmbito de suas jurisdições. É a base para instauração de IPM."},,
+{id:"b4_30",topico:"T4.4",e:"Segundo a Constituição do Estado do RS (art. 130), ao Corpo de Bombeiros Militar, dirigido pelo Comandante-Geral, competem:",ops:["Exclusivamente a prevenção e o combate de incêndios.","A polícia ostensiva e a preservação da ordem pública.","A prevenção e o combate de incêndios, as buscas e salvamentos, as ações de defesa civil e a polícia judiciária militar.","Apenas as ações de defesa civil, vedada a polícia judiciária militar.","A guarda externa dos presídios e o patrulhamento das rodovias estaduais."],g:2,doc:"CE/RS art. 130 (red. EC 67/14)",exp:"Art. 130 da CE/RS: ao CBM, dirigido pelo Comandante-Geral (oficial da ativa do quadro de Bombeiro Militar, do último posto da carreira), competem a prevenção e o combate de incêndios, as buscas e salvamentos, as ações de defesa civil e a polícia judiciária militar, na forma de lei complementar. Polícia ostensiva e ordem pública são da Brigada Militar (art. 129)."},
+{id:"b4_31",topico:"T4.4",e:"São órgãos da segurança pública do Estado do Rio Grande do Sul (CE/RS, art. 124), EXCETO:",ops:["Brigada Militar.","Corpo de Bombeiros Militar.","Polícia Civil.","Polícia Penal.","Guarda Municipal."],g:4,doc:"CE/RS art. 124 (incs. I a V)",exp:"O art. 124 da CE/RS elenca como órgãos estaduais de segurança pública: Brigada Militar, Polícia Civil, Coordenadoria-Geral de Perícias, Corpo de Bombeiros Militar (EC 67/14) e Polícia Penal (EC 82/22). As guardas municipais são do art. 128 e pertencem aos Municípios, não integrando os órgãos estaduais do art. 124."},
+{id:"b4_32",topico:"T4.4",e:"Conforme a CE/RS (art. 46), aos integrantes da Brigada Militar e do Corpo de Bombeiros Militar é assegurado:",ops:["Acesso a cursos ou concursos de ascensão funcional, independentemente de idade e de estado civil.","Direito de greve, nos termos de lei específica.","Estabilidade às praças com dois anos de efetivo serviço.","Filiação político-partidária, vedado apenas o uso do uniforme.","Acumulação de dois cargos militares, havendo compatibilidade de horários."],g:0,doc:"CE/RS art. 46, II",exp:"Art. 46, II, da CE/RS assegura o acesso a cursos ou concursos que signifiquem ascensão funcional, independentemente de idade e de estado civil. A estabilidade das praças é com CINCO anos (inc. IV), não dois; greve e sindicalização são vedadas aos militares; e a acumulação de dois cargos militares é vedada."},
+{id:"b4_33",topico:"T4.4",e:"De acordo com a CE/RS (art. 129), incumbem à Brigada Militar:",ops:["A prevenção e o combate de incêndios e as buscas e salvamentos.","A polícia ostensiva, a preservação da ordem pública e a polícia judiciária militar.","A execução das atividades de defesa civil e as perícias criminais.","A polícia judiciária comum e a investigação de crimes.","O patrulhamento ostensivo das rodovias federais."],g:1,doc:"CE/RS art. 129 (red. EC 73/17)",exp:"Art. 129 da CE/RS: à Brigada Militar, dirigida pelo Comandante-Geral (oficial da ativa do quadro da Polícia Militar, do último posto da carreira, de livre escolha, nomeação e exoneração pelo Governador), incumbem a polícia ostensiva, a preservação da ordem pública e a polícia judiciária militar. Incêndios, salvamentos e defesa civil são do CBM (art. 130)."},
+{id:"b4_34",topico:"T4.4",e:"Segundo a CE/RS (art. 130, parágrafo único), são autoridades bombeiros militares:",ops:["Somente o Comandante-Geral do Corpo de Bombeiros Militar.","O Comandante-Geral do CBM, os oficiais e as praças em comando de fração destacada.","Todos os integrantes do CBM, independentemente da função exercida.","Apenas os oficiais superiores do quadro de Bombeiro Militar.","O Governador do Estado e o Secretário da Segurança Pública."],g:1,doc:"CE/RS art. 130, par. único (red. EC 67/14)",exp:"Art. 130, parágrafo único, da CE/RS: são autoridades bombeiros militares o Comandante-Geral do Corpo de Bombeiros Militar, os oficiais e as praças em comando de fração destacada."},
+{id:"b4_35",topico:"T4.4",e:"Nos termos da CE/RS (art. 131), a organização, o efetivo, o material bélico, as garantias, a convocação e a mobilização da Brigada Militar e do Corpo de Bombeiros Militar serão regulados:",ops:["Por decreto do Governador, independentemente de lei.","Por lei complementar, observada a legislação federal.","Exclusivamente pela legislação federal.","Por resolução do Comando-Geral de cada Corporação.","Por lei ordinária de iniciativa municipal."],g:1,doc:"CE/RS art. 131 (red. EC 67/14)",exp:"Art. 131 da CE/RS (red. EC 67/14): a organização, o efetivo, o material bélico, as garantias, a convocação e a mobilização da BM e do CBM serão regulados em lei complementar, observada a legislação federal. A seleção, o preparo e a especialização dos integrantes são de competência das Corporações (§ 1º)."},
+{id:"b4_36",topico:"T4.4",e:"Conforme a CE/RS (art. 128), os Municípios poderão constituir:",ops:["Polícias militares municipais com poder de polícia ostensiva.","Corpos de bombeiros militares próprios, subordinados ao Prefeito.","Guardas municipais e serviços civis e auxiliares de combate ao fogo, de prevenção de incêndios e de defesa civil.","Polícia judiciária militar municipal.","Tribunais de Justiça Militar municipais."],g:2,doc:"CE/RS art. 128, I e II",exp:"Art. 128 da CE/RS: os Municípios poderão constituir (I) guardas municipais destinadas à proteção de seus bens, serviços e instalações, e (II) serviços civis e auxiliares de combate ao fogo, de prevenção de incêndios e de atividades de defesa civil. Não podem criar polícias militares, bombeiros militares próprios ou justiça militar."},
+{id:"b4_37",topico:"T4.2",e:"Segundo a LC 10.992/1997 (art. 17, com redação da LC 15.882/22), o Soldado, o Segundo-Sargento e o Primeiro-Sargento poderão ser promovidos à graduação imediatamente posterior:",ops:["Apenas por antiguidade, em qualquer caso.","Por antiguidade ou merecimento, alternadamente, observados o interstício, o curso de habilitação e a existência de vagas.","Somente por merecimento, mediante escolha do Comandante-Geral.","Automaticamente, ao completarem o interstício, sem curso.","Exclusivamente por ato discricionário do Governador."],g:1,doc:"LC 10.992/1997 art. 17 (red. LC 15.882/22)",exp:"Art. 17 da LC 10.992 (red. LC 15.882/22): o Soldado, o Segundo-Sargento e o Primeiro-Sargento poderão ser promovidos, por antiguidade OU merecimento, ALTERNADAMENTE, para a graduação imediatamente posterior, observados o interstício mínimo na graduação, a conclusão com aprovação do respectivo curso de habilitação (no acesso a Segundo-Sargento e a Primeiro-Tenente) e a existência de cargos vagos."},
+{id:"b4_38",topico:"T4.2",e:"Conforme a LC 10.992/1997 (art. 17, § 1º, red. LC 15.882/22), as vagas anuais para o CTSP e o CBAPM serão disponibilizadas em número equivalente a, no mínimo:",ops:["10% dos cargos vagos.","15% dos cargos vagos.","20% dos cargos vagos na graduação de Segundo-Sargento e no posto de Primeiro-Tenente, respectivamente.","30% dos cargos vagos.","50% dos cargos vagos."],g:2,doc:"LC 10.992/1997 art. 17, §1º (red. LC 15.882/22)",exp:"Art. 17, § 1º, da LC 10.992 (red. LC 15.882/22): serão disponibilizadas, anualmente, vagas para o CTSP e o CBAPM em número equivalente a, no mínimo, 20% dos cargos vagos na graduação de Segundo-Sargento e no posto de Primeiro-Tenente, respectivamente. A distribuição dessas vagas observa a proporção de 50% por antiguidade e 50% por processo seletivo (§ 2º)."},
+{id:"b4_39",topico:"T4.2",e:"Segundo a LC 10.992/1997 (art. 14, red. LC 16.181/24), o ingresso na carreira de praças da Brigada Militar e do Corpo de Bombeiros Militar dar-se-á:",ops:["Na graduação de Terceiro-Sargento, por convite do Comandante-Geral.","Na Primeira Classe da graduação de Soldado, por ato do Governador, após aprovação em concurso público e no respectivo Curso de Formação.","No posto de Capitão, mediante curso superior.","Diretamente na graduação de Cabo, sem concurso.","Por nomeação do Secretário da Segurança Pública, dispensado o curso de formação."],g:1,doc:"LC 10.992/1997 art. 14 (red. LC 16.181/24)",exp:"Art. 14 da LC 10.992 (red. LC 16.181/24): o ingresso na carreira de praças da BM e do CBM dar-se-á na Primeira Classe da graduação de Soldado, por ato do Governador do Estado, após aprovação em concurso público e no respectivo Curso de Formação."},
+{id:"b4_40",topico:"T4.2",e:"De acordo com a LC 10.992/1997 (art. 2º, § 1º), a carreira do Quadro de Oficiais de Estado-Maior (QOEM) é constituída pelos postos de:",ops:["Tenente, Capitão, Major e Coronel.","Capitão, Major, Tenente-Coronel e Coronel.","Aspirante, Tenente, Capitão e Major.","Segundo-Tenente, Primeiro-Tenente, Capitão e Major.","Major, Tenente-Coronel, Coronel e General."],g:1,doc:"LC 10.992/1997 art. 2º, §1º (c/c art. 3º)",exp:"Art. 2º, § 1º, da LC 10.992: a carreira dos Quadros de Oficiais é constituída dos postos de Capitão, Major, Tenente-Coronel e Coronel. O ingresso no QOEM dá-se no posto de Capitão, após aprovação no Curso Superior de Polícia Militar (art. 3º)."},
+{id:"b4_41",topico:"T4.7",e:"Segundo o Regulamento Disciplinar da Brigada Militar (Decreto 43.245/2004, art. 8º), as transgressões disciplinares, quanto à natureza, classificam-se em:",ops:["Leves, médias e graves.","Simples e qualificadas.","Culposas e dolosas.","Brandas, moderadas e gravíssimas.","Primárias e reincidentes."],g:0,doc:"RDBM (Dec. 43.245/2004) art. 8º",exp:"Art. 8º do RDBM: as transgressões disciplinares, quanto à natureza, classificam-se em leves, médias e graves. A classificação cabe a quem tem competência para aplicar a sanção (§ 1º)."},
+{id:"b4_42",topico:"T4.7",e:"Conforme o RDBM (Dec. 43.245/2004, art. 9º), NÃO é sanção disciplinar aplicável ao Militar Estadual:",ops:["Advertência.","Repreensão.","Detenção.","Multa pecuniária.","Exclusão a bem da disciplina."],g:3,doc:"RDBM (Dec. 43.245/2004) art. 9º",exp:"As sanções disciplinares do art. 9º do RDBM são: advertência, repreensão, detenção, prisão, licenciamento a bem da disciplina e exclusão a bem da disciplina. Multa pecuniária NÃO é sanção disciplinar prevista no RDBM."},
+{id:"b4_43",topico:"T4.7",e:"De acordo com o RDBM (Dec. 43.245/2004), ao ser incluído na Corporação, o Praça é classificado no comportamento:",ops:["Excepcional.","Ótimo.","Bom.","Insuficiente.","Em observação."],g:2,doc:"RDBM (Dec. 43.245/2004) art. 45 (c/c art. 46)",exp:"Art. 45 do RDBM: ao ser incluído na Corporação, o Praça é classificado no comportamento BOM. O art. 46 classifica o comportamento em excepcional, ótimo, bom, insuficiente e mau, conforme as punições sofridas em determinados períodos."},
+{id:"b4_44",topico:"T4.7",e:"Segundo o RDBM (Dec. 43.245/2004), a sanção disciplinar considerada a forma MAIS BRANDA, aplicada ostensivamente mediante publicação em Boletim, é a:",ops:["Advertência.","Repreensão.","Detenção.","Prisão.","Exclusão a bem da disciplina."],g:0,doc:"RDBM (Dec. 43.245/2004) art. 10",exp:"Art. 10 do RDBM: a advertência é a forma mais branda das sanções, aplicada ostensivamente por meio de publicação em Boletim e registrada nos assentamentos individuais. Ordem crescente de gravidade (art. 9º): advertência, repreensão, detenção, prisão, licenciamento e exclusão a bem da disciplina."}
 ],
 AT5B:[
 {id:"b5_01",topico:"T5.1",e:"Sobre os atos de movimentação (Dec. 57.390/2023), a ADIÇÃO vincula o militar a um OPM sem integrá-lo ao efetivo. Qual é a principal diferença entre adição e inclusão?",ops:["Adição é permanente; inclusão é temporária.","Inclusão integra o militar ao efetivo do OPM; adição vincula sem integrar.","Adição ocorre apenas em situações de emergência; inclusão é o ato regular.","Inclusão depende de autorização do Governador; adição é ato do Comandante-Geral.","Não há diferença prática entre os dois atos."],g:1,doc:"Decreto 57.390/2023 - Atos Administrativos · Caderno CTSP p.18",exp:"Inclusão = integra o militar ao efetivo. Adição = vincula sem integrar ao efetivo."},
@@ -1962,7 +1977,7 @@ const FCI=[
 {id:"fc70",a:"AT4",f:"Acumulação de cargos (CF art. 37, XVI)",v:"Permitida: um cargo técnico/científico + um de magistério, desde que haja compatibilidade de horários"},
 {id:"fc71",a:"AT4",f:"Justiça Militar Estadual (CF art. 125 §4º)",v:"Julga crimes militares de militares estaduais. ⚠️ Crime DOLOSO contra a vida de vítima CIVIL → Tribunal do Júri (Justiça Comum)"},
 {id:"fc72",a:"AT4",f:"Deserção × Abandono de posto × Insubmissão (CPM)",v:"Deserção: ausência sem licença > 8 dias (art. 187) | Abandono de posto: deixar o serviço sem ordem (art. 195) | Insubmissão: convocado CIVIL que não se apresenta"},
-{id:"fc73",a:"AT4",f:"Ação penal nos crimes militares",v:"SEMPRE pública incondicionada, promovida pelo Ministério Público — nunca depende de representação ou queixa"},
+{id:"fc73",a:"AT4",f:"Ação penal nos crimes militares",v:"REGRA: pública incondicionada, promovida pelo Ministério Público Militar. Exceção: condicionada à requisição nos crimes dos arts. 136-141 do CPM. Nunca de iniciativa privada (salvo a subsidiária da pública, art. 121 §ún)."},
 {id:"fc74",a:"AT4",f:"Prazos Corregedoria CBMRS — Sindicância × IPM",v:"Sindicância: 30 + 20 dias (pedido do SINDICANTE, 2 dias úteis de antecedência) | IPM: 40 + 20 dias"},
 {id:"fc75",a:"AT5",f:"Atos de movimentação (Dec. 57.390/2023)",v:"Inclusão = integra o efetivo | Adição = vincula SEM integrar | Efetivação = atribui ao efetivo do OPM onde já serve | Desligamento = desvincula"},
 {id:"fc76",a:"AT5",f:"Prazo de trânsito (Dec. 57.390/2023)",v:"Até 100 km: 2 dias | Acima de 100 km: 5 dias"},
@@ -1970,6 +1985,17 @@ const FCI=[
 {id:"fc78",a:"AT5",f:"Reforma por limite de idade (LC 10.990/1997)",v:"70 anos para Oficiais | 65 anos para Praças"},
 {id:"fc79",a:"AT5",f:"Gratificação de serviço extraordinário (Dec. 40.986/2001)",v:"50% sobre o valor da hora normal de trabalho (não 100%)"},
 {id:"fc80",a:"AT5",f:"Parte × Memorando × Ofício (Caderno Temático ABM 2023)",v:"Parte = comunicação INTERNA da caserna (subordinado → superior) | Memorando = INTERNA entre setores | Ofício = EXTERNA entre instituições"},
+,
+{id:"fc81",a:"AT4",f:"Órgãos da segurança pública no RS (CE/RS art. 124)",v:"Brigada Militar, Polícia Civil, Coordenadoria-Geral de Perícias, Corpo de Bombeiros Militar (EC 67/14) e Polícia Penal (EC 82/22). Guardas municipais são do art. 128 e pertencem aos Municípios."},
+{id:"fc82",a:"AT4",f:"CE/RS art. 130 — competências do Corpo de Bombeiros Militar",v:"Prevenção e combate de incêndios, buscas e salvamentos, ações de defesa civil e polícia judiciária militar. Polícia ostensiva e ordem pública são da Brigada Militar (art. 129)."},
+{id:"fc83",a:"AT4",f:"CE/RS art. 46 — direitos dos militares estaduais",v:"Estabilidade das praças: 5 anos de efetivo serviço (inc. IV). Acesso a cursos e concursos de ascensão independe de idade e de estado civil (inc. II). Greve e sindicalização são vedadas."},
+{id:"fc84",a:"AT4",f:"LC 14.920 — quem administra o CBMRS?",v:"Ao Comando-Geral, órgão de direção geral, compete a administração da Instituição (art. 5º §1º). O Comandante-Geral é indicado pelo Secretário da Segurança Pública e nomeado pelo Chefe do Executivo (art. 9º)."},
+{id:"fc85",a:"AT4",f:"LC 14.920 — Comando de Pelotão x Companhia",v:"Cmt de Pelotão: privativo do QTBM (art. 21). Cmt de Companhia: Oficiais da ativa do QOEM (art. 20). ⚠️ Pelotão NÃO é QOEM."},
+{id:"fc86",a:"AT4",f:"LC 14.920 — Comando Regional e Diretor de Departamento",v:"Cmt Regional: último E penúltimo posto do QOEM (art. 18 §ún). Diretor de Departamento: último posto do QOEM (art. 18). Cmt de Batalhão: oficiais superiores do QOEM (art. 19)."},
+{id:"fc87",a:"AT4",f:"LC 10.992 — promoção a Sargento (CTSP)",v:"Soldado, 2º e 1º-Sargento: promoção por antiguidade OU merecimento, alternadamente (art. 17). Vagas do CTSP: 50% antiguidade + 50% processo seletivo (§2º); oferta anual mínima de 20% dos cargos vagos (§1º)."},
+{id:"fc88",a:"AT4",f:"LC 10.992 — ingresso na carreira de praças (BM/CBM)",v:"Na Primeira Classe da graduação de Soldado, por ato do Governador, após aprovação em concurso público e no respectivo Curso de Formação (art. 14)."},
+{id:"fc89",a:"AT4",f:"CPPM — prazos do IPM",v:"Indiciado SOLTO: 40 dias, prorrogável por mais 20. Indiciado PRESO: 20 dias (não prorrogável). O IPM não pode ser arquivado pela autoridade militar — somente pelo juiz."},
+{id:"fc90",a:"AT4",f:"CPPM — busca domiciliar (art. 175 c/c CF 5º XI)",v:"Executada DE DIA, salvo para acudir vítimas de crime ou desastre (art. 175); em regra precedida de mandado (art. 177). A casa é asilo inviolável: entrada noturna só com consentimento, flagrante, desastre ou socorro (CF art. 5º XI)."}
 ];
 
 // ═══════════════════════════════
@@ -2164,7 +2190,7 @@ texto:`Princípios: Legalidade, Impessoalidade, Moralidade, Publicidade, EFICIÊ
 Concurso público:
 • Prazo de validade: até 2 anos
 • Prorrogação: UMA vez por igual período (não duas vezes!)
-• Aprovado tem direito subjetivo à nomeação dentro do prazo
+• Aprovado DENTRO DO NÚMERO DE VAGAS tem direito subjetivo à nomeação dentro do prazo de validade (STF)
 
 Lei reservará % de cargos para pessoas com deficiência (correto).`},
 {id:"r_at4_03",area:"AT4",titulo:"IPM e Sindicância — Prazos CBMRS",prob:"alta",
@@ -2417,16 +2443,16 @@ Condutas APH no TCE grave:
 // ── AT4 novos ──
 {id:"r_at4_04",area:"AT4",titulo:"LC 14.920/2016 — Estrutura do CBMRS",prob:"alta",
 texto:`Organização Básica do CBMRS (LC 14.920/2016):
-• Comando-Geral: órgão de DIREÇÃO GERAL — administra a instituição
-• Comandante-Geral: indicado pelo Conselho Superior, nomeado pelo Governador
-• Subcomandante-Geral: indicado pelo C-Geral, aprovado pelo Conselho Superior
+• Comando-Geral: órgão de DIREÇÃO GERAL — compete a administração da Instituição (art. 5º §1º)
+• Comandante-Geral: indicado pelo Secretário de Estado da Segurança Pública e nomeado pelo Chefe do Executivo (art. 9º); é Oficial da ativa do último posto do QOEM
+• Subcomandante-Geral: indicado pelo Comandante-Geral e nomeado pelo Governador (art. 10 §ún)
 
-Funções privativas:
-• Cmt Regional: Coronel (último posto QOEM)
-• Cmt de Batalhão: Tenente-Coronel (penúltimo posto QOEM)
-• Cmt de Companhia: Capitão (Oficial Intermediário)
-• Cmt de Pelotão: Tenente (Oficial Subalterno)
-• Cmt de Guarnição: Praça QPBM`},
+Funções privativas (LC 14.920):
+• Diretor de Departamento: último posto do QOEM — Coronel (art. 18)
+• Cmt Regional: último E penúltimo posto do QOEM — Cel/Ten-Cel (art. 18 §ún)
+• Cmt de Batalhão: Oficiais SUPERIORES do QOEM — Cel/Ten-Cel/Maj (art. 19)
+• Cmt de Companhia: Oficiais da ativa do QOEM (art. 20)
+• Cmt de Pelotão: Oficiais da ativa do QTBM (art. 21) ⚠️ é QTBM, NÃO QOEM`},
 
 {id:"r_at4_05",area:"AT4",titulo:"Acumulação de Cargos — CF art. 37 XVI",prob:"alta",
 texto:`Acumulação de cargos públicos — o que é PERMITIDO:
@@ -2456,11 +2482,11 @@ Inquérito Policial Militar (IPM):
 ⚠️ SUBCOMANDANTES não têm competência para instaurar IPM!`},
 
 {id:"r_at4_07",area:"AT4",titulo:"CPM — Crimes em Tempo de Paz",prob:"alta",
-texto:`Ação penal militar: SEMPRE PÚBLICA (nunca privada ou condicionada)
-Exercida pelo Ministério Público Militar
+texto:`Ação penal militar: REGRA é pública incondicionada (art. 121 CPM), exercida pelo Ministério Público Militar
+Exceção: condicionada à requisição nos crimes dos arts. 136-141 do CPM
 
 Crimes contra a autoridade/disciplina (arts. 149-176):
-• Motim: 3+ militares, com violência ou ameaça, contra ordem → reunião com armas e/ou material bélico
+• Motim (art. 149): reunião de militares recusando obediência ou agindo contra ordem do superior, DESARMADOS. Se ARMADOS = Revolta (§ún). Reunião com material bélico de propriedade militar praticando violência = art. 150
 • Insubordinação (art. 163): recusa de obediência a ordem legal superior
 • Desrespeito a superior (art. 160): ofensa à dignidade/decoro, mesmo sem contato físico
 • Deserção (art. 187): ausência > 8 dias da unidade sem licença
@@ -2468,7 +2494,7 @@ Crimes contra a autoridade/disciplina (arts. 149-176):
 
 ⚠️ Pegadinhas frequentes:
 • Furto de uso = NÃO é atípico no CPM (diferente do CP comum)
-• Ação penal = sempre PÚBLICA, nunca depende de representação
+• Ação penal = REGRA pública incondicionada; exceção: condicionada à requisição (arts. 136-141)
 • Deserção = 8 dias (não 7, não 10)`},
 
 {id:"r_at4_08",area:"AT4",titulo:"CPPM — IPM e Prisão Militar",prob:"alta",
@@ -2496,7 +2522,7 @@ Busca e apreensão (arts. 170-189):
 {id:"r_at4_09",area:"AT4",titulo:"CF arts. 125-126 e 142-143 — Judiciário e FA",prob:"alta",
 texto:`Poder Judiciário Estadual (CF art. 125):
 • Justiça Militar Estadual: efetivo > 20.000 → PODE criar Tribunal de JME
-• Crimes dolosos contra vida por militar = Tribunal do Júri (não JME)
+• Crime DOLOSO contra a vida de vítima CIVIL praticado por militar = Tribunal do Júri (Justiça Comum), não JME
 • JME julga militares estaduais em crimes militares
 
 CF art. 126: cada estado pode ter 1 juiz de direito com exclusividade para auditoria militar
@@ -2510,7 +2536,7 @@ Forças Armadas (CF arts. 142-143):
 
 CE/RS arts. 46-48 e 124-131:
 • Militar na ativa que aceita cargo civil permanente → transferido para reserva remunerada
-• Segurança pública no RS: PM, BM, PC, SUSEPE e IGP
+• Segurança pública no RS (CE/RS art. 124): Brigada Militar, Polícia Civil, Coordenadoria-Geral de Perícias, Corpo de Bombeiros Militar (EC 67/14) e Polícia Penal (EC 82/22)
 • CBMRS: órgão de segurança pública estadual subordinado ao Governador via SSP`},
 
 // ── AT2 novo ──
@@ -2600,10 +2626,10 @@ texto:`LC 14.920/2016 — Organização Básica do CBMRS:
 • Ao Comando-Geral (órgão de direção geral) compete a ADMINISTRAÇÃO da Instituição.
 • Conselho Superior do CBMRS: presidido pelo Comandante-Geral.
 
-Funções privativas (QOEM):
-• Cmt de Pelotão → Oficiais Subalternos (Tenentes) da ativa.
-• Cmt de Companhia → Oficiais Intermediários (Capitão) da ativa.
-⚠️ Pegadinha clássica: não troque Pelotão (Tenente) com Companhia (Capitão).
+Funções privativas:
+• Cmt de Pelotão → Oficiais da ativa do QTBM (art. 21). ⚠️ é QTBM, NÃO QOEM.
+• Cmt de Companhia → Oficiais da ativa do QOEM (art. 20).
+⚠️ Pegadinha clássica: Cmt de Pelotão pertence ao QTBM, enquanto Cmt de Companhia é do QOEM.
 
 Ingresso e efetivo:
 • Soldado QPBM: concurso público com formação no CTSP.
@@ -2612,6 +2638,31 @@ Ingresso e efetivo:
 Base legal do CTSP (promoção a Sargento):
 • A carreira dos militares estaduais é regida pela LC 10.992/1997 (art. 17, §2º embasa o acesso ao CTSP).
 • ⚠️ Não confundir: LC 10.990/1997 = Estatuto (direitos/deveres) | LC 10.992/1997 = carreira/promoção.`},
+{id:"r_at4_11",area:"AT4",titulo:"CE/RS — Segurança Pública e Militares Estaduais (T4.4)",prob:"alta",
+texto:`Constituição do Estado do RS — Segurança Pública (arts. 124-131) e Servidores Públicos Militares (arts. 46-48):
+
+Órgãos da segurança pública (art. 124):
+• Brigada Militar
+• Polícia Civil
+• Coordenadoria-Geral de Perícias
+• Corpo de Bombeiros Militar (incluído pela EC 67/14)
+• Polícia Penal (incluída pela EC 82/22)
+
+Brigada Militar (art. 129): polícia ostensiva, preservação da ordem pública e polícia judiciária militar.
+
+Corpo de Bombeiros Militar (art. 130): prevenção e combate de incêndios, buscas e salvamentos, ações de defesa civil e polícia judiciária militar. Ambos são dirigidos pelo Comandante-Geral (oficial da ativa do último posto da carreira, de livre escolha, nomeação e exoneração pelo Governador).
+• Autoridades bombeiros militares (art. 130, §ún): Comandante-Geral do CBM, oficiais e praças em comando de fração destacada.
+
+Municípios (art. 128): podem constituir guardas municipais e serviços civis e auxiliares de combate ao fogo, prevenção de incêndios e defesa civil. NÃO criam PM, CBM próprio ou justiça militar.
+
+Organização e efetivo (art. 131): a BM e o CBM são regulados por LEI COMPLEMENTAR, observada a legislação federal.
+
+Servidores públicos militares (arts. 46-48):
+• Estabilidade das PRAÇAS: 5 anos de efetivo serviço (art. 46, IV) — não 2.
+• Acesso a cursos/concursos de ascensão: independe de idade e de estado civil (art. 46, II).
+• Promoção extraordinária: morte, invalidez permanente em serviço ou ato de bravura (art. 46, §2º).
+• Aplicam-se aos militares estaduais as normas da CF (art. 47): quem assume cargo civil permanente vai para a reserva (CF art. 142, §3º, II); greve e sindicalização são vedadas.
+• Cargos em comissão privativos de militares: exoneração ad nutum (art. 48, §ún).`},
 {id:"r_at5_09",area:"AT5",titulo:"Documentos Oficiais — Parte, Ofício, Memorando e Sigilo (T5.3)",prob:"alta",
 texto:`Caderno Temático de Documentação Técnica — ABM 2023:
 
