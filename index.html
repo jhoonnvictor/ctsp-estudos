@@ -1549,7 +1549,7 @@ function renderProntidao(){
 // ── S35 BACKUP: exportação e restauração do progresso ──
 function exportarProgresso(){
   try{
-    const payload={app:'ctsp-estudos',versao:'v1.45',exportadoEm:new Date().toISOString(),userStats,userCards};
+    const payload={app:'ctsp-estudos',versao:'v1.46',exportadoEm:new Date().toISOString(),userStats,userCards};
     const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
     const url=URL.createObjectURL(blob);
     const a=document.createElement('a');
@@ -1941,9 +1941,9 @@ const FCI=[
 {id:"fc39",a:"AT4",f:"Crime militar em tempo de paz — base legal",v:"CPM (DL 1.001/69), art. 9º — define pelas circunstâncias (autor, local, situação, vítima)"},
 {id:"fc40",a:"AT4",f:"Quem exerce a Polícia Judiciária Militar? (CPPM art. 7º)",v:"Comandantes, Diretores e Chefes (e quem os substituir/tiver delegação)"},
 {id:"fc41",a:"AT4",f:"CF art. 144 — CBM tem qual atribuição constitucional?",v:"Execução de atividades de DEFESA CIVIL, além das definidas em lei"},
-{id:"fc42",a:"AT5",f:"PARTE × OFÍCIO",v:"Parte = comunicação INTERNA (caserna, subordinado→superior) | Ofício = comunicação EXTERNA"},
+{id:"fc42",a:"AT5",f:"PARTE × OFÍCIO",v:"Parte = comunicação INTERNA (caserna, subordinado→superior) | Ofício = pode ser INTERNO (mesmo órgão) ou EXTERNO (outras instituições) — absorveu Memorando/Circular/Aviso"},
 {id:"fc43",a:"AT5",f:"Prazo de apresentação da Parte",v:"Até 2 (dois) dias úteis da constatação/conhecimento (ressalvadas cautelares — RDBM arts. 17/18)"},
-{id:"fc44",a:"AT5",f:"Acúmulo de férias (LC 10.990/97)",v:"Por absoluta necessidade de serviço: até o máximo de 3 (três) anos"},
+{id:"fc44",a:"AT4",f:"Acúmulo de férias (LC 10.990/97)",v:"Por absoluta necessidade de serviço: até o máximo de 3 (três) anos"},
 {id:"fc45",a:"AT5",f:"Movimentação: Inclusão × Adição × Efetivação",v:"Inclusão=integra ao OPM | Adição=vincula sem integrar | Efetivação=atribui ao efetivo do OPM onde serve"},
 {id:"fc46",a:"AT5",f:"IPO de ocorrência de vulto — para onde?",v:"Mensagem de texto (app) ao CCOB, com tipo, prefixo, síntese, endereço e horário (IT 03/AODC)"},
 {id:"fc47",a:"AT3",f:"Onde se avalia o nível de consciência no XABCDE?",v:"Etapa D (Disability) — Escala de Coma de Glasgow; ECG ≤ 8 → COF"},
@@ -1976,11 +1976,10 @@ const FCI=[
 {id:"fc74",a:"AT4",f:"Prazos Corregedoria CBMRS — Sindicância × IPM",v:"Sindicância: 30 + 20 dias (pedido do SINDICANTE, 2 dias úteis de antecedência) | IPM: 40 + 20 dias"},
 {id:"fc75",a:"AT5",f:"Atos de movimentação (Dec. 57.390/2023)",v:"Inclusão = integra o efetivo | Adição = vincula SEM integrar | Efetivação = atribui ao efetivo do OPM onde já serve | Desligamento = desvincula"},
 {id:"fc76",a:"AT5",f:"Prazo de trânsito (Dec. 57.390/2023)",v:"Até 100 km: 2 dias | Acima de 100 km: 5 dias"},
-{id:"fc77",a:"AT5",f:"Proventos (LC 10.990/1997)",v:"Nome da remuneração dos militares na INATIVIDADE — não é 'salário' nem 'vencimentos'"},
-{id:"fc78",a:"AT5",f:"Reforma por limite de idade (LC 10.990/1997)",v:"70 anos para Oficiais | 65 anos para Praças"},
+{id:"fc77",a:"AT4",f:"Proventos (LC 10.990/1997)",v:"Nome da remuneração dos militares na INATIVIDADE — não é 'salário' nem 'vencimentos'"},
+{id:"fc78",a:"AT4",f:"Reforma por limite de idade (LC 10.990/1997)",v:"70 anos para Oficiais | 65 anos para Praças"},
 {id:"fc79",a:"AT5",f:"Gratificação de serviço extraordinário (Dec. 40.986/2001)",v:"50% sobre o valor da hora normal de trabalho (não 100%)"},
-{id:"fc80",a:"AT5",f:"Parte × Memorando × Ofício (Caderno Temático ABM 2023)",v:"Parte = comunicação INTERNA da caserna (subordinado → superior) | Memorando = INTERNA entre setores | Ofício = EXTERNA entre instituições"},
-,
+{id:"fc80",a:"AT5",f:"Ofício Interno × Ofício Externo (Caderno Temático ABM 2023)",v:"Ofício Interno = comunicação entre unidades do MESMO órgão (absorveu o antigo Memorando) | Ofício Externo = comunicação com outras instituições (absorveu também Circular e Aviso) | Memorando deixou de ser documento autônomo"},
 {id:"fc81",a:"AT4",f:"Órgãos da segurança pública no RS (CE/RS art. 124)",v:"Brigada Militar, Polícia Civil, Coordenadoria-Geral de Perícias, Corpo de Bombeiros Militar (EC 67/14) e Polícia Penal (EC 82/22). Guardas municipais são do art. 128 e pertencem aos Municípios."},
 {id:"fc82",a:"AT4",f:"CE/RS art. 130 — competências do Corpo de Bombeiros Militar",v:"Prevenção e combate de incêndios, buscas e salvamentos, ações de defesa civil e polícia judiciária militar. Polícia ostensiva e ordem pública são da Brigada Militar (art. 129)."},
 {id:"fc83",a:"AT4",f:"CE/RS art. 46 — direitos dos militares estaduais",v:"Estabilidade das praças: 5 anos de efetivo serviço (inc. IV). Acesso a cursos e concursos de ascensão independe de idade e de estado civil (inc. II). Greve e sindicalização são vedadas."},
@@ -1990,7 +1989,14 @@ const FCI=[
 {id:"fc87",a:"AT4",f:"LC 10.992 — promoção a Sargento (CTSP)",v:"Soldado, 2º e 1º-Sargento: promoção por antiguidade OU merecimento, alternadamente (art. 17). Vagas do CTSP: 50% antiguidade + 50% processo seletivo (§2º); oferta anual mínima de 20% dos cargos vagos (§1º)."},
 {id:"fc88",a:"AT4",f:"LC 10.992 — ingresso na carreira de praças (BM/CBM)",v:"Na Primeira Classe da graduação de Soldado, por ato do Governador, após aprovação em concurso público e no respectivo Curso de Formação (art. 14)."},
 {id:"fc89",a:"AT4",f:"CPPM — prazos do IPM",v:"Indiciado SOLTO: 40 dias, prorrogável por mais 20. Indiciado PRESO: 20 dias (não prorrogável). O IPM não pode ser arquivado pela autoridade militar — somente pelo juiz."},
-{id:"fc90",a:"AT4",f:"CPPM — busca domiciliar (art. 175 c/c CF 5º XI)",v:"Executada DE DIA, salvo para acudir vítimas de crime ou desastre (art. 175); em regra precedida de mandado (art. 177). A casa é asilo inviolável: entrada noturna só com consentimento, flagrante, desastre ou socorro (CF art. 5º XI)."}
+{id:"fc90",a:"AT4",f:"CPPM — busca domiciliar (art. 175 c/c CF 5º XI)",v:"Executada DE DIA, salvo para acudir vítimas de crime ou desastre (art. 175); em regra precedida de mandado (art. 177). A casa é asilo inviolável: entrada noturna só com consentimento, flagrante, desastre ou socorro (CF art. 5º XI)."},
+{id:"fc91",a:"AT5",f:"Soldo na substituição de posto/graduação superior (Lei 6.196 art.10)",v:"Percebe o soldo do posto/graduação SUPERIOR desempenhado. Se atribuído a mais de um posto, cabe o do MENOR (§1º); não se aplica a dispensas de até 30 dias (§3º)"},
+{id:"fc92",a:"AT5",f:"Quando NÃO cabe diária? (Dec. 24.846 art.6º §2º)",v:"Quando o deslocamento for exigência PERMANENTE do exercício do cargo/atribuição"},
+{id:"fc93",a:"AT5",f:"Diária pela METADE — quando? (Dec. 24.846 art.7º)",v:"Sem pernoite fora da sede | deslocamento no interior do próprio município | hospedagem paga diretamente pelo Estado"},
+{id:"fc94",a:"AT5",f:"Prazo de prestação de contas de diária (Dec. 35.693 art.1º)",v:"10 dias contados do REGRESSO, sob pena de ser considerado em ALCANCE"},
+{id:"fc95",a:"AT5",f:"Afastamento EVENTUAL — prazo (Dec. 35.818 art.3º §3º)",v:"Impossibilidade de exercer o cargo por prazo NÃO SUPERIOR a 3 dias"},
+{id:"fc96",a:"AT5",f:"Substituição temporária — forma padrão (Dec. 35.818 art.22)",v:"Sob a forma de ACUMULAÇÃO, exceto cargos de Comando/Direção/Chefia; vedadas substituições subsequentes"},
+{id:"fc97",a:"AT5",f:"Valor da ajuda de custo (Lei 6.196 art.37)",v:"1 mês de soldo SEM dependentes | 2 meses de soldo COM dependentes | reduz 50% se deslocamento for a menos de 100 km da sede"},
 ];
 
 // ═══════════════════════════════
@@ -2055,7 +2061,7 @@ Backdraft:
 
 ⚠️ Autoignição = processo onde ocorrem Flashover e Backdraft`},
 
-{id:"r_at5_07",area:"AT5",titulo:"LC 10.990/1997 — Licenças e Afastamentos",prob:"alta",
+{id:"r_at5_07",area:"AT4",titulo:"LC 10.990/1997 — Licenças e Afastamentos",prob:"alta",
 texto:`Principais licenças e afastamentos (LC 10.990/1997):
 
 Férias:
@@ -2077,7 +2083,7 @@ Ausência × Desaparecido:
 • Ausente: >24 horas sem licença
 • Desaparecido: >8 dias em desempenho de serviço`},
 
-{id:"r_at5_08",area:"AT5",titulo:"LC 10.990/1997 — Hierarquia, Promoção e Exclusão",prob:"alta",
+{id:"r_at5_08",area:"AT4",titulo:"LC 10.990/1997 — Hierarquia, Promoção e Exclusão",prob:"alta",
 texto:`Hierarquia e precedência:
 • Posto = grau hierárquico do Oficial (ato do Governador)
 • Graduação = grau hierárquico da Praça
@@ -2198,7 +2204,7 @@ Sindicância (IR 006/Corregedoria-Geral):
 • Prazo: 30 dias + 20 dias de prorrogação
 • Pedido: feito pelo SINDICANTE (não pelo sindicado)
 • Com 2 dias úteis de antecedência`},
-{id:"r_at5_01",area:"AT5",titulo:"Atos de movimentação — Dec. 57.390/2023",prob:"alta",
+{id:"r_at5_01",area:"AT5",titulo:"Atos de movimentação — Dec. 57.390/2023 (T5.1)",prob:"alta",
 texto:`5 atos administrativos de movimentação:
 • INCLUSÃO: integra o militar no OPM (fica "não apresentado" até chegar)
 • EXCLUSÃO: deixa de integrar o OPM
@@ -2208,7 +2214,7 @@ texto:`5 atos administrativos de movimentação:
 
 Trânsito: até 100 km = 2 dias | acima de 100 km = 5 dias
 Instalação: concedida pelo Cmt do OPM de DESTINO (não de origem!)`},
-{id:"r_at5_02",area:"AT5",titulo:"IPO, CCOB e COBOM — IT 03/AODC-GCG",prob:"alta",
+{id:"r_at5_02",area:"AT5",titulo:"IPO, CCOB e COBOM — IT 03/AODC-GCG (T5.5)",prob:"alta",
 texto:`IPO — Informação Preliminar de Ocorrência (IT 03/AODC-GCG, item 3 EXECUÇÃO; item "l" alterado pela Portaria 055/CBMRS/23):
 → Canal obrigatório: mensagem de texto via WhatsApp ou Telegram ao CCOB
 → NÃO é e-mail, NÃO é rádio, NÃO é o sistema E193
@@ -2223,17 +2229,18 @@ COBOM — Centro de Operações de Bombeiro Militar:
 • Atendimento do 193: atende, cadastra e empenha guarnições no Ebombeiro WEB
 
 FR² (IT 04.3/AODC-GCG): o Cmt de BBM solicita apoio diretamente ao CCOB quando o evento excede a capacidade operativa da Célula da sua ART.`},
-{id:"r_at5_03",area:"AT5",titulo:"Parte Disciplinar e Documentos",prob:"media",
+{id:"r_at5_03",area:"AT5",titulo:"Parte Disciplinar e Documentos (T5.4)",prob:"media",
 texto:`Parte Disciplinar:
 • É o relato de uma transgressão cometida por militar estadual
 • Prazo: até 2 dias úteis da constatação
 • Deve ser clara, precisa, com: identificação + local + data + hora + circunstâncias
 • É PROIBIDO tecer comentários ou opiniões pessoais!
 
-Tipos de documentos:
+Tipos de documentos (Caderno Temático ABM 2023 — padrão ofício):
 • PARTE: comunicação interna, subordinado → superior, rotina do serviço
-• MEMORANDO: comunicação interna entre setores de mesma hierarquia
-• OFÍCIO: comunicação externa ou formal com outras instituições`},
+• OFÍCIO INTERNO: comunicação entre unidades do MESMO órgão (absorveu o antigo Memorando)
+• OFÍCIO EXTERNO: comunicação com outras instituições (absorveu também Circular e Aviso)
+⚠️ O Memorando deixou de ser documento autônomo.`},
 
 // ── AT1 novos ──
 {id:"r_at1_06",area:"AT1",titulo:"Classificação de Ocupações — Dec. 51.803/2014 (LC 14.376/2013)",prob:"alta",
@@ -2563,7 +2570,7 @@ Técnica em porta com vidro:
 3. Limpar a moldura dos cacos restantes
 4. Abrir pelo puxador interno (não inserir a mão diretamente)`},
 
-{id:"r_at5_04",area:"AT5",titulo:"Trânsito e Instalação — Dec. 57.390/2023",prob:"alta",
+{id:"r_at5_04",area:"AT5",titulo:"Trânsito e Instalação — Dec. 57.390/2023 (T5.1)",prob:"alta",
 texto:`Trânsito (tempo para deslocamento na transferência):
 • Mesmo município: 48 horas
 • Até 100 km: 2 dias
@@ -2576,7 +2583,7 @@ Instalação:
 
 ⚠️ Pegadinha: instalação = OPM de DESTINO, não de origem!`},
 
-{id:"r_at5_05",area:"AT5",titulo:"Serviço Extraordinário — Dec. 40.986/2001",prob:"alta",
+{id:"r_at5_05",area:"AT5",titulo:"Serviço Extraordinário — Dec. 40.986/2001 (T5.3)",prob:"alta",
 texto:`Serviço extraordinário (horas extras):
 • Gratificação: 50% sobre a hora normal de trabalho
   ⚠️ NÃO é 100%!
@@ -2658,13 +2665,14 @@ Servidores públicos militares (arts. 46-48):
 • Promoção extraordinária: morte, invalidez permanente em serviço ou ato de bravura (art. 46, §2º).
 • Aplicam-se aos militares estaduais as normas da CF (art. 47): quem assume cargo civil permanente vai para a reserva (CF art. 142, §3º, II); greve e sindicalização são vedadas.
 • Cargos em comissão privativos de militares: exoneração ad nutum (art. 48, §ún).`},
-{id:"r_at5_09",area:"AT5",titulo:"Documentos Oficiais — Parte, Ofício, Memorando e Sigilo (T5.3)",prob:"alta",
+{id:"r_at5_09",area:"AT5",titulo:"Documentos Oficiais — Parte, Ofício (Interno/Externo) e Sigilo (T5.4)",prob:"alta",
 texto:`Caderno Temático de Documentação Técnica — ABM 2023:
 
-Tipos de comunicação:
+Tipos de comunicação (padrão ofício — Caderno ABM 2023):
 • PARTE → comunicação INTERNA da caserna; o subordinado participa ao superior em matéria de serviço.
-• MEMORANDO → comunicação INTERNA entre órgãos/setores da mesma instituição.
-• OFÍCIO → comunicação EXTERNA, entre instituições diferentes.
+• OFÍCIO INTERNO → comunicação entre unidades administrativas do MESMO órgão (absorveu as finalidades do antigo Memorando).
+• OFÍCIO EXTERNO → comunicação entre instituições DIFERENTES (absorveu também Circular e Aviso).
+⚠️ O Memorando deixou de ser documento autônomo — suas finalidades internas hoje são do Ofício Interno.
 
 Parte disciplinar:
 • Apresentada em até 2 (dois) dias úteis da constatação/conhecimento do fato (ressalvadas as medidas cautelares dos arts. 17 e 18 do RDBM).
@@ -2688,6 +2696,28 @@ Escala de Coma de Glasgow (etapa D):
 • Aplicada em TODOS os pacientes (responsivos ou não), inclusive para quantificar o grau de irresponsividade.
 • ECG ≤ 8 → via aérea ameaçada → inserir Cânula Orofaríngea (COF).
 • Os scores individuais (abertura ocular, resposta verbal, motora) DEVEM ser repassados à equipe que recebe o paciente — não apenas o total.`},
+{id:"r_at5_06",area:"AT5",titulo:"Vencimentos, Diárias e Substituições (T5.2)",prob:"alta",
+texto:`Indenizações (Lei 6.196/1971, arts. 23-24):
+• Compreendem: diárias, ajuda de custo, transporte e moradia
+• NÃO se confundem com vencimentos (soldo, gratificações)
+
+Soldo na substituição (Lei 6.196, art. 10):
+• Cargo/função privativa de posto SUPERIOR → percebe o soldo desse posto
+• Se atribuído a mais de um posto: soldo do MENOR (§1º)
+• Não se aplica a dispensas de até 30 dias (§3º)
+
+Ajuda de custo (Lei 6.196, art. 37):
+• 1 mês de soldo SEM dependentes | 2 meses de soldo COM dependentes
+• Reduz 50% se deslocamento for a menos de 100 km da sede
+
+Diárias (Dec. 24.846/1976):
+• NÃO cabe diária quando o deslocamento for exigência PERMANENTE do cargo (art. 6º §2º)
+• Paga pela METADE: sem pernoite fora da sede | deslocamento no interior do próprio município | hospedagem paga diretamente pelo Estado (art. 7º)
+• Prestação de contas: até 10 dias do REGRESSO, sob pena de ALCANCE (Dec. 35.693/1994, art. 1º)
+
+Substituições temporárias (Dec. 35.818/1995):
+• Afastamento EVENTUAL: impossibilidade de exercer o cargo por prazo NÃO SUPERIOR a 3 dias (art. 3º §3º)
+• Forma padrão: ACUMULAÇÃO, exceto cargos de Comando/Direção/Chefia — vedadas substituições subsequentes (art. 22)`},
 ];
 
 
