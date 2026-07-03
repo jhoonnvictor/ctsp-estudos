@@ -1549,7 +1549,7 @@ function renderProntidao(){
 // ── S35 BACKUP: exportação e restauração do progresso ──
 function exportarProgresso(){
   try{
-    const payload={app:'ctsp-estudos',versao:'v1.50',exportadoEm:new Date().toISOString(),userStats,userCards};
+    const payload={app:'ctsp-estudos',versao:'v1.51',exportadoEm:new Date().toISOString(),userStats,userCards};
     const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
     const url=URL.createObjectURL(blob);
     const a=document.createElement('a');
@@ -3031,27 +3031,22 @@ async function loadQuestoes(){
     return toSave;
   };
   const local=localFallback();
-  const nLocal=Object.keys(local).length;
+  // QI (versionado no index.html) é SEMPRE a fonte de verdade do conteúdo — usado em memória
+  // incondicionalmente, independente do estado do Firebase (elimina questões órfãs herdadas
+  // de limpezas/consolidações anteriores que nunca foram removidas do banco remoto).
+  allQuestoes=local;
   try{
     const snap=await withTimeout(db.ref('questoes').get());
-    if(snap.exists()){
-      const remoto=snap.val();
-      // Reconciliação por contagem: QI (versionado no index.html) é a fonte da verdade do CONTEÚDO.
-      // Se o Firebase está defasado (MENOS questões que o QI local), o local vence: merge na memória
-      // (todos os usuários passam a ver o banco completo na hora) + re-seed não-destrutivo no Firebase
-      // (só admin tem permissão de escrita; falha em silêncio p/ não-admin).
-      if(Object.keys(remoto).length<nLocal){
-        allQuestoes={...remoto,...local};
-        try{await withTimeout(db.ref('questoes').update(local));}catch(e){console.warn('Re-seed questoes (sem permissão de escrita?):',e.message);}
-      }else{allQuestoes=remoto;}
-    }
-    else{
-      try{await withTimeout(db.ref('questoes').set(local));}catch(e){console.warn('Seed questoes:',e.message);}
-      allQuestoes=local;
+    const remoto=snap.exists()?snap.val():{};
+    const remotoKeys=Object.keys(remoto),localKeys=Object.keys(local);
+    const desalinhado=remotoKeys.length!==localKeys.length||remotoKeys.some(k=>!local[k])||localKeys.some(k=>!remoto[k]);
+    if(desalinhado&&isAdmin()){
+      // Auto-cura silenciosa: espelha o Firebase 1:1 com o local (remove órfãos, adiciona novos).
+      // set() (não update()) — sobrescreve o nó inteiro, garantindo que nada desatualizado sobre.
+      try{await withTimeout(db.ref('questoes').set(local));}catch(e){console.warn('Auto-sync questoes (sem permissão de escrita?):',e.message);}
     }
   }catch(e){
-    console.warn('loadQuestoes usando banco local:',e.message);
-    allQuestoes=local;
+    console.warn('loadQuestoes: Firebase indisponível, usando banco local.',e.message);
   }
   // Garantir que a lista de áreas está sempre populada após carregar
   renderAreaList();
@@ -3060,26 +3055,20 @@ async function loadQuestoes(){
 async function loadFlashcards(){
   const localFallback=()=>{const t={};FCI.forEach(fc=>{t[fc.id]=fc;});return t;};
   const local=localFallback();
+  // FCI (versionado no index.html) é SEMPRE a fonte de verdade do conteúdo — usado em memória
+  // incondicionalmente (elimina flashcards órfãos de consolidações anteriores nunca removidos do Firebase).
+  allFlashcards=local;
   try{
     const snap=await withTimeout(db.ref('flashcards').get());
-    if(snap.exists()){
-      const remoto=snap.val();
-      // Reconciliação por contagem: FCI (versionado no index.html) é a fonte da verdade do CONTEÚDO.
-      // Se o Firebase está defasado (MENOS cards que o FCI local — ex.: nó antigo travado em 24),
-      // o local vence: merge na memória (todos veem os 80 na hora) + re-seed não-destrutivo no
-      // Firebase (só admin tem permissão de escrita; falha em silêncio p/ não-admin).
-      if(Object.keys(remoto).length<FCI.length){
-        allFlashcards={...remoto,...local};
-        try{await withTimeout(db.ref('flashcards').update(local));}catch(e){console.warn('Re-seed flashcards (sem permissão de escrita?):',e.message);}
-      }else{allFlashcards=remoto;}
-    }
-    else{
-      try{await withTimeout(db.ref('flashcards').set(local));}catch(e){console.warn('Seed flashcards:',e.message);}
-      allFlashcards=local;
+    const remoto=snap.exists()?snap.val():{};
+    const remotoKeys=Object.keys(remoto),localKeys=Object.keys(local);
+    const desalinhado=remotoKeys.length!==localKeys.length||remotoKeys.some(k=>!local[k])||localKeys.some(k=>!remoto[k]);
+    if(desalinhado&&isAdmin()){
+      // Auto-cura silenciosa: espelha o Firebase 1:1 com o local via set() (sobrescreve o nó inteiro).
+      try{await withTimeout(db.ref('flashcards').set(local));}catch(e){console.warn('Auto-sync flashcards (sem permissão de escrita?):',e.message);}
     }
   }catch(e){
-    console.warn('loadFlashcards usando banco local:',e.message);
-    allFlashcards=local;
+    console.warn('loadFlashcards: Firebase indisponível, usando banco local.',e.message);
   }
   // Atualizar cards e badges após carregar
   renderCards();
@@ -4294,7 +4283,7 @@ async function makeAdmin(uid){if(!isAdmin())return;await db.ref('usuarios/'+uid)
 // já corrige o caso comum automaticamente, mas este botão força a sincronização quando preciso.
 async function sincronizarBanco(){
   if(!isAdmin())return;
-  if(!confirm('Sincronizar questões (QI) e flashcards (FCI) com o Firebase?\n\nAdiciona itens novos e atualiza os existentes. Operação não-destrutiva — nada é apagado.'))return;
+  if(!confirm('Sincronizar questões (QI) e flashcards (FCI) com o Firebase?\n\nEspelho completo: o Firebase passa a ser IDÊNTICO ao index.html — adiciona itens novos, atualiza existentes E remove do Firebase qualquer item que não exista mais no QI/FCI local (órfãos de limpezas/consolidações anteriores).'))return;
   const mapa={};
   Object.entries(QI).forEach(([area,qs])=>{
     const areaKey=area.replace(/B$/,'');
@@ -4305,12 +4294,12 @@ async function sincronizarBanco(){
   const n=Object.keys(mapa).length,nfc=Object.keys(mapaFC).length;
   showMsg('sync-msg','Sincronizando '+n+' questões e '+nfc+' flashcards...');
   try{
-    await withTimeout(db.ref('questoes').update(mapa));
-    await withTimeout(db.ref('flashcards').update(mapaFC));
-    Object.assign(allQuestoes,mapa);
-    Object.assign(allFlashcards,mapaFC);
+    await withTimeout(db.ref('questoes').set(mapa));
+    await withTimeout(db.ref('flashcards').set(mapaFC));
+    allQuestoes=mapa;
+    allFlashcards=mapaFC;
     renderAreaList();renderCards();updateBadges();
-    showMsg('sync-msg','Banco sincronizado: '+n+' questões + '+nfc+' flashcards.','ok');
+    showMsg('sync-msg','Banco sincronizado (espelho completo): '+n+' questões + '+nfc+' flashcards.','ok');
     showToast('Banco sincronizado: '+n+' questões + '+nfc+' flashcards.');
   }catch(err){showMsg('sync-msg','Erro: '+err.message);}
 }
