@@ -1248,7 +1248,7 @@ html[data-theme="dark"] .fb-caderno{color:var(--ember);}
     <button class="btn-primary" style="margin-top:20px" onclick="salvarConfig()">Salvar</button>
   </div>
 </div>
-<script src="data.js?v=153"></script>
+<script src="data.js?v=154"></script>
 <script>
 // ═══════════════════════════════
 // FIREBASE
@@ -1550,7 +1550,7 @@ function renderProntidao(){
 // ── S35 BACKUP: exportação e restauração do progresso ──
 function exportarProgresso(){
   try{
-    const payload={app:'ctsp-estudos',versao:'v1.53',exportadoEm:new Date().toISOString(),userStats,userCards};
+    const payload={app:'ctsp-estudos',versao:'v1.54',exportadoEm:new Date().toISOString(),userStats,userCards};
     const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
     const url=URL.createObjectURL(blob);
     const a=document.createElement('a');
