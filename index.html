@@ -2133,7 +2133,7 @@ function renderDashboard(){
       <div class="area-prog-bar"><div class="area-prog-fill" style="width:${p}%;background:${a.color}"></div></div>
       <div style="display:flex;justify-content:space-between;align-items:center">
         <span style="font-size:11px;color:var(--text2)">${t} questões</span>
-        <span class="area-prog-pct" style="color:${a.color}">${p}%</span>
+        <span class="area-prog-pct" style="color:${t>0?a.color:'var(--text3)'}">${p}%</span>
       </div>
       <div class="area-card-counts">${ca.novas} nova${ca.novas!==1?'s':''} · ${ca.rev} a revisar</div>
     </div>`;
@@ -2292,7 +2292,7 @@ function renderAreaList(){
         <div class="area-row-name">${a.nome}</div>
         <div class="area-row-meta">${n} questões · ${t} respondidas</div>
       </div>
-      <div class="area-row-pct" style="color:${a.color}">${p}%</div>
+      <div class="area-row-pct" style="color:${t>0?a.color:'var(--text3)'}">${p}%</div>
     </div>`;
   });
 }
@@ -2994,7 +2994,8 @@ async function encerrarSimulado(){
   // Áreas
   const areasEl=document.getElementById('sim-result-areas');
   areasEl.innerHTML='<div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px">DESEMPENHO POR ÁREA</div>';
-  Object.entries(byArea).forEach(([k,v])=>{
+  ['AT1','AT2','AT3','AT4','AT5'].forEach(k=>{
+    const v=byArea[k];if(!v)return;
     const p=Math.round(v.c/v.t*100);
     const aInfo=AI[k]||{};
     areasEl.innerHTML+=`<div class="sim-result-area-row">
@@ -3081,7 +3082,7 @@ function renderDominioTopicos(){
     const ai=AI[a]||{};
     html+=`<div class="topico-area-head">${ai.icon||''} ${sanitize(ai.nome||a)}</div>`;
     ts.forEach(p=>{
-      const semDados=p.n===0; const pct=Math.round(p.pL*100); const pctTxt=semDados?'—':pct+'%'; const barW=semDados?0:pct; const corT=semDados?'var(--text3)':cor(pct);
+      const semDados=p.n===0; const baixaConf=p.n>0&&p.n<3; const pct=Math.round(p.pL*100); const pctTxt=semDados?'—':pct+'%'; const barW=semDados?0:pct; const corT=(semDados||baixaConf)?'var(--text3)':cor(pct);
       const tag=p.n===0?'<span style="font-size:10px;color:var(--text3)"> · sem dados</span>':'';
       html+=`<div class="topico-row">
         <span class="topico-code">${sanitize(p.t)}</span>
