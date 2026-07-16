@@ -237,6 +237,19 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 .sec-title{font-family:var(--font-display);font-size:14px;font-weight:600;color:var(--text);text-transform:uppercase;letter-spacing:.13em;margin:4px 0 10px;display:flex;align-items:center;justify-content:space-between;position:relative;padding-left:18px;}
 .sec-title::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:11px;height:3px;border-radius:2px;background:var(--fire-line);}
 .sec-title a{font-size:11px;color:var(--red);font-weight:700;text-transform:none;letter-spacing:0;}
+/* ── Acordeão "Meu progresso" (consolidação dos 5 painéis de análise) ── */
+.mp-item{background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:9px;overflow:hidden;}
+.mp-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;cursor:pointer;}
+.mp-head:focus-visible{outline:3px solid var(--ember);outline-offset:-3px;border-radius:12px;}
+.mp-title{font-family:var(--font-display);font-size:14px;font-weight:600;text-transform:uppercase;letter-spacing:.09em;color:var(--text);display:flex;align-items:center;gap:7px;position:relative;padding-left:16px;}
+.mp-title::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:9px;height:3px;border-radius:2px;background:var(--fire-line);}
+.mp-right{display:flex;align-items:center;gap:10px;flex:none;}
+.mp-glance{font-family:var(--font-display);font-size:16px;font-weight:700;color:var(--text);}
+.mp-glance small{font-size:11px;color:var(--text3);font-weight:600;}
+.mp-chev{color:var(--text3);display:flex;transition:transform .22s ease;}
+.mp-item.open .mp-chev{transform:rotate(180deg);}
+.mp-body{display:none;padding:0 14px 14px;}
+.mp-item.open .mp-body{display:block;}
 
 /* Ring SVG */
 .ring-svg{transform:rotate(-90deg);}
@@ -797,7 +810,7 @@ html[data-theme="dark"] .fb-caderno{color:var(--ember);}
           <div class="dash-stat-div"></div>
           <div class="dash-stat"><div class="dash-stat-v" id="dash-pct">0%</div><div class="dash-stat-l">Acertos</div></div>
           <div class="dash-stat-div"></div>
-          <div class="dash-stat"><div class="dash-stat-v" id="dash-cards">0</div><div class="dash-stat-l">Cards</div></div>
+          <div class="dash-stat"><div class="dash-stat-v" id="dash-cards">0</div><div class="dash-stat-l">Revisados</div></div>
           <div class="dash-stat-div"></div>
           <div class="dash-stat"><div class="dash-stat-v" style="display:flex;align-items:center;justify-content:center;gap:3px"><span id="dash-streak">0</span><svg style="width:13px;height:13px;color:var(--ember)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c1.5 3.5 5 5.2 5 9a5 5 0 0 1-10 0c0-2 .9-3.4 1.8-4.7.4 1.2 1.2 2 2.2 2.5C10.6 6.7 11 4.4 12 2z"/></svg></div><div class="dash-stat-l">Dias</div></div>
         </div>
@@ -899,44 +912,86 @@ html[data-theme="dark"] .fb-caderno{color:var(--ember);}
             <div class="quick-btn-sub">15 questões · pontos fracos</div>
           </div>
         </div>
-        <!-- Progresso por área -->
-        <div class="sec-title">Histórico de acertos por área <span class="info-btn" onclick="showInfo('desempenho')" aria-label="Mais informações">?</span></div>
-        <div class="area-grid" id="dash-areas"></div>
-        <!-- Gráfico últimos 7 dias -->
-        <div class="sec-title">Últimos 7 dias</div>
-        <div class="chart-wrap">
-          <div style="display:flex;align-items:center;justify-content:space-between;">
-            <span style="font-size:12px;color:var(--text2);">Questões respondidas</span>
-            <span style="font-size:12px;font-weight:700;" id="chart-total-week">0 essa semana</span>
+        <!-- ═══ MEU PROGRESSO — acordeão dos 5 painéis de análise ═══ -->
+        <div class="sec-title" style="margin-top:6px">Meu progresso</div>
+
+        <!-- Painel 1: Índice de Domínio Real (aberto por padrão) -->
+        <div class="mp-item open">
+          <div class="mp-head" role="button" tabindex="0" aria-expanded="true" onclick="toggleMp(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleMp(this);}">
+            <span class="mp-title">Índice de domínio real <span class="info-btn" onclick="event.stopPropagation();showInfo('dominio')" aria-label="Mais informações">?</span></span>
+            <span class="mp-right"><span class="mp-glance" id="glance-dominio">—</span><span class="mp-chev"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span></span>
           </div>
-          <div class="chart-bars" id="chart-bars"></div>
-        </div>
-        <!-- Gráfico evolução por área -->
-        <div class="sec-title">Evolução por área <span class="info-btn" onclick="showInfo('evolucao')" aria-label="Mais informações">?</span></div>
-        <div class="chart-wrap" id="area-evolution-wrap">
-          <div id="area-evolution"></div>
-        </div>
-        <!-- Índice de Domínio Real -->
-        <div class="sec-title">Índice de domínio real <span class="info-btn" onclick="showInfo('dominio')" aria-label="Mais informações">?</span></div>
-        <div class="dominio-card" id="dominio-card">
-          <div class="dominio-geral-wrap">
-            <div class="dominio-geral-info">
-              <div class="dominio-geral-pct" id="dominio-geral-num">0%</div>
-              <div class="dominio-geral-label">de domínio geral</div>
-              <div style="display:flex;gap:12px;margin-top:6px;">
-                <span class="dominio-badge" style="background:var(--blue-light);color:var(--blue)">Quiz 50%</span>
-                <span class="dominio-badge" style="background:var(--green-light);color:var(--green)">Cards 30%</span>
-                <span class="dominio-badge" style="background:var(--amber-light);color:var(--amber)">Resumos 20%</span>
+          <div class="mp-body">
+            <div class="dominio-card" id="dominio-card">
+              <div class="dominio-geral-wrap">
+                <div class="dominio-geral-info">
+                  <div class="dominio-geral-pct" id="dominio-geral-num">0%</div>
+                  <div class="dominio-geral-label">de domínio geral</div>
+                  <div style="display:flex;gap:12px;margin-top:6px;">
+                    <span class="dominio-badge" style="background:var(--blue-light);color:var(--blue)">Quiz 50%</span>
+                    <span class="dominio-badge" style="background:var(--green-light);color:var(--green)">Cards 30%</span>
+                    <span class="dominio-badge" style="background:var(--amber-light);color:var(--amber)">Resumos 20%</span>
+                  </div>
+                </div>
               </div>
+              <div id="dominio-areas"></div>
             </div>
           </div>
-          <div id="dominio-areas"></div>
         </div>
-        <!-- Cobertura do Edital -->
-        <div class="sec-title">Cobertura do edital <span class="info-btn" onclick="showInfo('cobertura')" aria-label="Mais informações">?</span></div>
-        <div class="dominio-card">
-          <div style="font-size:11px;color:var(--text2);margin-bottom:12px;">Quanto do conteúdo de cada área você já percorreu (questões + cards + resumos).</div>
-          <div id="cobertura-areas"></div>
+
+        <!-- Painel 2: Cobertura do Edital -->
+        <div class="mp-item">
+          <div class="mp-head" role="button" tabindex="0" aria-expanded="false" onclick="toggleMp(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleMp(this);}">
+            <span class="mp-title">Cobertura do edital <span class="info-btn" onclick="event.stopPropagation();showInfo('cobertura')" aria-label="Mais informações">?</span></span>
+            <span class="mp-right"><span class="mp-glance" id="glance-cobertura">—</span><span class="mp-chev"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span></span>
+          </div>
+          <div class="mp-body">
+            <div class="dominio-card">
+              <div style="font-size:11px;color:var(--text2);margin-bottom:12px;">Quanto do conteúdo de cada área você já percorreu (questões + cards + resumos).</div>
+              <div id="cobertura-areas"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Painel 3: Histórico de acertos por área -->
+        <div class="mp-item">
+          <div class="mp-head" role="button" tabindex="0" aria-expanded="false" onclick="toggleMp(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleMp(this);}">
+            <span class="mp-title">Histórico de acertos por área <span class="info-btn" onclick="event.stopPropagation();showInfo('desempenho')" aria-label="Mais informações">?</span></span>
+            <span class="mp-right"><span class="mp-glance" id="glance-acertos">—</span><span class="mp-chev"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span></span>
+          </div>
+          <div class="mp-body">
+            <div class="area-grid" id="dash-areas"></div>
+          </div>
+        </div>
+
+        <!-- Painel 4: Evolução por área -->
+        <div class="mp-item">
+          <div class="mp-head" role="button" tabindex="0" aria-expanded="false" onclick="toggleMp(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleMp(this);}">
+            <span class="mp-title">Evolução por área <span class="info-btn" onclick="event.stopPropagation();showInfo('evolucao')" aria-label="Mais informações">?</span></span>
+            <span class="mp-right"><span class="mp-chev"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span></span>
+          </div>
+          <div class="mp-body">
+            <div class="chart-wrap" id="area-evolution-wrap">
+              <div id="area-evolution"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Painel 5: Últimos 7 dias -->
+        <div class="mp-item">
+          <div class="mp-head" role="button" tabindex="0" aria-expanded="false" onclick="toggleMp(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleMp(this);}">
+            <span class="mp-title">Últimos 7 dias</span>
+            <span class="mp-right"><span class="mp-glance" id="glance-semana">—</span><span class="mp-chev"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span></span>
+          </div>
+          <div class="mp-body">
+            <div class="chart-wrap">
+              <div style="display:flex;align-items:center;justify-content:space-between;">
+                <span style="font-size:12px;color:var(--text2);">Questões respondidas</span>
+                <span style="font-size:12px;font-weight:700;" id="chart-total-week">0 essa semana</span>
+              </div>
+              <div class="chart-bars" id="chart-bars"></div>
+            </div>
+          </div>
         </div>
         <!-- Objetivo da Semana -->
         <div class="sec-title">Objetivo da semana</div>
@@ -2088,6 +2143,7 @@ function renderDashboard(){
   if(gEl)gEl.textContent=(hh<5?'Boa madrugada':hh<12?'Bom dia':hh<18?'Boa tarde':'Boa noite')+',';
   animateCount(document.getElementById('dash-total'),total);
   document.getElementById('dash-pct').textContent=pct+'%';
+  {const g=document.getElementById('glance-acertos');if(g)g.innerHTML=total>0?pct+'<small>%</small>':'—';}
   animateCount(document.getElementById('dash-cards'),Object.keys(userCards).length);
   const dsk=document.getElementById('dash-streak');if(dsk)dsk.textContent=(userStats.streak||0);
   const drl=document.getElementById('dash-ring-label');if(drl)drl.textContent=todayN+'/'+meta;
@@ -2207,6 +2263,7 @@ function renderChart(){
   }
   bars.innerHTML=html;
   document.getElementById('chart-total-week').textContent=totalSemana>0?totalSemana+' essa semana':'Comece hoje — seu progresso aparece aqui';
+  {const g=document.getElementById('glance-semana');if(g)g.innerHTML=totalSemana>0?totalSemana+'<small> q</small>':'—';}
   renderAreaEvolution();
 }
 
@@ -3323,6 +3380,12 @@ function calcDominio(){
   return result;
 }
 
+function toggleMp(el){
+  const item=el.closest('.mp-item');
+  if(!item)return;
+  const open=item.classList.toggle('open');
+  el.setAttribute('aria-expanded',open?'true':'false');
+}
 function renderDominio(){
   const dom=calcDominio();
   // Geral só considera áreas COM confiança de quiz; sem nenhuma, mostra "—".
@@ -3333,6 +3396,9 @@ function renderDominio(){
   const numEl=document.getElementById('dominio-geral-num');
   if(ptEl)ptEl.textContent=geral===null?'—':geral+'%';
   if(numEl)numEl.textContent=geral===null?'ainda medindo':geral+'% de domínio';
+  {const gd=document.getElementById('glance-dominio');if(gd)gd.innerHTML=geral===null?'—':geral+'<small>%</small>';}
+  let _cobV=0,_cobT=0;Object.values(dom).forEach(d=>{_cobV+=(d.cobVistos||0);_cobT+=(d.cobTotal||0);});
+  {const gc=document.getElementById('glance-cobertura');if(gc)gc.innerHTML=_cobT>0?Math.round(_cobV/_cobT*100)+'<small>%</small>':'—';}
 
   // --- Barras de domínio por área (com confiança) ---
   const areasEl=document.getElementById('dominio-areas');
