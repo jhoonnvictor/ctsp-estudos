@@ -27,7 +27,7 @@
   --navy:#101B3D;--navy-2:#1B2A55;--navy-deep:#0B1430;
   --paper:#F7F3EC;--paper-2:#EFE9DD;--surface:#FFFFFF;
   --white:#FFFFFF;--bg:#EFE9DD;
-  --text:#1C2233;--text2:#5A6072;--text3:#9AA0B0;
+  --text:#1C2233;--text2:#5A6072;--text3:#64697A;
   --border:#E6DFD2;--line-soft:#EDE7DB;
   --green:#1F8A4C;--green-light:#E9F4EC;
   --amber:#C77B1D;--amber-light:#FAF1E3;
@@ -82,6 +82,12 @@ body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opac
 #app,#auth-screen,#loading{position:relative;z-index:1;}
 button{font-family:inherit;cursor:pointer;border:none;outline:none;}
 input,select,textarea{font-family:inherit;outline:none;}
+/* A11y: foco visível apenas para navegação por teclado (não afeta clique/toque) */
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,
+.quiz-opt:focus-visible,.nav-item:focus-visible,.auth-tab:focus-visible,.quick-btn:focus-visible,
+.adapt-btn:focus-visible,.diag-card:focus-visible,.weak-card:focus-visible,.btn-weak:focus-visible{
+  outline:2px solid transparent;box-shadow:0 0 0 3px rgba(240,136,60,.45);border-radius:var(--radius-xs);
+}
 /* Ícones inline do sistema */
 .ai-ic{width:1.05em;height:1.05em;display:inline-block;vertical-align:-0.16em;}
 /* Números técnicos */
@@ -868,7 +874,7 @@ html[data-theme="dark"] .fb-caderno{color:var(--ember);}
           </div>
           <div style="height:8px;background:var(--paper-2);border-radius:6px;overflow:hidden;margin-top:8px;"><div id="pront-bar" style="height:100%;width:0%;background:var(--fire-line);border-radius:6px;transition:width .5s;"></div></div>
           <div style="font-size:11px;color:var(--text3);margin-top:6px;" id="pront-detalhe"></div>
-          <div id="pront-aviso" style="display:none;font-size:11px;color:var(--ember-deep);background:var(--amber-light);border-radius:8px;padding:7px 9px;margin-top:8px;line-height:1.4;">⚠️ Estimativa preliminar — baseada em poucas respostas. Vai ficar mais precisa conforme você estuda.</div>
+          <div id="pront-aviso" style="display:none;font-size:11px;color:var(--ember-deep);background:var(--amber-light);border-radius:8px;padding:7px 9px;margin-top:8px;line-height:1.4;"><svg style="width:13px;height:13px;vertical-align:-1px;margin-right:3px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Estimativa preliminar — baseada em poucas respostas. Vai ficar mais precisa conforme você estuda.</div>
         </div>
         <!-- Quick actions -->
         <div class="sec-title">Estudar agora</div>
@@ -906,7 +912,7 @@ html[data-theme="dark"] .fb-caderno{color:var(--ember);}
           <div class="chart-bars" id="chart-bars"></div>
         </div>
         <!-- Gráfico evolução por área -->
-        <div class="sec-title">Histórico de acertos por área <span class="info-btn" onclick="showInfo('evolucao')" aria-label="Mais informações">?</span></div>
+        <div class="sec-title">Evolução por área <span class="info-btn" onclick="showInfo('evolucao')" aria-label="Mais informações">?</span></div>
         <div class="chart-wrap" id="area-evolution-wrap">
           <div id="area-evolution"></div>
         </div>
