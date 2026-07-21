@@ -1321,7 +1321,7 @@ html[data-theme="dark"] .fb-caderno{color:var(--ember);}
     <button class="btn-primary" style="margin-top:20px" onclick="salvarConfig()">Salvar</button>
   </div>
 </div>
-<script src="data.js?v=171"></script>
+<script src="data.js?v=172"></script>
 <script>
 // ═══════════════════════════════
 // FIREBASE
@@ -1622,7 +1622,7 @@ function renderProntidao(){
 // ── S35 BACKUP: exportação e restauração do progresso ──
 function exportarProgresso(){
   try{
-    const payload={app:'ctsp-estudos',versao:'v1.76',exportadoEm:new Date().toISOString(),userStats,userCards};
+    const payload={app:'ctsp-estudos',versao:'v1.77',exportadoEm:new Date().toISOString(),userStats,userCards};
     const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
     const url=URL.createObjectURL(blob);
     const a=document.createElement('a');
@@ -1696,22 +1696,7 @@ estrategia:"Responda pelo que sabe. Se duas alternativas parecem certas, a mais 
 exemplo:"a1_01"}
 ];
 
-const INCIDENCIA=[
-{assunto:"Decreto 51.803 — penalidades e interdição",area:"AT1",prob:"alta",provas:"2024 e 2025"},
-{assunto:"RT CBMRS nº 14/2016 — medidas extintores",area:"AT1",prob:"alta",provas:"2024 e 2025"},
-{assunto:"Prazos IPM (40+20) e Sindicância (30+20)",area:"AT4",prob:"alta",provas:"2024 e 2025"},
-{assunto:"XABCDE — sequência correta",area:"AT3",prob:"alta",provas:"2024 e 2025"},
-{assunto:"RCP — proporções lactente com 2 socorristas",area:"AT3",prob:"alta",provas:"2024 e 2025"},
-{assunto:"Atos de movimentação Dec. 57.390/2023",area:"AT5",prob:"alta",provas:"2024 e 2025"},
-{assunto:"Art. 37 CF — princípios LIMPE",area:"AT4",prob:"alta",provas:"2024 e 2025"},
-{assunto:"Art. 144 CF — atribuições dos órgãos",area:"AT4",prob:"alta",provas:"2024 e 2025"},
-{assunto:"POP Salvamento Veicular — 13 passos",area:"AT3",prob:"alta",provas:"2024 e 2025"},
-{assunto:"Concentração O₂ por fase de combustão",area:"AT2",prob:"alta",provas:"2024 e 2025"},
-{assunto:"IPO via WhatsApp/Telegram ao CCOB",area:"AT5",prob:"media",provas:"2025"},
-{assunto:"LC 14.920/2016 — funções e cargos CBMRS",area:"AT4",prob:"media",provas:"2025"},
-{assunto:"SOL-CBMRS — prazos de recurso",area:"AT1",prob:"media",provas:"2025"},
-{assunto:"FR² — solicitação ao COBOM",area:"AT5",prob:"media",provas:"2025"}
-];
+// INCIDENCIA vive em data.js (Bloco A — dado fora da lógica)
 
 // ═══════════════════════════════
 // AUTH
