@@ -2,15 +2,27 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
 <meta name="mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="apple-mobile-web-app-title" content="CTSP"/>
 <meta name="theme-color" content="#101B3D"/>
 <link rel="apple-touch-icon" href="img/icon.png"/>
-<title>Bombeiro CTSP</title>
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' https://*.googleapis.com https://*.gstatic.com https://*.firebase.com https://*.firebaseio.com https://*.firebaseapp.com https://ctsp-anthropic-proxy.jvictor-projetos-ti.workers.dev https://www.recaptcha.net https://recaptcha.net https://www.google.com https://www.gstatic.com wss://*.firebaseio.com data: blob:;">
+<title>Bombeiro CTSP 2026 — Plataforma de Estudos do CBMRS</title>
+<meta name="description" content="Plataforma de estudos para o CTSP 2026 do CBMRS: 454 questões auditadas contra a norma vigente, simulado no formato real da prova, flashcards com revisão espaçada e diagnóstico automático das suas áreas fracas."/>
+<meta property="og:type" content="website"/>
+<meta property="og:site_name" content="Bombeiro CTSP"/>
+<meta property="og:title" content="Bombeiro CTSP 2026 — sua preparação, medida por área e por tópico"/>
+<meta property="og:description" content="454 questões auditadas, simulado no formato real (60Q · 14/8/14/12/12), flashcards com revisão espaçada e um sistema que identifica seu ponto fraco e diz o que estudar."/>
+<meta property="og:image" content="https://jhoonnvictor.github.io/ctsp-estudos/img/logo.png"/>
+<meta property="og:url" content="https://jhoonnvictor.github.io/ctsp-estudos/"/>
+<meta property="og:locale" content="pt_BR"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="Bombeiro CTSP 2026 — Plataforma de Estudos"/>
+<meta name="twitter:description" content="454 questões auditadas, simulado no formato real e diagnóstico automático do seu desempenho."/>
+<meta name="twitter:image" content="https://jhoonnvictor.github.io/ctsp-estudos/img/logo.png"/>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' https://*.googleapis.com https://*.gstatic.com https://*.firebase.com https://*.firebaseio.com https://*.firebaseapp.com https://ctsp-anthropic-proxy.jvictor-projetos-ti.workers.dev https://www.recaptcha.net https://recaptcha.net https://www.google.com https://www.gstatic.com wss://*.firebaseio.com data: blob:; object-src 'none'; base-uri 'self'; form-action 'none'; frame-ancestors 'none';">
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-check-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
@@ -168,7 +180,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 .auth-tab.active{background:var(--navy);color:white;box-shadow:0 2px 8px rgba(16,27,61,.25);}
 .field{margin-bottom:14px;}
 .field label{display:block;font-family:var(--font-display);font-size:12px;font-weight:600;color:var(--text2);margin-bottom:5px;text-transform:uppercase;letter-spacing:.12em;}
-.field input,.field select,.field textarea{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:11px;font-size:15px;color:var(--text);background:var(--surface);transition:border-color .2s,box-shadow .2s;}
+.field input,.field select,.field textarea{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:11px;font-size:16px;color:var(--text);background:var(--surface);transition:border-color .2s,box-shadow .2s;}
 .field input:focus,.field select:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(16,27,61,.08);background:var(--surface);}
 .btn-primary{width:100%;padding:14px;background:var(--red);color:white;border-radius:14px;font-size:15px;font-weight:700;letter-spacing:.02em;transition:all .2s var(--ease-out);box-shadow:0 6px 20px rgba(211,36,18,.28);}
 .btn-primary:active{transform:scale(.97);box-shadow:0 2px 8px rgba(211,36,18,.2);}
@@ -754,7 +766,10 @@ html[data-theme="dark"] .fb-caderno{color:var(--ember);}
       <!-- PENDING -->
       <div id="tab-pending" class="hidden">
         <div class="pending-box">
-          Conta criada! Aguardando aprovação do administrador.<br>Em breve você receberá acesso.
+          <strong style="color:var(--text);font-size:15px;">Conta criada com sucesso.</strong><br>
+          Seu acesso está aguardando liberação manual.<br>
+          <span style="display:inline-block;margin-top:10px;">A liberação costuma sair em <strong>até 24h</strong>. Assim que for liberada, é só entrar com o mesmo e-mail e senha — não precisa cadastrar de novo.</span>
+          <span style="display:block;margin-top:10px;color:var(--text3);font-size:12px;">Já fez o pagamento e passou o prazo? Chame no WhatsApp que eu libero na hora.</span>
         </div>
       </div>
     </div>
@@ -1611,7 +1626,7 @@ function renderProntidao(){
 // ── S35 BACKUP: exportação e restauração do progresso ──
 function exportarProgresso(){
   try{
-    const payload={app:'ctsp-estudos',versao:'v1.71',exportadoEm:new Date().toISOString(),userStats,userCards};
+    const payload={app:'ctsp-estudos',versao:'v1.74',exportadoEm:new Date().toISOString(),userStats,userCards};
     const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
     const url=URL.createObjectURL(blob);
     const a=document.createElement('a');
@@ -2651,16 +2666,28 @@ async function responderQuiz(idx){
   document.getElementById('quiz-score-v').textContent=quizSessao.c+'/'+quizSessao.t;
 }
 
+// ── S36 SEC: toda chamada de IA passa por aqui, autenticada com o ID token do Firebase.
+// O Worker valida o token e só responde a usuário aprovado; model/max_tokens são fixados
+// no servidor (o que vai no corpo é apenas compatibilidade com o Worker antigo).
+const IA_PROXY='https://ctsp-anthropic-proxy.jvictor-projetos-ti.workers.dev';
+async function iaFetch(payload){
+  const u=firebase.auth().currentUser;
+  if(!u)throw new Error('sem sessao');
+  const token=await u.getIdToken();
+  return fetch(IA_PROXY,{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+    body:JSON.stringify(payload)
+  });
+}
+
 async function buscarDicaIA(q,escolhida){
   try{
-    const resp=await fetch('https://ctsp-anthropic-proxy.jvictor-projetos-ti.workers.dev',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
+    const resp=await iaFetch({
+        tarefa:'dica',
         model:ANTHROPIC_MODEL,max_tokens:150,
         system:'Você é instrutor do CTSP 2026 do CBMRS. O aluno errou uma questão. Em no máximo 2 linhas, aponte objetivamente POR QUE a alternativa que ele marcou está errada e fixe o conceito correto. Não repita apenas a resposta certa — explique o erro. Seja direto e prático.',
         messages:[{role:'user',content:`Questão: ${q.e}\nAlternativa marcada (errada): ${escolhida||'(não informada)'}\nResposta correta: ${q.ops[q.g]}\nExplicação base: ${q.exp}\n\nExplique por que a alternativa marcada está errada e fixe o conceito correto.`}]
-      })
     });
     const data=await resp.json();
     const tip=data.content?.[0]?.text||'';
@@ -3078,14 +3105,11 @@ async function gerarDiagnosticoIA(pct,byArea){
   const el=document.getElementById('sim-ai-diag');
   try{
     const areas=Object.entries(byArea).map(([k,v])=>`${k}: ${Math.round(v.c/v.t*100)}%`).join(', ');
-    const resp=await fetch('https://ctsp-anthropic-proxy.jvictor-projetos-ti.workers.dev',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
+    const resp=await iaFetch({
+        tarefa:'diagnostico',
         model:ANTHROPIC_MODEL,max_tokens:200,
         system:'Você é um instrutor do CTSP 2026 CBMRS. Dê um diagnóstico curto do simulado e 2 recomendações práticas. Seja objetivo.',
         messages:[{role:'user',content:`Resultado: ${pct}%. Por área: ${areas}. O que devo focar?`}]
-      })
     });
     const data=await resp.json();
     el.textContent='Diagnóstico IA: '+( data.content?.[0]?.text||'Diagnóstico não disponível.');
