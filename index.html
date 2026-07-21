@@ -1626,7 +1626,7 @@ function renderProntidao(){
 // ── S35 BACKUP: exportação e restauração do progresso ──
 function exportarProgresso(){
   try{
-    const payload={app:'ctsp-estudos',versao:'v1.74',exportadoEm:new Date().toISOString(),userStats,userCards};
+    const payload={app:'ctsp-estudos',versao:'v1.75',exportadoEm:new Date().toISOString(),userStats,userCards};
     const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
     const url=URL.createObjectURL(blob);
     const a=document.createElement('a');
@@ -1873,6 +1873,26 @@ async function initApp(){
 }
 
 // ═══════════════════════════════
+// S48 FIX — chaves do BKT no Firebase
+// ═══════════════════════════════
+// Os tópicos são "T1.1", "T2.4"… e o PONTO é caractere PROIBIDO em chave do
+// Realtime Database. Como `userStats.bkt` usa o id do tópico como chave, o
+// `set()` inteiro era recusado ("invalid key") e NENHUM progresso subia — nem
+// acertos, nem streak, nem cards. Só o espelho local salvava.
+// Solução: converter apenas na fronteira com o Firebase — "T2.4" ⇄ "T2_4".
+// Em memória as chaves seguem com ponto (todo o resto do código depende disso).
+function bktParaFirebase(st){
+  if(!st||!st.bkt)return st;
+  const b={};Object.keys(st.bkt).forEach(k=>{b[k.split('.').join('_')]=st.bkt[k];});
+  return {...st,bkt:b};
+}
+function bktDoFirebase(st){
+  if(!st||!st.bkt)return st;
+  const b={};Object.keys(st.bkt).forEach(k=>{b[k.split('_').join('.')]=st.bkt[k];});
+  return {...st,bkt:b};
+}
+
+// ═══════════════════════════════
 // DATA LOAD
 // ═══════════════════════════════
 async function loadUserData(){
@@ -1881,7 +1901,7 @@ async function loadUserData(){
     try{
       const snap=await withTimeout(db.ref('progresso/'+currentUser.uid).get(),attempt*8000);
       // S47: reconciliar Firebase × espelho local — o snapshot mais avançado vence
-      const remoto=snap.exists()?{...PROG_DEFAULT,...snap.val()}:null;
+      const remoto=snap.exists()?{...PROG_DEFAULT,...bktDoFirebase(snap.val())}:null;
       const espLocal=lerEspelho();
       const local=espLocal?{...PROG_DEFAULT,...espLocal}:null;
       let escolhido;
@@ -1891,7 +1911,7 @@ async function loadUserData(){
       dataLoaded=true;gravarEspelho(); // S30: leitura confirmada — gravações liberadas
       // S47: se o espelho local venceu o servidor (ex.: quiz de hoje vs Firebase defasado), empurrar de volta
       if(local&&escolhido===local&&remoto!==local){
-        try{await db.ref('progresso/'+currentUser.uid).set(userStats);}catch(e){}
+        try{await db.ref('progresso/'+currentUser.uid).set(bktParaFirebase(userStats));}catch(e){}
       }
       const cs=await withTimeout(db.ref('cards/'+currentUser.uid).get(),attempt*8000);
       if(cs.exists())userCards=cs.val();
@@ -1918,7 +1938,7 @@ async function loadUserData(){
     }
     if(s.exists()||lerEspelho()){
       // S47: reconciliar em vez de sobrescrever
-      const remoto=s.exists()?{...PROG_DEFAULT,...s.val()}:null;
+      const remoto=s.exists()?{...PROG_DEFAULT,...bktDoFirebase(s.val())}:null;
       const espLocal=lerEspelho();
       const local=espLocal?{...PROG_DEFAULT,...espLocal}:null;
       let escolhido;
@@ -1947,10 +1967,11 @@ async function saveProg(){
     if(progressoLocalOk)savePendente=true; // estado confiável deste aparelho → sincroniza depois
     return; // S30 BUG-DATA: jamais gravar no servidor antes da leitura confirmada
   }
-  try{await db.ref('progresso/'+currentUser.uid).set(userStats);flashSalvo();}
+  const payload=bktParaFirebase(userStats);   // S48: chaves do BKT sem "."
+  try{await db.ref('progresso/'+currentUser.uid).set(payload);flashSalvo();}
   catch(e){
     console.warn('saveProg 1ª tentativa:',e.message);
-    try{await db.ref('progresso/'+currentUser.uid).set(userStats);}
+    try{await db.ref('progresso/'+currentUser.uid).set(payload);}
     catch(e2){savePendente=true;showToast('Sem conexão — progresso guardado no aparelho');}
   }
 }
