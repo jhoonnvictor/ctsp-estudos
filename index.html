@@ -24,7 +24,6 @@
 <meta name="twitter:image" content="https://jhoonnvictor.github.io/ctsp-estudos/img/logo.png"/>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' https://*.googleapis.com https://*.gstatic.com https://*.firebase.com https://*.firebaseio.com https://*.firebaseapp.com https://www.recaptcha.net https://recaptcha.net https://www.google.com https://www.gstatic.com wss://*.firebaseio.com data: blob:; object-src 'none'; base-uri 'self'; form-action 'none';">
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-check-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
@@ -293,6 +292,13 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 .weak-area{font-size:14px;font-weight:700;color:var(--text);}
 .weak-pct{font-size:12px;color:var(--red);font-weight:600;font-variant-numeric:tabular-nums;}
 .btn-weak{background:var(--red);color:white;border-radius:10px;padding:8px 14px;font-size:12px;font-weight:700;flex-shrink:0;box-shadow:0 4px 12px rgba(211,36,18,.25);}
+/* Bloco B — material nominal recomendado pelo tópico fraco */
+.weak-material{background:var(--surface);border:1px solid var(--line-soft);border-radius:14px;padding:12px 14px;margin:-6px 0 14px;box-shadow:var(--shadow);}
+.weak-material-title{font-size:11px;font-weight:800;color:var(--text2);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;}
+.weak-mat-item{display:flex;align-items:center;gap:8px;padding:7px 0;border-top:1px solid var(--line-soft);font-size:13px;color:var(--text);cursor:pointer;}
+.weak-mat-item:first-of-type{border-top:0;}
+.weak-mat-tag{font-size:10px;font-weight:800;padding:2px 7px;border-radius:8px;background:var(--paper-2);color:var(--text2);flex-shrink:0;}
+.weak-mat-txt{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 
 /* Quick actions */
 .quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
@@ -395,6 +401,9 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 .quiz-feedback.show{display:block;}
 .quiz-feedback-title{font-size:12px;font-weight:800;margin-bottom:6px;}
 .quiz-feedback-text{font-size:13px;color:var(--text2);line-height:1.55;}
+/* Bloco B — ciclo erro → flashcard: fecha o laço entre errar e memorizar */
+.quiz-fb-reforco{margin-top:12px;padding-top:10px;border-top:1px solid var(--line-soft);display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.quiz-fb-reforco .rf-txt{font-size:11.5px;color:var(--text3);flex-basis:100%;margin-bottom:2px;}
 .quiz-next-btn{width:100%;margin-top:16px;padding:14px;background:var(--red);color:white;border-radius:12px;font-size:15px;font-weight:700;display:none;box-shadow:0 4px 14px rgba(211,36,18,.22);}
 .quiz-next-btn.show{display:block;}
 
@@ -521,7 +530,12 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 .padrao-estrategia{font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:10px;}
 .padrao-exemplo-btn{width:100%;padding:10px;background:var(--red-light);color:var(--red);border-radius:10px;font-size:12px;font-weight:700;}
 .incidencia-card{background:var(--surface);border:1px solid var(--line-soft);border-radius:14px;padding:14px;box-shadow:var(--shadow);margin-bottom:10px;}
-.incidencia-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line-soft);}
+.incidencia-row{display:block;padding:10px 0;border-bottom:1px solid var(--line-soft);}
+/* Bloco B — ações por assunto de alta incidência */
+.incidencia-acoes{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;}
+.inc-btn{font-size:11.5px;font-weight:700;padding:6px 11px;border-radius:9px;border:1px solid var(--line-soft);background:var(--paper-2);color:var(--text2);}
+.inc-btn.praticar{background:var(--red);border-color:var(--red);color:#fff;}
+.inc-btn.revisar{background:var(--surface);}
 .incidencia-row:last-child{border-bottom:none;}
 .incidencia-assunto{font-size:13px;color:var(--text);}
 .incidencia-prob{font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;}
@@ -868,6 +882,7 @@ html[data-theme="dark"] .fb-caderno{color:var(--ember);}
           </div>
           <button class="btn-weak" onclick="estudarFraco()">Estudar</button>
         </div>
+        <div id="weak-material" class="weak-material hidden"></div>
         <div id="dash-due" class="weak-card hidden">
           <div class="weak-icon" style="background:var(--amber-light);color:var(--ember-deep)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><polyline points="3 4 3 9 8 9"/><polyline points="12 7 12 12 15.5 14"/></svg></div>
           <div class="weak-info">
@@ -1047,6 +1062,7 @@ html[data-theme="dark"] .fb-caderno{color:var(--ember);}
             <div class="quiz-feedback-title" id="quiz-fb-title"></div>
             <div class="quiz-fb-erro" id="quiz-fb-erro" style="display:none"></div>
             <div class="quiz-feedback-text" id="quiz-fb-text"></div>
+            <div class="quiz-fb-reforco hidden" id="quiz-fb-reforco"></div>
             <button class="rep-link" onclick="abrirReporte('questao',questaoAtualId)">⚐ Reportar erro nesta questão</button>
           </div>
           <button class="quiz-next-btn" id="quiz-next-btn" onclick="nextQuiz()">Próxima →</button>
@@ -1295,6 +1311,20 @@ html[data-theme="dark"] .fb-caderno{color:var(--ember);}
     </div>
     <div class="config-row">
       <div>
+        <div class="config-label">Flashcards por dia</div>
+        <div class="config-sub">Dose da sessão (~5 min)</div>
+      </div>
+      <input type="number" class="config-input" id="config-dose-cards" min="1" max="200" placeholder="15">
+    </div>
+    <div class="config-row">
+      <div>
+        <div class="config-label">Resumos por dia</div>
+        <div class="config-sub">Dose da sessão (~12 min)</div>
+      </div>
+      <input type="number" class="config-input" id="config-dose-resumos" min="1" max="70" placeholder="3">
+    </div>
+    <div class="config-row">
+      <div>
         <div class="config-label">Data da prova</div>
         <div class="config-sub">Ativa a contagem regressiva</div>
       </div>
@@ -1321,7 +1351,7 @@ html[data-theme="dark"] .fb-caderno{color:var(--ember);}
     <button class="btn-primary" style="margin-top:20px" onclick="salvarConfig()">Salvar</button>
   </div>
 </div>
-<script src="data.js?v=172"></script>
+<script src="data.js?v=174"></script>
 <script>
 // ═══════════════════════════════
 // FIREBASE
@@ -1335,9 +1365,11 @@ firebase.initializeApp({
   messagingSenderId:"267159679171",
   appId:"1:267159679171:web:1ffb1853f07aff3ae2b276"
 });
-// ── App Check (reCAPTCHA v3) ──
-const appCheck = firebase.appCheck();
-appCheck.activate('6Lf1nw0tAAAAABuGxbqJzesfcIuZbXOLbMZf3_GY', true);
+// ── App Check REMOVIDO (Bloco B, 21/07/2026) ──
+// A aplicação do App Check no RTDB já havia sido desligada no bloco 25 (throttle de 24h
+// derrubava o cliente, 24% do tráfego falhando). Manter o SDK inicializando só poluía o
+// console e não protegia nada. O perímetro real são as regras do RTDB.
+// Para reverter: recarregar firebase-app-check-compat.js e reativar aqui.
 
 const auth=firebase.auth();
 const db=firebase.database();
@@ -1519,6 +1551,114 @@ function perfilTopicos(){
   });
 }
 
+// ═══════════════════════════════
+// BLOCO B — MALHA DE TÓPICOS E DOSE DIÁRIA (21/07/2026)
+// Consome o eixo `topico` que o Bloco A criou em resumos, flashcards e INCIDENCIA.
+// A regra é uma só: o app deixa de recomendar ÁREA e passa a recomendar MATERIAL NOMEADO.
+// ═══════════════════════════════
+
+// Sessão padrão de ~45 min: 10 questões (~20') + 15 cards (~5') + 3 resumos (~12').
+// Ajustável pelo usuário em userStats.dose, como já é a metaDiaria.
+const DOSE_PADRAO={questoes:10,cards:15,resumos:3};
+function dose(k){
+  const d=userStats.dose||{};
+  const v=d[k];
+  return (typeof v==='number'&&v>0)?v:DOSE_PADRAO[k];
+}
+// Doses extras da sessão em curso ("continuar estudando"). Não persistem entre sessões.
+let doseExtra={cards:0,resumos:0};
+
+// Casa um item (resumo/flashcard) com um tópico. Aceita `topico` ou `topicos:[]`.
+function itemDoTopico(x,t){return x.topico===t||(Array.isArray(x.topicos)&&x.topicos.includes(t));}
+function topicoDe(x){return x.topico||(Array.isArray(x.topicos)?x.topicos[0]:'');}
+
+// Material de estudo de um tópico — o elo que faltava.
+function materialDoTopico(t){
+  if(!t)return{resumos:[],cards:[],questoes:[]};
+  return{
+    resumos:RESUMOS_BANCO.filter(r=>itemDoTopico(r,t)),
+    cards:Object.values(allFlashcards).filter(c=>itemDoTopico(c,t)),
+    questoes:Object.values(allQuestoes).filter(q=>q.topico===t)
+  };
+}
+
+// Tópicos com domínio baixo pelo BKT. minN evita apontar tópico sem amostra suficiente.
+function topicosFracos(limite=3,minN=3,teto=0.6){
+  return perfilTopicos()
+    .filter(p=>p.n>=minN&&p.nQ>0&&p.pL<teto)
+    .sort((a,b)=>a.pL-b.pL)
+    .slice(0,limite);
+}
+function setTopicosFracos(){return new Set(topicosFracos(99).map(p=>p.t));}
+
+// Tópicos que caíram em 2024/2025, segundo o INCIDENCIA.
+function setTopicosIncidencia(){
+  const s=new Set();
+  if(typeof INCIDENCIA!=='undefined')INCIDENCIA.forEach(i=>{if(i.topico)s.add(i.topico);});
+  return s;
+}
+
+// Prioridade da dose: (1) vencido de verdade — memória em risco;
+// (2) tópico mais fraco pelo BKT; (3) alta incidência nas provas.
+function priorizarPorMalha(itens,ehVencido){
+  const fracos=setTopicosFracos();
+  const inc=setTopicosIncidencia();
+  return itens.map(x=>{
+    const t=topicoDe(x);
+    let p=0;
+    if(ehVencido(x))p+=100;
+    if(t&&fracos.has(t))p+=10;
+    if(t&&inc.has(t))p+=1;
+    return{x,p};
+  }).sort((a,b)=>b.p-a.p).map(o=>o.x);
+}
+
+// Nome legível do tópico, com degradação segura se o código não existir.
+function nomeTopico(t){return (TOPICOS[t]&&TOPICOS[t].n)?t+' · '+TOPICOS[t].n:(t||'');}
+
+// Abre o quiz restrito a um tópico.
+function praticarTopico(t){
+  const qs=Object.values(allQuestoes).filter(q=>q.topico===t);
+  if(!qs.length){showToast('Ainda não há questões deste tópico.');return;}
+  quizArea=(TOPICOS[t]&&TOPICOS[t].a)||'TODAS';quizModoErro=false;
+  quizQueue=montarFilaEstudo(qs,Math.min(dose('questoes'),qs.length));
+  quizIdx=0;quizSessao={c:0,t:0};
+  document.getElementById('quiz-home-view').classList.add('hidden');
+  document.getElementById('quiz-running-view').classList.remove('hidden');
+  document.getElementById('quiz-area-tag').textContent=nomeTopico(t);
+  navTo('quiz');renderQuizQ();
+}
+
+// Abre um conjunto nomeado de questões (usado pelo INCIDENCIA, que já traz os ids).
+function praticarIds(ids,rotulo){
+  const qs=(ids||[]).map(id=>allQuestoes[id]).filter(Boolean);
+  if(!qs.length){showToast('Questões deste assunto ainda não carregaram.');return;}
+  quizArea=qs[0].area||'TODAS';quizModoErro=false;
+  quizQueue=shuffle(qs);quizIdx=0;quizSessao={c:0,t:0};
+  document.getElementById('quiz-home-view').classList.add('hidden');
+  document.getElementById('quiz-running-view').classList.remove('hidden');
+  document.getElementById('quiz-area-tag').textContent=rotulo||'Alta incidência';
+  navTo('quiz');renderQuizQ();
+}
+
+// Manda o usuário para o resumo exato de um tópico (ou para a aba, se não houver).
+function revisarTopico(t){
+  const m=materialDoTopico(t);
+  navTo('resumos');
+  if(m.resumos.length)mostrarResumoDirecto(m.resumos[0].id);
+  else{renderResumos();showToast('Este tópico ainda não tem resumo — revise pelos flashcards.');}
+}
+
+// Abre a aba de cards já filtrada por um tópico (usado no ciclo erro → flashcard).
+let cardsFiltroTopico=null;
+function revisarCardsDoTopico(t){
+  const m=materialDoTopico(t);
+  if(!m.cards.length){showToast('Este tópico ainda não tem flashcards.');return;}
+  cardsFiltroTopico=t;
+  navTo('cards');
+  renderCards();
+}
+
 // ── S34 INTERLEAVE: alternância deliberada de tópicos (prática intercalada) ──
 function interleavePorTopico(arr){
   const grupos={};
@@ -1622,7 +1762,7 @@ function renderProntidao(){
 // ── S35 BACKUP: exportação e restauração do progresso ──
 function exportarProgresso(){
   try{
-    const payload={app:'ctsp-estudos',versao:'v1.77',exportadoEm:new Date().toISOString(),userStats,userCards};
+    const payload={app:'ctsp-estudos',versao:'v1.80',exportadoEm:new Date().toISOString(),userStats,userCards};
     const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
     const url=URL.createObjectURL(blob);
     const a=document.createElement('a');
@@ -1849,8 +1989,34 @@ async function initApp(){
   // Animação inicial do dashboard
   setTimeout(()=>{const sc=document.getElementById('screen-inicio');if(sc)animateBars(sc);},600);
   // S47: 1º acesso → nivelamento obrigatório (gera domínio); senão, splash normal
+  // S50: se o usuário veio de um QR do ebook, o deep link substitui o splash.
   if(!userStats.diagFeito){mostrarOnboard();}
-  else{mostrarSplash();}
+  else if(!consumirDeepLink()){mostrarSplash();}
+}
+
+// ═══════════════════════════════
+// S50 DEEP LINK — ebook impresso → ponto exato do app
+// ═══════════════════════════════
+// Os QR do ebook apontam para  …/ctsp-estudos/#t=T3.4  (revisar o resumo) e
+// …/ctsp-estudos/#p=T3.4  (praticar as questões do tópico).
+// Regras de segurança desta função:
+//  • roda SÓ no fim do initApp, portanto depois de dataLoaded — nunca antes;
+//  • o código do tópico é validado por regex E contra as chaves de TOPICOS
+//    (whitelist). Nada vindo da URL chega ao DOM sem passar por este filtro;
+//  • o hash é consumido com replaceState para um F5 não reabrir a mesma tela;
+//  • URL inválida = ignora em silêncio e segue o fluxo normal (splash).
+// Retorna true se despachou, false se não havia deep link utilizável.
+function consumirDeepLink(){
+  let h='';
+  try{h=decodeURIComponent((location.hash||'').replace(/^#/,'')).trim();}
+  catch(e){return false;}                       // %-encoding quebrado
+  const m=/^([tp])=(T[1-5]\.[1-9])$/.exec(h);
+  if(!m)return false;
+  const acao=m[1],t=m[2];
+  if(!Object.prototype.hasOwnProperty.call(TOPICOS,t))return false;
+  try{history.replaceState(null,'',location.pathname+location.search);}catch(e){}
+  if(acao==='p')praticarTopico(t);else revisarTopico(t);
+  return true;
 }
 
 // ═══════════════════════════════
@@ -2237,29 +2403,71 @@ function renderDashboard(){
   renderObjetivoSemana();
 }
 
-function renderPontoFraco(){
+// Área mais fraca (fallback quando ainda não há BKT suficiente por tópico).
+function areaMaisFraca(){
   const ba=userStats.byArea||{};
   let worstArea=null,worstPct=101;
   Object.entries(AI).forEach(([k])=>{
     const c=(ba[k]?.correct||0),w=(ba[k]?.wrong||0),t=c+w;
     if(t>=3){const p=Math.round(c/t*100);if(p<worstPct){worstPct=p;worstArea=k;}}
   });
+  return{area:worstArea,pct:worstPct};
+}
+
+function renderPontoFraco(){
   const card=document.getElementById('dash-weak');
-  if(worstArea&&worstPct<80){
+  const mat=document.getElementById('weak-material');
+  // BLOCO B: o ponto fraco passa a ser um TÓPICO, e vem acompanhado do material nominal.
+  const fraco=topicosFracos(1)[0];
+  const {area:worstArea,pct:worstPct}=areaMaisFraca();
+
+  if(fraco){
+    card.classList.remove('hidden');
+    document.getElementById('weak-area-name').textContent=nomeTopico(fraco.t);
+    document.getElementById('weak-area-pct').textContent='Domínio estimado '+Math.round(fraco.pL*100)+'% · '+fraco.n+' resposta'+(fraco.n!==1?'s':'');
+  } else if(worstArea&&worstPct<80){
     card.classList.remove('hidden');
     document.getElementById('weak-area-name').textContent=AI[worstArea].nome;
     document.getElementById('weak-area-pct').textContent=worstPct+'% de acertos';
-  } else {card.classList.add('hidden');}
+  } else {
+    card.classList.add('hidden');
+    if(mat)mat.classList.add('hidden');
+    return;
+  }
+
+  // Material nominal do tópico fraco — só aparece quando há tópico identificado.
+  if(!mat)return;
+  if(!fraco){mat.classList.add('hidden');mat.innerHTML='';return;}
+  const m=materialDoTopico(fraco.t);
+  if(!m.resumos.length&&!m.cards.length){
+    mat.classList.remove('hidden');
+    mat.innerHTML=`<div class="weak-material-title">Para estudar</div>
+      <div style="font-size:12.5px;color:var(--text2)">Este tópico ainda não tem resumo nem flashcard. Treine pelas ${m.questoes.length} questões.</div>`;
+    return;
+  }
+  let html='<div class="weak-material-title">Estude isto — '+sanitize(nomeTopico(fraco.t))+'</div>';
+  m.resumos.slice(0,3).forEach(r=>{
+    html+=`<div class="weak-mat-item" onclick="abrirResumoDoPainel('${r.id}')">
+      <span class="weak-mat-tag">RESUMO</span><span class="weak-mat-txt">${sanitize(r.titulo)}</span></div>`;
+  });
+  if(m.cards.length){
+    html+=`<div class="weak-mat-item" onclick="revisarCardsDoTopico('${fraco.t}')">
+      <span class="weak-mat-tag">CARDS</span><span class="weak-mat-txt">${m.cards.length} flashcard${m.cards.length!==1?'s':''} deste tópico</span></div>`;
+  }
+  mat.classList.remove('hidden');
+  mat.innerHTML=html;
+}
+
+function abrirResumoDoPainel(id){
+  navTo('resumos');
+  mostrarResumoDirecto(id);
 }
 
 function estudarFraco(){
-  const ba=userStats.byArea||{};
-  let worstArea=null,worstPct=101;
-  Object.entries(AI).forEach(([k])=>{
-    const c=(ba[k]?.correct||0),w=(ba[k]?.wrong||0),t=c+w;
-    if(t>=3){const p=Math.round(c/t*100);if(p<worstPct){worstPct=p;worstArea=k;}}
-  });
-  if(worstArea)iniciarQuiz(worstArea);
+  const fraco=topicosFracos(1)[0];
+  if(fraco){praticarTopico(fraco.t);return;}
+  const {area}=areaMaisFraca();
+  if(area)iniciarQuiz(area);
 }
 
 function renderChart(){
@@ -2317,23 +2525,20 @@ function renderAreaEvolution(){
   el.innerHTML=html;
 }
 
+// BLOCO B: os badges passam a mostrar A DOSE DO DIA, não o acervo.
+// Um badge com "70" no primeiro acesso é o pior sinal possível para quem tem 45 min por dia.
 function updateBadges(){
-  // Cards vencidos
-  const now=Date.now();
-  const _todos=Object.values(allFlashcards);
-  const _venc=_todos.filter(fc=>{const uc=userCards[fc.id];return uc&&uc.reps>0&&uc.next&&uc.next<=now;}).length;
-  const _novos=_todos.filter(fc=>{const uc=userCards[fc.id];return !uc||!uc.reps;}).length;
-  const due=_venc+Math.min(_novos,12);
+  // Cards — dose do dia
+  const acervoC=cardsPendentes(null).todos.length;
+  const due=Math.min(acervoC,dose('cards')+doseExtra.cards);
   const bc=document.getElementById('badge-cards');
   if(due>0){bc.classList.remove('hidden');bc.textContent=due;}else bc.classList.add('hidden');
   document.getElementById('cards-due').textContent=due;
   document.getElementById('cards-total-n').textContent=Object.keys(allFlashcards).length;
 
-  // Resumos vencidos
-  const dueR=RESUMOS_BANCO.filter(r=>{
-    const ur=userStats['resumo_'+r.id];
-    return !ur||!ur.next||ur.next<=now;
-  }).length;
+  // Resumos — dose do dia
+  const acervoR=resumosPendentes().length;
+  const dueR=Math.min(acervoR,dose('resumos')+doseExtra.resumos);
   const br=document.getElementById('badge-resumos');
   if(dueR>0){br.classList.remove('hidden');br.textContent=dueR;}else br.classList.add('hidden');
   document.getElementById('resumos-fila').textContent=dueR;
@@ -2579,6 +2784,7 @@ function renderQuizQ(){
   opts.parentNode.insertBefore(btnRevelar,opts);
   opts.parentNode.insertBefore(dica,opts);
   document.getElementById('quiz-feedback').classList.remove('show');
+  {const rf=document.getElementById('quiz-fb-reforco');if(rf){rf.innerHTML='';rf.classList.add('hidden');}}
   document.getElementById('quiz-next-btn').classList.remove('show');
 }
 
@@ -2658,6 +2864,19 @@ async function responderQuiz(idx){
   const sufixoErro=!acertou&&contErros>1?` (${contErros}ª vez que erra esta questão)`:'';
   document.getElementById('quiz-fb-text').textContent=(q.exp||'')+sufixoErro;
 
+  // BLOCO B — CICLO ERRO → FLASHCARD: errou, o app oferece o material do tópico
+  // na hora. Fecha o laço erro → memorização em vez de só registrar o erro.
+  const rf=document.getElementById('quiz-fb-reforco');
+  if(rf){
+    const m=q.topico?materialDoTopico(q.topico):{resumos:[],cards:[]};
+    if(!acertou&&(m.cards.length||m.resumos.length)){
+      let h=`<div class="rf-txt">Reforço de ${sanitize(nomeTopico(q.topico))}</div>`;
+      if(m.cards.length)h+=`<button class="inc-btn praticar" onclick="revisarCardsDoTopico('${q.topico}')">Revisar ${m.cards.length} flashcard${m.cards.length!==1?'s':''}</button>`;
+      if(m.resumos.length)h+=`<button class="inc-btn revisar" onclick="abrirResumoDoPainel('${m.resumos[0].id}')">Ler o resumo</button>`;
+      rf.innerHTML=h;rf.classList.remove('hidden');
+    } else {rf.innerHTML='';rf.classList.add('hidden');}
+  }
+
   document.getElementById('quiz-next-btn').classList.add('show');
   document.getElementById('quiz-score-v').textContent=quizSessao.c+'/'+quizSessao.t;
 }
@@ -2690,27 +2909,46 @@ function finishQuiz(){
 // FLASHCARDS
 // ═══════════════════════════════
 let cardQueue=[],cardIdx=0;
+// Fila completa de cards pendentes (vencidos + novos), sem corte de dose.
+function cardsPendentes(filtro){
+  const now=Date.now();
+  const f=(filtro===undefined)?cardsFiltroTopico:filtro;
+  const todos=Object.values(allFlashcards).filter(fc=>!f||itemDoTopico(fc,f));
+  const vencidos=todos.filter(fc=>{const uc=userCards[fc.id];return !!(uc&&uc.reps>0&&uc.next&&uc.next<=now);});
+  const novos=todos.filter(fc=>{const uc=userCards[fc.id];return !uc||!uc.reps;});
+  return{vencidos,novos,todos:[...vencidos,...novos]};
+}
+
 function renderCards(){
   const now=Date.now();
-  const todos=Object.values(allFlashcards);
-  // S47: vencidos (já revisados e com prazo vencido) primeiro; novos limitados a 12 por sessão
-  const vencidos=todos.filter(fc=>{const uc=userCards[fc.id];return uc&&uc.reps>0&&uc.next&&uc.next<=now;});
-  const novos=todos.filter(fc=>{const uc=userCards[fc.id];return !uc||!uc.reps;});
-  cardQueue=[...shuffle(vencidos),...shuffle(novos).slice(0,12)];
+  const ehVencido=fc=>{const uc=userCards[fc.id];return !!(uc&&uc.reps>0&&uc.next&&uc.next<=now);};
+  const pend=cardsPendentes();
+  const acervo=pend.todos.length;
+  // BLOCO B — DOSE DIÁRIA: a fila mostra a dose do dia, não o acervo.
+  // O acervo continua visível como informação secundária ("15 de 84").
+  const limite=dose('cards')+doseExtra.cards;
+  cardQueue=priorizarPorMalha(pend.todos,ehVencido).slice(0,limite);
   const body=document.getElementById('cards-body');
-  const streak=userStats.cardStreak||0;
-  document.getElementById('cards-streak-n').textContent=streak;
+  document.getElementById('cards-streak-n').textContent=userStats.cardStreak||0;
   if(!cardQueue.length){
+    const restam=acervo;
+    const filtro=cardsFiltroTopico;
     body.innerHTML=`<div class="cards-done">
       <div class="cards-done-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.5 13l1.5 8-5-3-5 3 1.5-8"/></svg></div>
-      <div class="cards-done-title">Revisão concluída!</div>
-      <div class="cards-done-sub">Todos os cards revisados. Continue praticando no Quiz.</div>
+      <div class="cards-done-title">${restam>0?'Dose do dia concluída!':'Revisão concluída!'}</div>
+      <div class="cards-done-sub">${restam>0?`Ainda restam ${restam} card${restam!==1?'s':''} no acervo. Você já fez o que o dia pedia.`:(filtro?'Todos os cards deste tópico foram revisados.':'Todos os cards revisados. Continue praticando no Quiz.')}</div>
+      ${restam>0?`<button class="btn-weak" style="margin-top:12px" onclick="maisCards()">Fazer mais ${Math.min(dose('cards'),restam)}</button>`:''}
+      ${filtro?`<button class="btn-weak" style="margin-top:8px;background:var(--paper-2);color:var(--text2)" onclick="limparFiltroCards()">Ver todos os tópicos</button>`:''}
     </div>`;
     return;
   }
   cardIdx=0;
   renderCard();
 }
+
+// Segunda sessão: quem tem tempo continua; quem não tem, fecha o dia sem dever nada.
+function maisCards(){doseExtra.cards+=dose('cards');renderCards();}
+function limparFiltroCards(){cardsFiltroTopico=null;doseExtra.cards=0;renderCards();}
 
 function renderCard(){
   if(cardIdx>=cardQueue.length){renderCards();return;}
@@ -2721,11 +2959,15 @@ function renderCard(){
   const ehNovo=!ucAtual||!ucAtual.reps; // S47: rótulo Novo/Revisão
   const body=document.getElementById('cards-body');
   const remaining=cardQueue.length-cardIdx;
+  const acervo=cardsPendentes().todos.length;
+  const tFc=topicoDe(fc);
   body.innerHTML=`
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
       <span style="font-size:13px;color:var(--text2)">${remaining} card${remaining!==1?'s':''} restante${remaining!==1?'s':''} <span class="q-badge ${ehNovo?'badge-nova':'badge-rev'}">${ehNovo?'NOVO':'REVISÃO'}</span></span>
       <span style="font-size:11px;font-weight:700;color:var(--text3)">Toque para virar</span>
     </div>
+    ${acervo>cardQueue.length?`<div style="font-size:11px;color:var(--text3);margin:-6px 0 10px">Dose de hoje · ${cardQueue.length} de ${acervo} pendentes</div>`:''}
+    ${tFc?`<div style="font-size:11px;color:var(--text3);margin:-6px 0 10px">${sanitize(nomeTopico(tFc))}</div>`:''}
     <div class="card-flip-wrap">
       <div class="card-flip" id="card-flip-el" onclick="flipCard()">
         <div class="card-face card-front">
@@ -2771,17 +3013,33 @@ async function avaliarCard(dif){
 // ═══════════════════════════════
 let resumoAtualId=null;
 let resumoFiltroAT='todos';
-function renderResumos(){
+// Resumos pendentes de revisão (acervo, sem corte de dose).
+function resumosPendentes(){
   const now=Date.now();
-  const fila=RESUMOS_BANCO.filter(r=>{
+  return RESUMOS_BANCO.filter(r=>{
     const ur=userStats['resumo_'+r.id];
     return !ur||!ur.next||ur.next<=now;
   });
+}
+// Dose de resumos do dia, já priorizada pela malha.
+function resumosDose(){
+  const now=Date.now();
+  const ehVencido=r=>{const ur=userStats['resumo_'+r.id];return !!(ur&&ur.reps>0&&ur.next&&ur.next<=now);};
+  return priorizarPorMalha(resumosPendentes(),ehVencido).slice(0,dose('resumos')+doseExtra.resumos);
+}
+
+function renderResumos(){
+  const acervo=resumosPendentes().length;
+  // BLOCO B — DOSE DIÁRIA: o primeiro acesso deixa de abrir pedindo 70 resumos.
+  // Mostra 3; o acervo continua visível como informação secundária.
+  const fila=resumosDose();
   document.getElementById('resumos-fila').textContent=fila.length;
   const content=document.getElementById('resumos-content');
   if(!fila.length){
-    // Mostrar todos como lista
-    content.innerHTML=`<div style="text-align:center;padding:24px;color:var(--text2);font-size:14px;margin-bottom:16px;">Todos em dia! Próximas revisões agendadas.</div>`
+    content.innerHTML=(acervo>0
+      ? `<div style="text-align:center;padding:24px;color:var(--text2);font-size:14px;margin-bottom:8px;">Dose do dia concluída.<br><span style="font-size:12.5px;color:var(--text3)">Ainda restam ${acervo} resumo${acervo!==1?'s':''} no acervo — mas você já fez o que o dia pedia.</span></div>
+         <div style="text-align:center;margin-bottom:16px"><button class="btn-weak" onclick="maisResumos()">Ler mais ${Math.min(dose('resumos'),acervo)}</button></div>`
+      : `<div style="text-align:center;padding:24px;color:var(--text2);font-size:14px;margin-bottom:16px;">Todos em dia! Próximas revisões agendadas.</div>`)
     +renderResumoLista();
     return;
   }
@@ -2808,9 +3066,24 @@ function renderResumos(){
         </div>
       </div>
     </div>
-    ${fila.length>1?`<div style="text-align:center;color:var(--text2);font-size:13px;margin-bottom:12px;">+${fila.length-1} resumo${fila.length-1>1?'s':''} pendente${fila.length-1>1?'s':''}</div>`:''}
+    ${blocoPraticarTopico(topicoDe(r))}
+    <div style="text-align:center;color:var(--text2);font-size:13px;margin-bottom:12px;">
+      Dose de hoje: ${fila.length} resumo${fila.length!==1?'s':''}${acervo>fila.length?` <span style="color:var(--text3)">· ${acervo} pendentes no total</span>`:''}
+    </div>
     ${renderResumoLista()}`;
 }
+
+// Ponte resumo → questão: o elo que o Bloco A tornou possível.
+function blocoPraticarTopico(t){
+  if(!t||!TOPICOS[t])return '';
+  const n=Object.values(allQuestoes).filter(q=>q.topico===t).length;
+  if(!n)return '';
+  return `<div style="text-align:center;margin:-4px 0 12px">
+    <button class="btn-weak" onclick="praticarTopico('${t}')">Praticar ${sanitize(nomeTopico(t))} — ${n} ${n===1?'questão':'questões'}</button>
+  </div>`;
+}
+
+function maisResumos(){doseExtra.resumos+=dose('resumos');renderResumos();}
 
 function renderResumoLista(){
   const areas=[...new Set(RESUMOS_BANCO.map(r=>r.area))].sort();
@@ -2849,7 +3122,8 @@ function mostrarResumoDirecto(id){
   const r=RESUMOS_BANCO.find(x=>x.id===id);
   if(!r)return;
   const aInfo=AI[r.area]||{};
-  const probLabel=r.prob==='alta'?'Alta':'Média';
+  // Rótulos suportados: alta | media | baixa (o Bloco A usa só os dois primeiros).
+  const probLabel=r.prob==='alta'?'Alta':r.prob==='baixa'?'Baixa':'Média';
   resumoAtualId=id;
   document.getElementById('resumos-content').innerHTML=`
     <div class="resumo-card">
@@ -2870,7 +3144,8 @@ function mostrarResumoDirecto(id){
       </div>
       <button class="rep-link" onclick="abrirReporte('resumo','${r.id}')">⚐ Reportar erro neste resumo</button>
       <button onclick="renderResumos()" style="width:100%;margin-top:12px;padding:10px;background:var(--bg);border-radius:10px;font-size:13px;font-weight:600;color:var(--text2);">← Voltar à fila</button>
-    </div>`;
+    </div>
+    ${blocoPraticarTopico(topicoDe(r))}`;
 }
 
 async function avaliarResumo(dif){
@@ -3092,8 +3367,51 @@ function gerarDiagnostico(pct,byArea){
   const fortes=linhas.filter(l=>l.pct>=75).map(l=>l.nome);
   const mantem=fortes.length?` Mantenha ${fortes.join(', ')} com revisão espaçada.`:'';
 
-  const acao=focos.length?' Refaça as questões do Caderno de Erros e revise os resumos pendentes dessas áreas.':'';
-  el.textContent=`Diagnóstico: ${pct}% de acerto. ${leitura} ${alvo}${mantem}${acao}`;
+  const acao=focos.length?' Refaça as questões do Caderno de Erros e comece pelo material abaixo.':'';
+  const prosa=`Diagnóstico: ${pct}% de acerto. ${leitura} ${alvo}${mantem}${acao}`;
+
+  // BLOCO B: o diagnóstico deixa de dizer "revise os resumos dessas áreas" e passa
+  // a listar os resumos e cards EXATOS, priorizados por pendência, prob e tópico fraco.
+  const areasFoco=focos.map(l=>l.k);
+  const mats=areasFoco.length?materialParaAreas(areasFoco,4):[];
+  let html=`<div>${sanitize(prosa)}</div>`;
+  if(mats.length){
+    html+=`<div class="weak-material-title" style="margin-top:12px">Comece por aqui</div>`;
+    mats.forEach(r=>{
+      const t=topicoDe(r);
+      html+=`<div class="weak-mat-item" onclick="abrirResumoDoPainel('${r.id}')">
+        <span class="weak-mat-tag">${r.prob==='alta'?'ALTA INCID.':'RESUMO'}</span>
+        <span class="weak-mat-txt">${sanitize(r.titulo)}</span></div>`;
+      const nc=t?materialDoTopico(t).cards.length:0;
+      if(nc)html+=`<div class="weak-mat-item" onclick="revisarCardsDoTopico('${t}')">
+        <span class="weak-mat-tag">CARDS</span>
+        <span class="weak-mat-txt">${nc} flashcard${nc!==1?'s':''} de ${sanitize(nomeTopico(t))}</span></div>`;
+    });
+  }
+  el.innerHTML=html;
+}
+
+// Resumos mais úteis para um conjunto de áreas: pendentes primeiro, depois prob alta,
+// depois tópico fraco pelo BKT, depois assunto de alta incidência.
+function materialParaAreas(areas,limite=4){
+  const now=Date.now();
+  const fracos=setTopicosFracos();
+  const inc=setTopicosIncidencia();
+  const score=r=>{
+    let p=0;
+    const ur=userStats['resumo_'+r.id];
+    if(!ur||!ur.next||ur.next<=now)p+=50;
+    if(r.prob==='alta')p+=20;
+    const t=topicoDe(r);
+    if(t&&fracos.has(t))p+=10;
+    if(t&&inc.has(t))p+=1;
+    return p;
+  };
+  return RESUMOS_BANCO.filter(r=>areas.includes(r.area))
+    .map(r=>({r,p:score(r)}))
+    .sort((a,b)=>b.p-a.p)
+    .slice(0,limite)
+    .map(o=>o.r);
 }
 
 function voltarSimHome(){
@@ -3120,14 +3438,28 @@ function renderPadroes(){
     </div>
   </div>`).join('');
 
+  // BLOCO B: cada assunto de alta incidência ganha "praticar" (as questões exatas,
+  // pelos ids que o Bloco A vinculou) e "revisar" (o resumo/cards do mesmo tópico).
   const inc=document.getElementById('incidencia-lista');
-  inc.innerHTML=INCIDENCIA.map(i=>`<div class="incidencia-row">
-    <div>
-      <div class="incidencia-assunto">${sanitize(i.assunto)}</div>
-      <div style="font-size:11px;color:var(--text2)">Área: ${i.area} · Provas: ${i.provas}</div>
-    </div>
-    <span class="incidencia-prob" style="background:${i.prob==='alta'?'var(--red-light)':'var(--amber-light)'};color:${i.prob==='alta'?'var(--red-dark)':'var(--amber)'}">${i.prob==='alta'?'Alta':'Média'}</span>
-  </div>`).join('');
+  inc.innerHTML=INCIDENCIA.map((i,ix)=>{
+    const nQ=(i.qs||[]).filter(id=>allQuestoes[id]).length;
+    const m=i.topico?materialDoTopico(i.topico):{resumos:[],cards:[]};
+    const temRevisar=m.resumos.length>0||m.cards.length>0;
+    const acoes=(nQ||temRevisar)?`<div class="incidencia-acoes">
+      ${nQ?`<button class="inc-btn praticar" onclick="praticarIncidencia(${ix})">Praticar · ${nQ} ${nQ===1?'questão':'questões'}</button>`:''}
+      ${temRevisar?`<button class="inc-btn revisar" onclick="revisarTopico('${i.topico}')">Revisar${m.resumos.length?' · '+m.resumos.length+(m.resumos.length===1?' resumo':' resumos'):''}</button>`:''}
+    </div>`:'';
+    return `<div class="incidencia-row">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
+        <div>
+          <div class="incidencia-assunto">${sanitize(i.assunto)}</div>
+          <div style="font-size:11px;color:var(--text2)">${i.topico?sanitize(nomeTopico(i.topico))+' · ':''}Provas: ${sanitize(i.provas||'')}</div>
+        </div>
+        <span class="incidencia-prob" style="background:${i.prob==='alta'?'var(--red-light)':'var(--amber-light)'};color:${i.prob==='alta'?'var(--red-dark)':'var(--amber)'}">${i.prob==='alta'?'Alta':'Média'}</span>
+      </div>
+      ${acoes}
+    </div>`;
+  }).join('');
   renderDominioTopicos();
 }
 
@@ -3154,6 +3486,13 @@ function renderDominioTopicos(){
     });
   });
   el.innerHTML=html||'<p style="font-size:13px;color:var(--text2)">Responda algumas questões para gerar seu perfil por tópico.</p>';
+}
+
+// Abre as questões exatas de um assunto de alta incidência (ids vinculados no Bloco A).
+function praticarIncidencia(ix){
+  const i=INCIDENCIA[ix];
+  if(!i)return;
+  praticarIds(i.qs,i.assunto);
 }
 
 function togglePadrao(i){document.getElementById('pad-'+i).classList.toggle('open');}
@@ -3583,6 +3922,10 @@ function abrirModalConfig(){
   document.getElementById('config-streak-info').textContent=(userStats.streak||0)+' dias seguidos';
   const metaInp=document.getElementById('config-meta-input');
   if(metaInp)metaInp.value=userStats.metaDiaria||10;
+  const dcInp=document.getElementById('config-dose-cards');
+  if(dcInp)dcInp.value=dose('cards');
+  const drInp=document.getElementById('config-dose-resumos');
+  if(drInp)drInp.value=dose('resumos');
   const provaInp=document.getElementById('config-prova-input');
   if(provaInp)provaInp.value=userStats.dataProva||'';
   document.getElementById('modal-config').classList.remove('hidden');
@@ -3605,6 +3948,16 @@ async function salvarConfig(){
   const metaInp=document.getElementById('config-meta-input');
   const metaVal=metaInp?parseInt(metaInp.value)||0:0;
   if(metaVal>=1&&metaVal<=200)userStats.metaDiaria=metaVal;
+  // Bloco B: dose diária configurável (cards e resumos), como já era a meta de questões.
+  if(!userStats.dose)userStats.dose={};
+  userStats.dose.questoes=userStats.metaDiaria||DOSE_PADRAO.questoes;
+  const dcInp=document.getElementById('config-dose-cards');
+  const dcVal=dcInp?parseInt(dcInp.value)||0:0;
+  if(dcVal>=1&&dcVal<=200)userStats.dose.cards=dcVal;
+  const drInp=document.getElementById('config-dose-resumos');
+  const drVal=drInp?parseInt(drInp.value)||0:0;
+  if(drVal>=1&&drVal<=70)userStats.dose.resumos=drVal;
+  doseExtra={cards:0,resumos:0};
   // S35: data da prova (contagem regressiva)
   const provaInp=document.getElementById('config-prova-input');
   const provaVal=provaInp?provaInp.value.trim():'';
