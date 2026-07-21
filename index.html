@@ -1762,7 +1762,7 @@ function renderProntidao(){
 // ── S35 BACKUP: exportação e restauração do progresso ──
 function exportarProgresso(){
   try{
-    const payload={app:'ctsp-estudos',versao:'v1.78',exportadoEm:new Date().toISOString(),userStats,userCards};
+    const payload={app:'ctsp-estudos',versao:'v1.79',exportadoEm:new Date().toISOString(),userStats,userCards};
     const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
     const url=URL.createObjectURL(blob);
     const a=document.createElement('a');
@@ -1989,8 +1989,34 @@ async function initApp(){
   // Animação inicial do dashboard
   setTimeout(()=>{const sc=document.getElementById('screen-inicio');if(sc)animateBars(sc);},600);
   // S47: 1º acesso → nivelamento obrigatório (gera domínio); senão, splash normal
+  // S50: se o usuário veio de um QR do ebook, o deep link substitui o splash.
   if(!userStats.diagFeito){mostrarOnboard();}
-  else{mostrarSplash();}
+  else if(!consumirDeepLink()){mostrarSplash();}
+}
+
+// ═══════════════════════════════
+// S50 DEEP LINK — ebook impresso → ponto exato do app
+// ═══════════════════════════════
+// Os QR do ebook apontam para  …/ctsp-estudos/#t=T3.4  (revisar o resumo) e
+// …/ctsp-estudos/#p=T3.4  (praticar as questões do tópico).
+// Regras de segurança desta função:
+//  • roda SÓ no fim do initApp, portanto depois de dataLoaded — nunca antes;
+//  • o código do tópico é validado por regex E contra as chaves de TOPICOS
+//    (whitelist). Nada vindo da URL chega ao DOM sem passar por este filtro;
+//  • o hash é consumido com replaceState para um F5 não reabrir a mesma tela;
+//  • URL inválida = ignora em silêncio e segue o fluxo normal (splash).
+// Retorna true se despachou, false se não havia deep link utilizável.
+function consumirDeepLink(){
+  let h='';
+  try{h=decodeURIComponent((location.hash||'').replace(/^#/,'')).trim();}
+  catch(e){return false;}                       // %-encoding quebrado
+  const m=/^([tp])=(T[1-5]\.[1-9])$/.exec(h);
+  if(!m)return false;
+  const acao=m[1],t=m[2];
+  if(!Object.prototype.hasOwnProperty.call(TOPICOS,t))return false;
+  try{history.replaceState(null,'',location.pathname+location.search);}catch(e){}
+  if(acao==='p')praticarTopico(t);else revisarTopico(t);
+  return true;
 }
 
 // ═══════════════════════════════
