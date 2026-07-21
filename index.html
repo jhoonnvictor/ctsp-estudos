@@ -22,7 +22,7 @@
 <meta name="twitter:title" content="Bombeiro CTSP 2026 — Plataforma de Estudos"/>
 <meta name="twitter:description" content="454 questões auditadas, simulado no formato real e diagnóstico automático do seu desempenho."/>
 <meta name="twitter:image" content="https://jhoonnvictor.github.io/ctsp-estudos/img/logo.png"/>
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' https://*.googleapis.com https://*.gstatic.com https://*.firebase.com https://*.firebaseio.com https://*.firebaseapp.com https://ctsp-anthropic-proxy.jvictor-projetos-ti.workers.dev https://www.recaptcha.net https://recaptcha.net https://www.google.com https://www.gstatic.com wss://*.firebaseio.com data: blob:; object-src 'none'; base-uri 'self'; form-action 'none';">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' https://*.googleapis.com https://*.gstatic.com https://*.firebase.com https://*.firebaseio.com https://*.firebaseapp.com https://www.recaptcha.net https://recaptcha.net https://www.google.com https://www.gstatic.com wss://*.firebaseio.com data: blob:; object-src 'none'; base-uri 'self'; form-action 'none';">
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-check-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
@@ -80,7 +80,7 @@ html[data-theme="dark"] .field input:focus,html[data-theme="dark"] .field select
 html[data-theme="dark"] .diag-card{background:linear-gradient(135deg,#7E180B,#C2412C);}
 html[data-theme="dark"] .quick-btn.destaque{border-color:#4A2B1A;background:linear-gradient(180deg,#241A14,var(--surface));}
 html[data-theme="dark"] .quiz-fb-erro .fb-correta{color:var(--green);}
-html[data-theme="dark"] .quiz-ai-tip,html[data-theme="dark"] .padrao-dica{color:var(--amber);}
+html[data-theme="dark"] .padrao-dica{color:var(--amber);}
 html[data-theme="dark"] .badge-admin,html[data-theme="dark"] .btn-mkadmin{color:var(--amber);}
 html[data-theme="dark"] .weak-card{border-color:var(--border);}
 html,body{height:100%;font-family:-apple-system,'SF Pro Display','Helvetica Neue',Arial,sans-serif;background:var(--paper);color:var(--text);overflow-x:hidden;}
@@ -395,7 +395,6 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 .quiz-feedback.show{display:block;}
 .quiz-feedback-title{font-size:12px;font-weight:800;margin-bottom:6px;}
 .quiz-feedback-text{font-size:13px;color:var(--text2);line-height:1.55;}
-.quiz-ai-tip{background:var(--amber-light);border-radius:10px;padding:10px 12px;margin-top:10px;font-size:12px;color:#7A5212;line-height:1.5;border-left:3px solid var(--ember-deep);}
 .quiz-next-btn{width:100%;margin-top:16px;padding:14px;background:var(--red);color:white;border-radius:12px;font-size:15px;font-weight:700;display:none;box-shadow:0 4px 14px rgba(211,36,18,.22);}
 .quiz-next-btn.show{display:block;}
 
@@ -1048,7 +1047,6 @@ html[data-theme="dark"] .fb-caderno{color:var(--ember);}
             <div class="quiz-feedback-title" id="quiz-fb-title"></div>
             <div class="quiz-fb-erro" id="quiz-fb-erro" style="display:none"></div>
             <div class="quiz-feedback-text" id="quiz-fb-text"></div>
-            <div class="quiz-ai-tip" id="quiz-ai-tip" style="display:none"><strong>Dica IA:</strong> <span id="quiz-ai-tip-text"></span></div>
             <button class="rep-link" onclick="abrirReporte('questao',questaoAtualId)">⚐ Reportar erro nesta questão</button>
           </div>
           <button class="quiz-next-btn" id="quiz-next-btn" onclick="nextQuiz()">Próxima →</button>
@@ -1120,7 +1118,7 @@ html[data-theme="dark"] .fb-caderno{color:var(--ember);}
           </div>
           <div class="sim-result-label" id="sim-result-label"></div>
           <div class="sim-result-areas" id="sim-result-areas"></div>
-          <div class="sim-ai-diag" id="sim-ai-diag">Gerando diagnóstico...</div>
+          <div class="sim-ai-diag" id="sim-ai-diag"></div>
           <button onclick="voltarSimHome()" style="width:100%;padding:14px;background:var(--red);color:white;border-radius:12px;font-size:15px;font-weight:700;">Voltar ao início</button>
         </div>
       </div>
@@ -1364,7 +1362,6 @@ function setTema(p){
   aplicarTema(lerTema());
 })();
 const ADMIN_EMAIL="jvictor.projetos.ti@gmail.com";
-const ANTHROPIC_MODEL="claude-sonnet-4-20250514";
 
 // ── Sanitize XSS ──
 function sanitize(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');}
@@ -1625,7 +1622,7 @@ function renderProntidao(){
 // ── S35 BACKUP: exportação e restauração do progresso ──
 function exportarProgresso(){
   try{
-    const payload={app:'ctsp-estudos',versao:'v1.75',exportadoEm:new Date().toISOString(),userStats,userCards};
+    const payload={app:'ctsp-estudos',versao:'v1.76',exportadoEm:new Date().toISOString(),userStats,userCards};
     const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
     const url=URL.createObjectURL(blob);
     const a=document.createElement('a');
@@ -2598,7 +2595,6 @@ function renderQuizQ(){
   opts.parentNode.insertBefore(dica,opts);
   document.getElementById('quiz-feedback').classList.remove('show');
   document.getElementById('quiz-next-btn').classList.remove('show');
-  document.getElementById('quiz-ai-tip').style.display='none';
 }
 
 async function responderQuiz(idx){
@@ -2677,46 +2673,8 @@ async function responderQuiz(idx){
   const sufixoErro=!acertou&&contErros>1?` (${contErros}ª vez que erra esta questão)`:'';
   document.getElementById('quiz-fb-text').textContent=(q.exp||'')+sufixoErro;
 
-  // Dica IA — específica do erro do aluno
-  if(!acertou){
-    buscarDicaIA(q,escolhidaTxt);
-  }
-
   document.getElementById('quiz-next-btn').classList.add('show');
   document.getElementById('quiz-score-v').textContent=quizSessao.c+'/'+quizSessao.t;
-}
-
-// ── S36 SEC: toda chamada de IA passa por aqui, autenticada com o ID token do Firebase.
-// O Worker valida o token e só responde a usuário aprovado; model/max_tokens são fixados
-// no servidor (o que vai no corpo é apenas compatibilidade com o Worker antigo).
-const IA_PROXY='https://ctsp-anthropic-proxy.jvictor-projetos-ti.workers.dev';
-async function iaFetch(payload){
-  const u=firebase.auth().currentUser;
-  if(!u)throw new Error('sem sessao');
-  const token=await u.getIdToken();
-  return fetch(IA_PROXY,{
-    method:'POST',
-    headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
-    body:JSON.stringify(payload)
-  });
-}
-
-async function buscarDicaIA(q,escolhida){
-  try{
-    const resp=await iaFetch({
-        tarefa:'dica',
-        model:ANTHROPIC_MODEL,max_tokens:150,
-        system:'Você é instrutor do CTSP 2026 do CBMRS. O aluno errou uma questão. Em no máximo 2 linhas, aponte objetivamente POR QUE a alternativa que ele marcou está errada e fixe o conceito correto. Não repita apenas a resposta certa — explique o erro. Seja direto e prático.',
-        messages:[{role:'user',content:`Questão: ${q.e}\nAlternativa marcada (errada): ${escolhida||'(não informada)'}\nResposta correta: ${q.ops[q.g]}\nExplicação base: ${q.exp}\n\nExplique por que a alternativa marcada está errada e fixe o conceito correto.`}]
-    });
-    const data=await resp.json();
-    const tip=data.content?.[0]?.text||'';
-    if(tip){
-      const el=document.getElementById('quiz-ai-tip');
-      document.getElementById('quiz-ai-tip-text').textContent=tip;
-      el.style.display='block';
-    }
-  }catch(e){console.warn('IA tip error:',e);}
 }
 
 function nextQuiz(){
@@ -3117,23 +3075,40 @@ async function encerrarSimulado(){
   userStats.simHistorico=userStats.simHistorico.slice(-20);
   saveProg();
 
-  // Diagnóstico IA
-  gerarDiagnosticoIA(pct,byArea);
+  gerarDiagnostico(pct,byArea);
 }
 
-async function gerarDiagnosticoIA(pct,byArea){
+// S49: diagnóstico local, sem rede e sem custo. Prioriza por PONTOS EM JOGO
+// (cota do edital × lacuna de acerto), não pelo percentual bruto — errar em AT1/AT3
+// (14 questões) pesa mais que errar em AT2 (8).
+function gerarDiagnostico(pct,byArea){
   const el=document.getElementById('sim-ai-diag');
-  try{
-    const areas=Object.entries(byArea).map(([k,v])=>`${k}: ${Math.round(v.c/v.t*100)}%`).join(', ');
-    const resp=await iaFetch({
-        tarefa:'diagnostico',
-        model:ANTHROPIC_MODEL,max_tokens:200,
-        system:'Você é um instrutor do CTSP 2026 CBMRS. Dê um diagnóstico curto do simulado e 2 recomendações práticas. Seja objetivo.',
-        messages:[{role:'user',content:`Resultado: ${pct}%. Por área: ${areas}. O que devo focar?`}]
-    });
-    const data=await resp.json();
-    el.textContent='Diagnóstico IA: '+( data.content?.[0]?.text||'Diagnóstico não disponível.');
-  }catch(e){el.textContent='Diagnóstico IA: foque nas áreas abaixo de 60% e revise os resumos pendentes.';}
+  if(!el)return;
+  const linhas=Object.entries(byArea)
+    .filter(([,v])=>v&&v.t>0)
+    .map(([k,v])=>{
+      const p=v.c/v.t;
+      const cota=(AI[k]&&AI[k].n)||0;
+      return {k,nome:(AI[k]&&AI[k].nome)||k,pct:Math.round(p*100),perda:cota*(1-p)};
+    })
+    .sort((a,b)=>b.perda-a.perda);
+
+  if(!linhas.length){el.textContent='Responda um simulado completo para gerar o diagnóstico.';return;}
+
+  const leitura = pct>=70 ? 'Desempenho consistente.'
+                : pct>=50 ? 'Base formada, com lacunas concentradas.'
+                : 'Base ainda irregular — priorize revisão antes de novo simulado.';
+
+  const focos=linhas.filter(l=>l.perda>0).slice(0,2);
+  const alvo=focos.length
+    ? 'Maior ganho possível: '+focos.map(l=>`${l.nome} (${l.pct}%, vale ${AI[l.k].n} questões na prova)`).join(' e ')+'.'
+    : 'Nenhuma área com perda relevante neste simulado.';
+
+  const fortes=linhas.filter(l=>l.pct>=75).map(l=>l.nome);
+  const mantem=fortes.length?` Mantenha ${fortes.join(', ')} com revisão espaçada.`:'';
+
+  const acao=focos.length?' Refaça as questões do Caderno de Erros e revise os resumos pendentes dessas áreas.':'';
+  el.textContent=`Diagnóstico: ${pct}% de acerto. ${leitura} ${alvo}${mantem}${acao}`;
 }
 
 function voltarSimHome(){
