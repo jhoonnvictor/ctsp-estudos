@@ -14,13 +14,13 @@
 <meta property="og:type" content="website"/>
 <meta property="og:site_name" content="Bombeiro CTSP"/>
 <meta property="og:title" content="Bombeiro CTSP 2026 — sua preparação, medida por área e por tópico"/>
-<meta property="og:description" content="454 questões auditadas, simulado no formato real (60Q · 14/8/14/12/12), flashcards com revisão espaçada e um sistema que identifica seu ponto fraco e diz o que estudar."/>
+<meta property="og:description" content="514 questões auditadas, simulado no formato real (60Q · 14/8/14/12/12), flashcards com revisão espaçada e um sistema que identifica seu ponto fraco e diz o que estudar."/>
 <meta property="og:image" content="https://jhoonnvictor.github.io/ctsp-estudos/img/logo.png"/>
 <meta property="og:url" content="https://jhoonnvictor.github.io/ctsp-estudos/"/>
 <meta property="og:locale" content="pt_BR"/>
 <meta name="twitter:card" content="summary_large_image"/>
 <meta name="twitter:title" content="Bombeiro CTSP 2026 — Plataforma de Estudos"/>
-<meta name="twitter:description" content="454 questões auditadas, simulado no formato real e diagnóstico automático do seu desempenho."/>
+<meta name="twitter:description" content="514 questões auditadas, simulado no formato real e diagnóstico automático do seu desempenho."/>
 <meta name="twitter:image" content="https://jhoonnvictor.github.io/ctsp-estudos/img/logo.png"/>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' https://*.googleapis.com https://*.gstatic.com https://*.firebase.com https://*.firebaseio.com https://*.firebaseapp.com https://www.recaptcha.net https://recaptcha.net https://www.google.com https://www.gstatic.com wss://*.firebaseio.com data: blob:; object-src 'none'; base-uri 'self'; form-action 'none';">
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -298,7 +298,18 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 .weak-mat-item{display:flex;align-items:center;gap:8px;padding:7px 0;border-top:1px solid var(--line-soft);font-size:13px;color:var(--text);cursor:pointer;}
 .weak-mat-item:first-of-type{border-top:0;}
 .weak-mat-tag{font-size:10px;font-weight:800;padding:2px 7px;border-radius:8px;background:var(--paper-2);color:var(--text2);flex-shrink:0;}
-.weak-mat-txt{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.weak-mat-txt{flex:1;min-width:0;overflow-wrap:anywhere;}
+/* S51 MOBILE-FIT (bloco31) — corrige ESTOURO HORIZONTAL do painel no celular.
+   Causa: filho flex com `flex:1` mantém `min-width:auto` e não encolhe abaixo da
+   largura intrínseca do texto — o card é empurrado além da viewport e cria scroll
+   lateral (relatado no "Caderno de Erros" e no "Estude isto"). `min-width:0` libera
+   o encolhimento e o texto passa a quebrar. Mesma solução já usada em `.quiz-opt-text`.
+   Mobile-first: vale em qualquer largura, sem media query. */
+.weak-info,.adapt-btn-info,.diag-card-info,.dominio-geral-info,.dominio-area-info,
+.area-row-info,.user-item-info,.header-titles,.topico-name{min-width:0;}
+.weak-area,.weak-pct,.weak-title,.diag-card-title,.diag-card-sub,.adapt-btn-title,
+.adapt-btn-sub,.quick-btn-title,.quick-btn-sub{overflow-wrap:anywhere;}
+.weak-card,.weak-material,.weak-mat-item,.adapt-btn,.diag-card{max-width:100%;}
 
 /* Quick actions */
 .quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
@@ -521,9 +532,15 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 .padroes-header p{font-size:12px;opacity:.72;}
 .padrao-card{background:var(--surface);border:1px solid var(--line-soft);border-radius:14px;padding:14px;box-shadow:var(--shadow);margin-bottom:10px;cursor:pointer;}
 .padrao-top{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
-.padrao-pct-badge{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:16px;font-weight:700;flex-shrink:0;font-variant-numeric:tabular-nums;}
-.padrao-info h3{font-size:14px;font-weight:700;}
-.padrao-info p{font-size:11px;color:var(--text2);}
+/* S55: a badge deixou de ser só "38%" — agora carrega medida qualitativa
+   ("raro", "não caiu") quando a amostra não sustenta percentual. Largura passa a
+   ser flexível, com piso de 46px para manter o alinhamento das que são número. */
+.padrao-pct-badge{min-width:46px;max-width:92px;min-height:46px;padding:6px 8px;border-radius:12px;display:flex;align-items:center;justify-content:center;text-align:center;font-family:var(--font-display);font-size:15px;font-weight:700;line-height:1.15;flex-shrink:0;font-variant-numeric:tabular-nums;overflow-wrap:anywhere;}
+.padrao-info{min-width:0;}
+.padrao-info h3{font-size:14px;font-weight:700;overflow-wrap:anywhere;}
+.padrao-info p{font-size:11px;color:var(--text2);overflow-wrap:anywhere;}
+.padrao-sem-exemplo{font-size:11.5px;color:var(--text2);font-style:italic;line-height:1.4;padding:8px 10px;background:var(--paper-2);border-radius:10px;}
+.padroes-base{font-size:11px;color:var(--text2);line-height:1.4;margin:-4px 0 10px;}
 .padrao-detail{display:none;border-top:1px solid var(--line-soft);padding-top:12px;margin-top:2px;}
 .padrao-card.open .padrao-detail{display:block;}
 .padrao-dica{background:var(--amber-light);border-radius:10px;padding:10px 12px;font-size:13px;color:#7A5212;line-height:1.5;margin-bottom:10px;border-left:3px solid var(--ember-deep);}
@@ -1163,6 +1180,7 @@ html[data-theme="dark"] .fb-caderno{color:var(--ember);}
           <p>Metodologia e tópicos de alta incidência CTSP 2024/2025</p>
         </div>
         <div class="sec-title">Tipos de questão</div>
+        <div class="padroes-base">Medido nas <b>2 últimas provas</b> (109 questões): Caderno do Edital 004/2025 e a prova anterior. Duas provas são pouca base — onde a amostra não sustenta um percentual, mostramos a contagem crua.</div>
         <div id="padroes-lista"></div>
         <div class="sec-title mt14">Tópicos de alta incidência</div>
         <div class="incidencia-card" id="incidencia-lista"></div>
@@ -1444,6 +1462,32 @@ function mostrarAlertaConexao(on){
 let userCards={};
 let allQuestoes={},allFlashcards={};
 let quizQueue=[],quizIdx=0,quizArea='TODAS',quizSessao={c:0,t:0},quizAnswered=false,quizModoErro=false;
+
+// S53 TEMPO POR QUESTÃO (bloco31) — a prova dá 3 min por questão (60Q em 3h).
+// Mede o ritmo real para o militar saber se cabe no orçamento de tempo da prova.
+// A amostra é limitada a [1s, 600s]: abaixo é clique acidental, acima é celular
+// largado na mesa — nos dois casos a leitura não representa ritmo de prova.
+// Chaves gravadas ('soma'/'n') não têm ponto: seguras como chave de Firebase.
+const TEMPO_PROVA_POR_Q = 180; // segundos por questão na prova real
+let quizQT0 = 0;               // instante em que a questão atual apareceu
+function registrarTempoQuestao(){
+  if(!quizQT0)return;
+  const s=Math.round((Date.now()-quizQT0)/1000);
+  quizQT0=0;                                   // consome: não conta 2x na mesma questão
+  if(!(s>0))return;
+  const amostra=Math.min(600,Math.max(1,s));
+  if(!userStats.tempoQ)userStats.tempoQ={soma:0,n:0};
+  userStats.tempoQ.soma=(userStats.tempoQ.soma||0)+amostra;
+  userStats.tempoQ.n=(userStats.tempoQ.n||0)+1;
+}
+function tempoMedioQuestao(){
+  const t=userStats.tempoQ;
+  return (t&&t.n>0)?t.soma/t.n:0;
+}
+function fmtRitmo(seg){
+  const m=Math.floor(seg/60),s=Math.round(seg%60);
+  return m>0?`${m}min${String(s).padStart(2,'0')}s`:`${s}s`;
+}
 let simQuestoes=[],simRespostas={},simOrdem={},simIdx=0,simTimer=null,simTempo=10800,simModo='completo';
 let resumosQueue=[],resumoAtualIdx=0;
 
@@ -1492,18 +1536,39 @@ function ordemEmbaralhada(q){const ops=q.ops||[];const todos=ops.map((_,i)=>i);c
 
 // ── F2.2 BKT — P(saber) por tópico ──
 const BKT_P={L0:0.30,T:0.15,S:0.10,G:0.20}; // G≈1/5 opções
+
+// S52 DECAIMENTO TEMPORAL (bloco31) — domínio envelhece quando não se revisa.
+// Problema que isso resolve: quem acertou um tópico em maio aparecia com domínio
+// alto em julho sem ter revisado nada. O BKT puro só se move quando há resposta.
+// Modelo: o excedente sobre o prior L0 decai por MEIA-VIDA (30 dias).
+//   pL_efetivo = L0 + (pL - L0) * 0,5^(dias/30)
+// Regras deliberadas:
+//   • só decai PARA BAIXO, e nunca abaixo de L0 — ficar sem estudar não pode
+//     "melhorar" um tópico ruim (se pL <= L0, devolve pL intacto);
+//   • é PURO: não reescreve o que está gravado. O banco guarda pL cru + `last`;
+//     o decaimento é aplicado só na LEITURA. Assim nada é perdido e é reversível.
+//   • sem `last` (registro antigo) não decai — não inventar histórico.
+const BKT_MEIA_VIDA_MS = 30 * 24 * 60 * 60 * 1000;
+function bktPLefetivo(b) {
+  if (!b || typeof b.pL !== 'number') return BKT_P.L0;
+  if (!b.last || b.pL <= BKT_P.L0) return b.pL;
+  const decorrido = Date.now() - b.last;
+  if (!(decorrido > 0)) return b.pL;                     // relógio adiantado: ignora
+  const fator = Math.pow(0.5, decorrido / BKT_MEIA_VIDA_MS);
+  return Math.max(BKT_P.L0, BKT_P.L0 + (b.pL - BKT_P.L0) * fator);
+}
 function bktUpdate(topico,acertou){
   if(!topico)return;
   if(!userStats.bkt)userStats.bkt={};
   const cur=userStats.bkt[topico]||{pL:BKT_P.L0,n:0};
-  const pL=cur.pL;
+  const pL=bktPLefetivo(cur); // parte do domínio JÁ envelhecido, depois atualiza
   const post=acertou
     ? (pL*(1-BKT_P.S))/(pL*(1-BKT_P.S)+(1-pL)*BKT_P.G)
     : (pL*BKT_P.S)/(pL*BKT_P.S+(1-pL)*(1-BKT_P.G));
   const pLnew=post+(1-post)*BKT_P.T;
   userStats.bkt[topico]={pL:Math.min(0.99,Math.max(0.01,pLnew)),n:(cur.n||0)+1,last:Date.now()};
 }
-function bktDe(topico){const b=userStats.bkt&&userStats.bkt[topico];return b?b.pL:BKT_P.L0;}
+function bktDe(topico){const b=userStats.bkt&&userStats.bkt[topico];return b?bktPLefetivo(b):BKT_P.L0;}
 
 // ── F2.3 FSRS-lite (questões): estabilidade S e dificuldade D ──
 function fsrsUpdate(card,acertou){
@@ -1547,7 +1612,8 @@ function perfilTopicos(){
   Object.values(allQuestoes).forEach(q=>{if(q.topico)cont[q.topico]=(cont[q.topico]||0)+1;});
   return Object.keys(TOPICOS).map(t=>{
     const b=userStats.bkt&&userStats.bkt[t];
-    return{t,nome:TOPICOS[t].n,area:TOPICOS[t].a,pL:b?b.pL:BKT_P.L0,n:b?b.n:0,nQ:cont[t]||0};
+    // pL já com decaimento temporal (S52) — todo consumidor de perfil herda isso.
+    return{t,nome:TOPICOS[t].n,area:TOPICOS[t].a,pL:b?bktPLefetivo(b):BKT_P.L0,n:b?b.n:0,nQ:cont[t]||0};
   });
 }
 
@@ -1762,7 +1828,7 @@ function renderProntidao(){
 // ── S35 BACKUP: exportação e restauração do progresso ──
 function exportarProgresso(){
   try{
-    const payload={app:'ctsp-estudos',versao:'v1.80',exportadoEm:new Date().toISOString(),userStats,userCards};
+    const payload={app:'ctsp-estudos',versao:'v1.82',exportadoEm:new Date().toISOString(),userStats,userCards};
     const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
     const url=URL.createObjectURL(blob);
     const a=document.createElement('a');
@@ -1813,27 +1879,43 @@ const AI={
 // ═══════════════════════════════
 // PADRÕES DAS PROVAS
 // ═══════════════════════════════
+// S55 PADRÕES (bloco31) — MEDIDOS nas duas provas reais, não estimados.
+// Base: 109 questões (Caderno do Edital 004/ABM-DENS/2025 + prova anterior).
+// Script auditável, com o gatilho de cada classificação questão a questão, em
+// `materiais/entregas/_analise/classificar_tipos.py`.
+//
+// CORREÇÃO CONCEITUAL: a tabela anterior misturava duas dimensões ortogonais numa
+// lista só — ESTRUTURA (como a resposta é montada) e POLARIDADE (se o enunciado
+// pede a correta ou a INCORRETA). "INCORRETA/EXCETO" não é um formato: é o
+// enunciado negado, e ocorre JUNTO de qualquer estrutura. Por isso agora é
+// marcado como TRANSVERSAL e não disputa percentual com os demais.
+//
+// HONESTIDADE DE AMOSTRA: 2 provas são pouca base. Onde o intervalo de confiança
+// de 95% (Wilson) é largo demais para cravar número, a interface mostra contagem
+// crua ou rótulo qualitativo — nunca um percentual de precisão falsa.
+// Números anteriores (38/22/18/12/10) não tinham lastro nas provas: em especial
+// "Correspondência Ordenada 12%", formato que teve ZERO ocorrências nas duas.
 const PADROES=[
-{tipo:"INCORRETA / EXCETO",pct:38,corT:"var(--red)",
-dica:"Procure a alternativa que TROCA um número, palavra ou conceito. Geralmente a pegadinha é sutil — 'ÚTEIS' vs 'CORRIDOS', 'STJ' vs 'STM', 'VEDADO' vs 'FACULTADO'.",
-estrategia:"Leia cada alternativa assumindo que está errada. Identifique o elemento incorreto antes de marcar. Cuidado com sinônimos falsos.",
-exemplo:"a1_07"},
-{tipo:"Apenas I, II, III...",pct:22,corT:"var(--amber)",
-dica:"Analise CADA item individualmente, não o conjunto. Um único item errado elimina a alternativa.",
-estrategia:"Avalie item por item. Se encontrar um errado, riscando mentalmente, já elimina todas as alternativas que o incluem.",
+{tipo:"Alternativa Direta",pct:83,medida:"83%",nota:"91 de 109 questões · faixa provável 75–89%",corT:"var(--green)",
+dica:"É o formato dominante da prova, com folga: quatro ou cinco alternativas independentes e só uma satisfaz o enunciado.",
+estrategia:"Responda pelo que sabe e não complique. Se duas parecem certas, a mais específica e mais literal à norma costuma ser a correta.",
+exemplo:"a1_01"},
+{tipo:"Apenas I, II, III...",pct:13,medida:"13%",nota:"14 de 109 questões · faixa provável 8–20%",corT:"var(--amber)",
+dica:"Itens em algarismo romano e alternativas que os combinam. Um único item errado elimina toda alternativa que o contenha.",
+estrategia:"Avalie item por item, nunca o conjunto. Ao achar um item falso, risque de uma vez todas as alternativas que o incluem.",
 exemplo:"a1_13"},
-{tipo:"V/F Sequencial",pct:18,corT:"var(--at3)",
-dica:"Um único item errado na sequência invalida várias alternativas de uma vez. Comece pelos que você tem certeza.",
-estrategia:"Identifique os itens mais fáceis primeiro. Use eliminação progressiva. Um F certo ou V certo já reduz as opções.",
-exemplo:"a3_09"},
-{tipo:"Correspondência Ordenada",pct:12,corT:"var(--at4)",
-dica:"Decoreba pura de sequências e conceitos. Foco nos atos de movimentação, rotinas e protocolos em ordem.",
-estrategia:"Monte um mnemônico para a sequência. Ex: POP Salvamento = 'Ação-Dim-Ger-Esta-Ace-Av-Tri-Des-Ext-AvS-Trans-Enc'",
-exemplo:"a3_14"},
-{tipo:"Alternativa Direta",pct:10,corT:"var(--green)",
-dica:"Questão objetiva, sem armadilha. Confia no conhecimento básico. Não complique.",
-estrategia:"Responda pelo que sabe. Se duas alternativas parecem certas, a mais específica e literal geralmente é a correta.",
-exemplo:"a1_01"}
+{tipo:"Enunciado negativo (INCORRETA / EXCETO)",pct:17,medida:"17%",nota:"19 de 109 · TRANSVERSAL: vem junto de qualquer formato acima, não é um tipo à parte",corT:"var(--red)",transversal:true,
+dica:"Não é um formato: é o enunciado pedindo a alternativa ERRADA. A pegadinha costuma ser sutil — 'ÚTEIS' vs 'CORRIDOS', 'VEDADO' vs 'FACULTADO'.",
+estrategia:"Marque a palavra INCORRETA/EXCETO antes de ler as alternativas. Depois leia cada uma assumindo que está certa: a que destoar da norma é a resposta.",
+exemplo:"a1_07"},
+{tipo:"V/F Sequencial",pct:4,medida:"raro",nota:"4 de 109 questões — amostra pequena demais para cravar percentual",corT:"var(--at3)",
+dica:"Marcar ( ) V ou F e escolher a sequência. Apareceu pouco nas duas últimas provas, mas vale reconhecer o formato.",
+estrategia:"Comece pelos itens de que você tem certeza: um V ou F certo já derruba várias sequências de uma vez.",
+exemplo:null},
+{tipo:"Correspondência Ordenada",pct:0,medida:"não caiu",nota:"0 de 109 questões nas provas de 2024 e 2025 — não priorize este formato",corT:"var(--text3)",
+dica:"Casar colunas ou numerar itens em ordem. NÃO apareceu em nenhuma das duas últimas provas analisadas.",
+estrategia:"Não vale gastar tempo treinando este formato. Fica listado apenas para você reconhecê-lo caso a banca mude o padrão.",
+exemplo:null}
 ];
 
 // INCIDENCIA vive em data.js (Bloco A — dado fora da lógica)
@@ -2756,6 +2838,7 @@ function renderQuizQ(){
   document.getElementById('quiz-q-doc').textContent=q.doc||'';questaoAtualId=q.id;
   document.getElementById('quiz-prog-fill').style.width=(quizIdx/tot*100)+'%';
   document.getElementById('quiz-score-v').textContent=quizSessao.c+'/'+quizSessao.t;
+  quizQT0=Date.now(); // S53: começa a cronometrar esta questão
   const opts=document.getElementById('quiz-opts');
   const letras=['A','B','C','D','E'];
 
@@ -2791,6 +2874,7 @@ function renderQuizQ(){
 async function responderQuiz(idx){
   if(quizAnswered)return;
   quizAnswered=true;
+  registrarTempoQuestao(); // S53: fecha o cronômetro antes de qualquer await
   const q=quizQueue[quizIdx];
   const correta=q._shuffledG!==undefined?q._shuffledG:q.g;
   const acertou=idx===correta;
@@ -2902,7 +2986,11 @@ function finishQuiz(){
     return;
   }
   renderDashboard();
-  showToast(`Sessão encerrada: ${quizSessao.c}/${quizSessao.t} acertos`);
+  // S53: devolve o ritmo junto do placar — só avisa quando estoura o orçamento
+  // de 3 min/questão da prova, para não virar cobrança em quem já está dentro.
+  const md=tempoMedioQuestao();
+  const ritmo=md?` · ritmo ${fmtRitmo(md)}/questão${md>TEMPO_PROVA_POR_Q?' (acima dos 3min da prova)':''}`:'';
+  showToast(`Sessão encerrada: ${quizSessao.c}/${quizSessao.t} acertos${ritmo}`);
 }
 
 // ═══════════════════════════════
@@ -3426,15 +3514,19 @@ function voltarSimHome(){
 // ═══════════════════════════════
 function renderPadroes(){
   const lista=document.getElementById('padroes-lista');
+  // S55: a medida vira texto (pode ser "raro"/"não caiu") e a nota carrega a base
+  // amostral. Sem exemplo no banco, o botão dá lugar a uma explicação honesta em
+  // vez de um botão que abriria uma questão do tipo errado.
   lista.innerHTML=PADROES.map((p,i)=>`<div class="padrao-card" id="pad-${i}" onclick="togglePadrao(${i})">
     <div class="padrao-top">
-      <div class="padrao-pct-badge" style="background:color-mix(in srgb, ${p.corT} 14%, transparent);color:${p.corT}">${p.pct}%</div>
-      <div class="padrao-info"><h3>${sanitize(p.tipo)}</h3><p>das questões da prova</p></div>
+      <div class="padrao-pct-badge" style="background:color-mix(in srgb, ${p.corT} 14%, transparent);color:${p.corT}">${sanitize(p.medida)}</div>
+      <div class="padrao-info"><h3>${sanitize(p.tipo)}</h3><p>${sanitize(p.nota)}</p></div>
     </div>
     <div class="padrao-detail">
       <div class="padrao-dica"><strong>Dica:</strong> ${sanitize(p.dica)}</div>
       <div class="padrao-estrategia"><strong>Estratégia:</strong> ${sanitize(p.estrategia)}</div>
-      <button class="padrao-exemplo-btn" onclick="event.stopPropagation();mostrarExemplo('${p.exemplo}')">Ver exemplo real →</button>
+      ${p.exemplo?`<button class="padrao-exemplo-btn" onclick="event.stopPropagation();mostrarExemplo('${p.exemplo}')">Ver exemplo real →</button>`
+                 :`<div class="padrao-sem-exemplo">Sem exemplo no banco: este formato não aparece nas provas analisadas.</div>`}
     </div>
   </div>`).join('');
 
@@ -4191,6 +4283,43 @@ function showToast(msg){
   setTimeout(()=>t.classList.remove('show'),2500);
 }
 
+// S54 A11Y (bloco31) — cards clicáveis alcançáveis por teclado.
+// Boa parte da UI é montada por template string, então anotar as ~33 marcações à
+// mão resolveria hoje e quebraria no próximo card. Em vez disso, uma passada varre
+// o DOM e promove todo elemento com `onclick` que não é focável por natureza.
+// Exclusões: overlay e box de modal — o overlay fecha ao clicar no fundo e a box é
+// só contêiner; ambos viram armadilha na ordem de tabulação se entrarem nela.
+const A11Y_IGNORA='.modal-overlay,.modal-box';
+function aplicarAcessibilidadeTeclado(raiz){
+  const alvo=raiz||document.getElementById('app');
+  if(!alvo||!alvo.querySelectorAll)return 0;
+  let n=0;
+  alvo.querySelectorAll('[onclick]').forEach(el=>{
+    const t=(el.tagName||'').toLowerCase();
+    if(t==='button'||t==='a'||t==='input'||t==='select'||t==='textarea')return; // já focável
+    if(el.matches&&el.matches(A11Y_IGNORA))return;
+    if(!el.hasAttribute('tabindex')){el.setAttribute('tabindex','0');n++;}
+    if(!el.hasAttribute('role'))el.setAttribute('role','button');
+  });
+  return n;
+}
+// O app troca listas inteiras por innerHTML, então reaplica após cada re-render.
+// Observa só childList/subtree — NÃO observa atributos, senão o setAttribute
+// acima realimentaria o observer em laço infinito.
+let _a11yAgendado=false;
+function agendarAcessibilidade(){
+  if(_a11yAgendado)return;
+  _a11yAgendado=true;
+  requestAnimationFrame(()=>{_a11yAgendado=false;aplicarAcessibilidadeTeclado();});
+}
+document.addEventListener('DOMContentLoaded',()=>{
+  aplicarAcessibilidadeTeclado();
+  const raiz=document.getElementById('app');
+  if(raiz&&window.MutationObserver){
+    new MutationObserver(agendarAcessibilidade).observe(raiz,{childList:true,subtree:true});
+  }
+});
+
 // S35 A11Y — Atalhos de teclado: Enter no login · 1–5 responde o quiz · Enter avança
 document.addEventListener('keydown',e=>{
   const tag=(e.target&&e.target.tagName||'').toLowerCase();
@@ -4200,6 +4329,15 @@ document.addEventListener('keydown',e=>{
       if(tl&&!tl.classList.contains('hidden'))doLogin();
     }
     return; // digitando em campo: não interceptar
+  }
+  // S54: Enter/Espaço ativam o card focado. Fica ANTES do guard de modal (card
+  // dentro de modal também precisa responder) e devolve cedo, para o atalho
+  // genérico de Enter não disparar junto e causar ação dupla.
+  const cardFocado=e.target&&e.target.closest?e.target.closest('[role="button"][tabindex]'):null;
+  if(cardFocado&&(e.key==='Enter'||e.key===' '||e.key==='Spacebar')){
+    e.preventDefault(); // Espaço não pode rolar a página
+    cardFocado.click();
+    return;
   }
   if(document.querySelector('.modal-overlay:not(.hidden)'))return; // modal aberto: não interceptar
   if(e.key==='Enter'){
