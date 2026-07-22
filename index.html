@@ -1455,6 +1455,32 @@ function mostrarAlertaConexao(on){
 let userCards={};
 let allQuestoes={},allFlashcards={};
 let quizQueue=[],quizIdx=0,quizArea='TODAS',quizSessao={c:0,t:0},quizAnswered=false,quizModoErro=false;
+
+// S53 TEMPO POR QUESTÃO (bloco31) — a prova dá 3 min por questão (60Q em 3h).
+// Mede o ritmo real para o militar saber se cabe no orçamento de tempo da prova.
+// A amostra é limitada a [1s, 600s]: abaixo é clique acidental, acima é celular
+// largado na mesa — nos dois casos a leitura não representa ritmo de prova.
+// Chaves gravadas ('soma'/'n') não têm ponto: seguras como chave de Firebase.
+const TEMPO_PROVA_POR_Q = 180; // segundos por questão na prova real
+let quizQT0 = 0;               // instante em que a questão atual apareceu
+function registrarTempoQuestao(){
+  if(!quizQT0)return;
+  const s=Math.round((Date.now()-quizQT0)/1000);
+  quizQT0=0;                                   // consome: não conta 2x na mesma questão
+  if(!(s>0))return;
+  const amostra=Math.min(600,Math.max(1,s));
+  if(!userStats.tempoQ)userStats.tempoQ={soma:0,n:0};
+  userStats.tempoQ.soma=(userStats.tempoQ.soma||0)+amostra;
+  userStats.tempoQ.n=(userStats.tempoQ.n||0)+1;
+}
+function tempoMedioQuestao(){
+  const t=userStats.tempoQ;
+  return (t&&t.n>0)?t.soma/t.n:0;
+}
+function fmtRitmo(seg){
+  const m=Math.floor(seg/60),s=Math.round(seg%60);
+  return m>0?`${m}min${String(s).padStart(2,'0')}s`:`${s}s`;
+}
 let simQuestoes=[],simRespostas={},simOrdem={},simIdx=0,simTimer=null,simTempo=10800,simModo='completo';
 let resumosQueue=[],resumoAtualIdx=0;
 
@@ -2789,6 +2815,7 @@ function renderQuizQ(){
   document.getElementById('quiz-q-doc').textContent=q.doc||'';questaoAtualId=q.id;
   document.getElementById('quiz-prog-fill').style.width=(quizIdx/tot*100)+'%';
   document.getElementById('quiz-score-v').textContent=quizSessao.c+'/'+quizSessao.t;
+  quizQT0=Date.now(); // S53: começa a cronometrar esta questão
   const opts=document.getElementById('quiz-opts');
   const letras=['A','B','C','D','E'];
 
@@ -2824,6 +2851,7 @@ function renderQuizQ(){
 async function responderQuiz(idx){
   if(quizAnswered)return;
   quizAnswered=true;
+  registrarTempoQuestao(); // S53: fecha o cronômetro antes de qualquer await
   const q=quizQueue[quizIdx];
   const correta=q._shuffledG!==undefined?q._shuffledG:q.g;
   const acertou=idx===correta;
@@ -2935,7 +2963,11 @@ function finishQuiz(){
     return;
   }
   renderDashboard();
-  showToast(`Sessão encerrada: ${quizSessao.c}/${quizSessao.t} acertos`);
+  // S53: devolve o ritmo junto do placar — só avisa quando estoura o orçamento
+  // de 3 min/questão da prova, para não virar cobrança em quem já está dentro.
+  const md=tempoMedioQuestao();
+  const ritmo=md?` · ritmo ${fmtRitmo(md)}/questão${md>TEMPO_PROVA_POR_Q?' (acima dos 3min da prova)':''}`:'';
+  showToast(`Sessão encerrada: ${quizSessao.c}/${quizSessao.t} acertos${ritmo}`);
 }
 
 // ═══════════════════════════════
