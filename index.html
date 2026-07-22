@@ -532,9 +532,15 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 .padroes-header p{font-size:12px;opacity:.72;}
 .padrao-card{background:var(--surface);border:1px solid var(--line-soft);border-radius:14px;padding:14px;box-shadow:var(--shadow);margin-bottom:10px;cursor:pointer;}
 .padrao-top{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
-.padrao-pct-badge{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:16px;font-weight:700;flex-shrink:0;font-variant-numeric:tabular-nums;}
-.padrao-info h3{font-size:14px;font-weight:700;}
-.padrao-info p{font-size:11px;color:var(--text2);}
+/* S55: a badge deixou de ser só "38%" — agora carrega medida qualitativa
+   ("raro", "não caiu") quando a amostra não sustenta percentual. Largura passa a
+   ser flexível, com piso de 46px para manter o alinhamento das que são número. */
+.padrao-pct-badge{min-width:46px;max-width:92px;min-height:46px;padding:6px 8px;border-radius:12px;display:flex;align-items:center;justify-content:center;text-align:center;font-family:var(--font-display);font-size:15px;font-weight:700;line-height:1.15;flex-shrink:0;font-variant-numeric:tabular-nums;overflow-wrap:anywhere;}
+.padrao-info{min-width:0;}
+.padrao-info h3{font-size:14px;font-weight:700;overflow-wrap:anywhere;}
+.padrao-info p{font-size:11px;color:var(--text2);overflow-wrap:anywhere;}
+.padrao-sem-exemplo{font-size:11.5px;color:var(--text2);font-style:italic;line-height:1.4;padding:8px 10px;background:var(--paper-2);border-radius:10px;}
+.padroes-base{font-size:11px;color:var(--text2);line-height:1.4;margin:-4px 0 10px;}
 .padrao-detail{display:none;border-top:1px solid var(--line-soft);padding-top:12px;margin-top:2px;}
 .padrao-card.open .padrao-detail{display:block;}
 .padrao-dica{background:var(--amber-light);border-radius:10px;padding:10px 12px;font-size:13px;color:#7A5212;line-height:1.5;margin-bottom:10px;border-left:3px solid var(--ember-deep);}
@@ -1174,6 +1180,7 @@ html[data-theme="dark"] .fb-caderno{color:var(--ember);}
           <p>Metodologia e tópicos de alta incidência CTSP 2024/2025</p>
         </div>
         <div class="sec-title">Tipos de questão</div>
+        <div class="padroes-base">Medido nas <b>2 últimas provas</b> (109 questões): Caderno do Edital 004/2025 e a prova anterior. Duas provas são pouca base — onde a amostra não sustenta um percentual, mostramos a contagem crua.</div>
         <div id="padroes-lista"></div>
         <div class="sec-title mt14">Tópicos de alta incidência</div>
         <div class="incidencia-card" id="incidencia-lista"></div>
@@ -1821,7 +1828,7 @@ function renderProntidao(){
 // ── S35 BACKUP: exportação e restauração do progresso ──
 function exportarProgresso(){
   try{
-    const payload={app:'ctsp-estudos',versao:'v1.81',exportadoEm:new Date().toISOString(),userStats,userCards};
+    const payload={app:'ctsp-estudos',versao:'v1.82',exportadoEm:new Date().toISOString(),userStats,userCards};
     const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
     const url=URL.createObjectURL(blob);
     const a=document.createElement('a');
@@ -1872,27 +1879,43 @@ const AI={
 // ═══════════════════════════════
 // PADRÕES DAS PROVAS
 // ═══════════════════════════════
+// S55 PADRÕES (bloco31) — MEDIDOS nas duas provas reais, não estimados.
+// Base: 109 questões (Caderno do Edital 004/ABM-DENS/2025 + prova anterior).
+// Script auditável, com o gatilho de cada classificação questão a questão, em
+// `materiais/entregas/_analise/classificar_tipos.py`.
+//
+// CORREÇÃO CONCEITUAL: a tabela anterior misturava duas dimensões ortogonais numa
+// lista só — ESTRUTURA (como a resposta é montada) e POLARIDADE (se o enunciado
+// pede a correta ou a INCORRETA). "INCORRETA/EXCETO" não é um formato: é o
+// enunciado negado, e ocorre JUNTO de qualquer estrutura. Por isso agora é
+// marcado como TRANSVERSAL e não disputa percentual com os demais.
+//
+// HONESTIDADE DE AMOSTRA: 2 provas são pouca base. Onde o intervalo de confiança
+// de 95% (Wilson) é largo demais para cravar número, a interface mostra contagem
+// crua ou rótulo qualitativo — nunca um percentual de precisão falsa.
+// Números anteriores (38/22/18/12/10) não tinham lastro nas provas: em especial
+// "Correspondência Ordenada 12%", formato que teve ZERO ocorrências nas duas.
 const PADROES=[
-{tipo:"INCORRETA / EXCETO",pct:38,corT:"var(--red)",
-dica:"Procure a alternativa que TROCA um número, palavra ou conceito. Geralmente a pegadinha é sutil — 'ÚTEIS' vs 'CORRIDOS', 'STJ' vs 'STM', 'VEDADO' vs 'FACULTADO'.",
-estrategia:"Leia cada alternativa assumindo que está errada. Identifique o elemento incorreto antes de marcar. Cuidado com sinônimos falsos.",
-exemplo:"a1_07"},
-{tipo:"Apenas I, II, III...",pct:22,corT:"var(--amber)",
-dica:"Analise CADA item individualmente, não o conjunto. Um único item errado elimina a alternativa.",
-estrategia:"Avalie item por item. Se encontrar um errado, riscando mentalmente, já elimina todas as alternativas que o incluem.",
+{tipo:"Alternativa Direta",pct:83,medida:"83%",nota:"91 de 109 questões · faixa provável 75–89%",corT:"var(--green)",
+dica:"É o formato dominante da prova, com folga: quatro ou cinco alternativas independentes e só uma satisfaz o enunciado.",
+estrategia:"Responda pelo que sabe e não complique. Se duas parecem certas, a mais específica e mais literal à norma costuma ser a correta.",
+exemplo:"a1_01"},
+{tipo:"Apenas I, II, III...",pct:13,medida:"13%",nota:"14 de 109 questões · faixa provável 8–20%",corT:"var(--amber)",
+dica:"Itens em algarismo romano e alternativas que os combinam. Um único item errado elimina toda alternativa que o contenha.",
+estrategia:"Avalie item por item, nunca o conjunto. Ao achar um item falso, risque de uma vez todas as alternativas que o incluem.",
 exemplo:"a1_13"},
-{tipo:"V/F Sequencial",pct:18,corT:"var(--at3)",
-dica:"Um único item errado na sequência invalida várias alternativas de uma vez. Comece pelos que você tem certeza.",
-estrategia:"Identifique os itens mais fáceis primeiro. Use eliminação progressiva. Um F certo ou V certo já reduz as opções.",
-exemplo:"a3_09"},
-{tipo:"Correspondência Ordenada",pct:12,corT:"var(--at4)",
-dica:"Decoreba pura de sequências e conceitos. Foco nos atos de movimentação, rotinas e protocolos em ordem.",
-estrategia:"Monte um mnemônico para a sequência. Ex: POP Salvamento = 'Ação-Dim-Ger-Esta-Ace-Av-Tri-Des-Ext-AvS-Trans-Enc'",
-exemplo:"a3_14"},
-{tipo:"Alternativa Direta",pct:10,corT:"var(--green)",
-dica:"Questão objetiva, sem armadilha. Confia no conhecimento básico. Não complique.",
-estrategia:"Responda pelo que sabe. Se duas alternativas parecem certas, a mais específica e literal geralmente é a correta.",
-exemplo:"a1_01"}
+{tipo:"Enunciado negativo (INCORRETA / EXCETO)",pct:17,medida:"17%",nota:"19 de 109 · TRANSVERSAL: vem junto de qualquer formato acima, não é um tipo à parte",corT:"var(--red)",transversal:true,
+dica:"Não é um formato: é o enunciado pedindo a alternativa ERRADA. A pegadinha costuma ser sutil — 'ÚTEIS' vs 'CORRIDOS', 'VEDADO' vs 'FACULTADO'.",
+estrategia:"Marque a palavra INCORRETA/EXCETO antes de ler as alternativas. Depois leia cada uma assumindo que está certa: a que destoar da norma é a resposta.",
+exemplo:"a1_07"},
+{tipo:"V/F Sequencial",pct:4,medida:"raro",nota:"4 de 109 questões — amostra pequena demais para cravar percentual",corT:"var(--at3)",
+dica:"Marcar ( ) V ou F e escolher a sequência. Apareceu pouco nas duas últimas provas, mas vale reconhecer o formato.",
+estrategia:"Comece pelos itens de que você tem certeza: um V ou F certo já derruba várias sequências de uma vez.",
+exemplo:null},
+{tipo:"Correspondência Ordenada",pct:0,medida:"não caiu",nota:"0 de 109 questões nas provas de 2024 e 2025 — não priorize este formato",corT:"var(--text3)",
+dica:"Casar colunas ou numerar itens em ordem. NÃO apareceu em nenhuma das duas últimas provas analisadas.",
+estrategia:"Não vale gastar tempo treinando este formato. Fica listado apenas para você reconhecê-lo caso a banca mude o padrão.",
+exemplo:null}
 ];
 
 // INCIDENCIA vive em data.js (Bloco A — dado fora da lógica)
@@ -3491,15 +3514,19 @@ function voltarSimHome(){
 // ═══════════════════════════════
 function renderPadroes(){
   const lista=document.getElementById('padroes-lista');
+  // S55: a medida vira texto (pode ser "raro"/"não caiu") e a nota carrega a base
+  // amostral. Sem exemplo no banco, o botão dá lugar a uma explicação honesta em
+  // vez de um botão que abriria uma questão do tipo errado.
   lista.innerHTML=PADROES.map((p,i)=>`<div class="padrao-card" id="pad-${i}" onclick="togglePadrao(${i})">
     <div class="padrao-top">
-      <div class="padrao-pct-badge" style="background:color-mix(in srgb, ${p.corT} 14%, transparent);color:${p.corT}">${p.pct}%</div>
-      <div class="padrao-info"><h3>${sanitize(p.tipo)}</h3><p>das questões da prova</p></div>
+      <div class="padrao-pct-badge" style="background:color-mix(in srgb, ${p.corT} 14%, transparent);color:${p.corT}">${sanitize(p.medida)}</div>
+      <div class="padrao-info"><h3>${sanitize(p.tipo)}</h3><p>${sanitize(p.nota)}</p></div>
     </div>
     <div class="padrao-detail">
       <div class="padrao-dica"><strong>Dica:</strong> ${sanitize(p.dica)}</div>
       <div class="padrao-estrategia"><strong>Estratégia:</strong> ${sanitize(p.estrategia)}</div>
-      <button class="padrao-exemplo-btn" onclick="event.stopPropagation();mostrarExemplo('${p.exemplo}')">Ver exemplo real →</button>
+      ${p.exemplo?`<button class="padrao-exemplo-btn" onclick="event.stopPropagation();mostrarExemplo('${p.exemplo}')">Ver exemplo real →</button>`
+                 :`<div class="padrao-sem-exemplo">Sem exemplo no banco: este formato não aparece nas provas analisadas.</div>`}
     </div>
   </div>`).join('');
 
