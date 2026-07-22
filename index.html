@@ -10,7 +10,7 @@
 <meta name="theme-color" content="#101B3D"/>
 <link rel="apple-touch-icon" href="img/icon.png"/>
 <title>Bombeiro CTSP 2026 — Plataforma de Estudos do CBMRS</title>
-<meta name="description" content="Plataforma de estudos para o CTSP 2026 do CBMRS: 454 questões auditadas contra a norma vigente, simulado no formato real da prova, flashcards com revisão espaçada e diagnóstico automático das suas áreas fracas."/>
+<meta name="description" content="Plataforma de estudos para o CTSP 2026 do CBMRS: 514 questões auditadas contra a norma vigente, simulado no formato real da prova, flashcards com revisão espaçada e diagnóstico automático das suas áreas fracas."/>
 <meta property="og:type" content="website"/>
 <meta property="og:site_name" content="Bombeiro CTSP"/>
 <meta property="og:title" content="Bombeiro CTSP 2026 — sua preparação, medida por área e por tópico"/>
@@ -1828,7 +1828,7 @@ function renderProntidao(){
 // ── S35 BACKUP: exportação e restauração do progresso ──
 function exportarProgresso(){
   try{
-    const payload={app:'ctsp-estudos',versao:'v1.82',exportadoEm:new Date().toISOString(),userStats,userCards};
+    const payload={app:'ctsp-estudos',versao:'v1.83',exportadoEm:new Date().toISOString(),userStats,userCards};
     const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
     const url=URL.createObjectURL(blob);
     const a=document.createElement('a');
