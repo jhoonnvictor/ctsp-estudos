@@ -362,6 +362,9 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 .area-evo-bar-wrap{flex:1;background:var(--paper-2);border-radius:6px;height:18px;overflow:hidden;}
 .area-evo-bar{height:100%;border-radius:6px;transition:width .4s;display:flex;align-items:center;justify-content:flex-end;padding-right:6px;}
 .area-evo-pct{font-size:10px;font-weight:800;color:white;}
+/* S57: coluna de valor com largura fixa — mantém as 5 linhas alinhadas e evita que
+   uma área com número curto pareça ter menos informação que as outras. */
+.area-evo-val{font-size:10.5px;font-weight:700;min-width:96px;text-align:right;flex-shrink:0;font-variant-numeric:tabular-nums;}
 .chart-bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;}
 .chart-bar{width:100%;background:rgba(16,27,61,.08);border-radius:6px 6px 0 0;transition:height .5s var(--ease-out);min-height:4px;}
 .chart-bar.hoje{background:linear-gradient(180deg,var(--ember),var(--red));}
@@ -1828,7 +1831,7 @@ function renderProntidao(){
 // ── S35 BACKUP: exportação e restauração do progresso ──
 function exportarProgresso(){
   try{
-    const payload={app:'ctsp-estudos',versao:'v1.83',exportadoEm:new Date().toISOString(),userStats,userCards};
+    const payload={app:'ctsp-estudos',versao:'v1.84',exportadoEm:new Date().toISOString(),userStats,userCards};
     const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
     const url=URL.createObjectURL(blob);
     const a=document.createElement('a');
@@ -2595,12 +2598,17 @@ function renderAreaEvolution(){
     } else {
       const pct=Math.round(c/t*100);
       const cor=pct>=80?'var(--green)':pct>=60?'var(--amber)':'var(--red)';
+      // S57 (bloco33): o percentual sai SEMPRE na coluna da direita, nunca dentro da
+      // barra. Antes, `pct>=20` mandava o número para dentro: as áreas acima de 20%
+      // ficavam com barra preenchida e rótulo branco, e as abaixo ficavam com um fio
+      // quase invisível e o número solto fora. Duas áreas pareciam ter dado e três
+      // pareciam vazias — foi lido como "faltando dados", quando os 130 respondidos
+      // sempre estiveram todos ali. Agora as 5 linhas têm a mesma anatomia, e a barra
+      // tem largura mínima para que 8% continue sendo visível como 8%, não como nada.
       html+=`<div class="area-evo-row">
         <div class="area-evo-label">${k}</div>
-        <div class="area-evo-bar-wrap"><div class="area-evo-bar" style="width:${pct}%;background:${cor}">
-          ${pct>=20?`<span class="area-evo-pct">${pct}%</span>`:''}
-        </div></div>
-        <span style="font-size:10.5px;font-weight:700;color:${cor};min-width:96px;text-align:right;">${pct>=20?'':pct+'% · '}${c}/${t} resp.</span>
+        <div class="area-evo-bar-wrap"><div class="area-evo-bar" style="width:${pct}%;min-width:${pct>0?'8px':'0'};background:${cor}"></div></div>
+        <span class="area-evo-val" style="color:${cor}">${pct}% · ${c}/${t} resp.</span>
       </div>`;
     }
   });
