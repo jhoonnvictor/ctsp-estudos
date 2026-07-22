@@ -383,6 +383,21 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 .cod-input:focus{outline:2px solid var(--ember);outline-offset:1px;border-color:var(--ember);}
 .cod-btn{flex-shrink:0;background:var(--navy);color:#fff;border-radius:10px;padding:9px 18px;font-size:13px;font-weight:800;}
 .cod-erro{font-size:11.5px;color:var(--red);font-weight:600;margin-top:6px;overflow-wrap:anywhere;}
+/* ═══ BLOCO 35 — diagnóstico por formato de questão ═══ */
+.fmt-ref{font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:12px;overflow-wrap:anywhere;}
+.fmt-grupo-tit{font-size:10.5px;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin:14px 0 8px;}
+.fmt-grupo-tit:first-child{margin-top:0;}
+.fmt-linha{margin-bottom:12px;max-width:100%;}
+.fmt-linha-top{display:flex;align-items:baseline;justify-content:space-between;gap:8px;}
+.fmt-nome{font-size:13px;font-weight:700;color:var(--text);min-width:0;overflow-wrap:anywhere;}
+.fmt-pct{font-size:14px;font-weight:800;color:var(--text);font-variant-numeric:tabular-nums;flex-shrink:0;}
+.fmt-amostra{font-size:11px;font-weight:600;color:var(--text3);flex-shrink:0;}
+.fmt-bar{height:7px;background:var(--paper-2);border-radius:6px;overflow:hidden;margin-top:6px;}
+.fmt-bar-fill{height:100%;border-radius:6px;transition:width .5s var(--ease-out);}
+.fmt-sub{font-size:11px;color:var(--text3);margin-top:5px;line-height:1.45;overflow-wrap:anywhere;}
+.fmt-rodape{font-size:11.5px;color:var(--text2);line-height:1.5;margin-top:16px;padding-top:12px;
+  border-top:1px solid var(--line-soft);overflow-wrap:anywhere;}
+.fmt-vazio{font-size:12.5px;color:var(--text2);line-height:1.5;overflow-wrap:anywhere;}
 
 /* Quick actions */
 .quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
@@ -1323,6 +1338,11 @@ html[data-theme="dark"] .fb-caderno{color:var(--ember);}
         <div class="sec-title">Tipos de questão</div>
         <div class="padroes-base">Medido nas <b>2 últimas provas</b> (109 questões): Caderno do Edital 004/2025 e a prova anterior. Duas provas são pouca base — onde a amostra não sustenta um percentual, mostramos a contagem crua.</div>
         <div id="padroes-lista"></div>
+        <!-- BLOCO 35: o espelho da tabela acima. Aquela mostra o que a PROVA cobra;
+             esta mostra como VOCÊ vai em cada formato. Sem esta, o usuário sabe que
+             17% da prova é de enunciado negativo mas não sabe se isso é problema dele. -->
+        <div class="sec-title mt14">Seu desempenho por formato <span class="info-btn" onclick="showInfo('formato')" aria-label="Mais informações">?</span></div>
+        <div class="incidencia-card" id="fmt-diag"></div>
         <div class="sec-title mt14">Tópicos de alta incidência</div>
         <div class="incidencia-card" id="incidencia-lista"></div>
         <div class="sec-title mt14">Domínio por tópico <span class="info-btn" onclick="showInfo('bkt')" aria-label="Mais informações">?</span></div>
@@ -2445,7 +2465,7 @@ async function loadFlashcards(){
 // S60: fonte ÚNICA da versão. Aparece nas Configurações e vai no backup exportado.
 // Bumpar SÓ aqui — antes o número vivia solto dentro do payload de exportação e não
 // tinha como o João conferir no aparelho se o deploy havia entrado.
-const APP_VERSAO='v1.88';
+const APP_VERSAO='v1.89';
 
 // ═══════════════════════════════
 // S60 DIA LOCAL (bloco33) — a meta diária não zerava
@@ -2916,6 +2936,181 @@ function focoContinuar(){
   if(prox)focoAbrirEtapa(prox.tipo,prox.id);
 }
 
+// ═══════════════════════════════════════════════════════════════
+// BLOCO 35 — DIAGNÓSTICO POR FORMATO DE QUESTÃO
+// ═══════════════════════════════════════════════════════════════
+// PARA QUE SERVE: descobrir se FORMATO é um problema seu. A medição do bloco 31
+// mostrou que a prova tem 13% de assertivas e 17% de enunciado negativo, enquanto o
+// banco tem 2% e 8%. O que ninguém sabe é se você ERRA mais nesses formatos. Sem esse
+// dado, qualquer "modo de treino por formato" seria obra construída no escuro.
+//
+// POR QUE SÓ MEDIÇÃO, SEM MODO DE TREINO: o banco tem 12 assertivas. Com a dose de
+// 10 questões/dia, um modo dedicado se esgota em pouco mais de uma sessão e vira
+// reconhecimento de questão, não treino de formato. Medir primeiro, decidir depois.
+//
+// POR QUE NÃO TOCA NO data.js: a classificação é DERIVADA do enunciado em tempo de
+// execução, com os mesmos gatilhos do `_analise/classificar_tipos.py`. Nenhum campo
+// novo nas 514 questões, nenhum `?v=` para bumpar, zero risco para o banco.
+//
+// ⚠️ NÃO AVISAR O FORMATO DURANTE A PRÁTICA (decisão registrada do João): dizer
+// "esta é uma questão de assertivas" treinaria uma muleta que a prova real não dá.
+// Medir e reportar DEPOIS: sim. Avisar ANTES: não.
+
+const FMT_ESTRUTURAS=['DIRETA','ASSERTIVAS','VF_SEQUENCIAL','CORRESPONDENCIA'];
+const FMT_NOMES={
+  DIRETA:'Alternativa direta',
+  ASSERTIVAS:'Apenas I, II, III…',
+  VF_SEQUENCIAL:'V/F sequencial',
+  CORRESPONDENCIA:'Correspondência'
+};
+// Amostra mínima para exibir PERCENTUAL. Abaixo disso a interface diz "amostra
+// pequena" — a lição do S55: nunca mostrar número que a base não sustenta.
+const FMT_MIN_AMOSTRA=10;
+
+function fmtSemAcento(s){
+  return String(s||'').normalize('NFKD').replace(/[̀-ͯ]/g,'');
+}
+// Gatilhos — espelho literal de G_* em classificar_tipos.py. Se um lado mudar, o
+// harness_formato.js acusa a divergência contra as 514 questões.
+const FMT_G_CORRESP=[/correlacion/i,/\bassocie\b/i,/relacione/i,/primeira coluna/i,
+                     /segunda coluna/i,/coluna\s*[12iI]{1,2}\b/i,/numere a coluna/i];
+const FMT_G_CAIXA_VF=/\(\s*\)/;
+const FMT_G_OPCAO_VF=/\b[VF]\s*[-–—,/]\s*[VF]\b/;
+const FMT_G_ROMANO_ITEM=/(?:^|[\s;.(])(I{1,3}|IV|V|VI{1,3}|IX|X)\s*[-–—.)]\s*/g;
+const FMT_G_OPCAO_ROMANO=[/\bapenas\s+[IV]/i,/\b[IV]{1,3}\s*,\s*[IV]{1,3}\b/i,
+                          /\b[IV]{1,3}\s+e\s+[IV]{1,3}\b/i,/\btodas as (assertivas|afirmativas)/i,
+                          /\bnenhuma das/i];
+const FMT_G_NEGATIVA=[/\bincorret/i,/\bexceto\b/i,/nao\s+e\s+corret/i,/nao\s+corresponde/i,
+                      /nao\s+se\s+aplica/i,/\bfalsa\b/i,/\bincorreto afirmar/i];
+
+function fmtAchou(lista,txt){return lista.some(rx=>rx.test(txt));}
+
+// Devolve {estrutura, negativa}. Ordem das regras importa: a primeira que casar decide.
+function classificarFormato(q){
+  const enun=String((q&&q.e)||'');
+  const ops=Array.isArray(q&&q.ops)?q.ops:[];
+  const e=fmtSemAcento(enun);
+  const o=fmtSemAcento(ops.join(' || '));
+  let estrutura;
+  if(fmtAchou(FMT_G_CORRESP,e)){
+    estrutura='CORRESPONDENCIA';
+  } else if(FMT_G_CAIXA_VF.test(e)&&FMT_G_OPCAO_VF.test(o)){
+    estrutura='VF_SEQUENCIAL';
+  } else {
+    // Precisa de >=2 itens DISTINTOS em romano NO ENUNCIADO e de opção que os
+    // referencie. As duas condições juntas evitam falso positivo de um "V -" solto
+    // no meio de texto normativo.
+    const marcas=new Set();
+    FMT_G_ROMANO_ITEM.lastIndex=0;          // regex global é stateful: zerar sempre
+    let m;
+    while((m=FMT_G_ROMANO_ITEM.exec(enun))!==null)marcas.add(m[1].toUpperCase());
+    estrutura=(marcas.size>=2&&fmtAchou(FMT_G_OPCAO_ROMANO,o))?'ASSERTIVAS':'DIRETA';
+  }
+  return{estrutura,negativa:fmtAchou(FMT_G_NEGATIVA,e)};
+}
+
+// Cache por id: classificar é regex sobre texto e roda a cada resposta e a cada
+// render do painel. Sem cache, a tela de Padrões reclassificaria as 514 toda vez.
+const _fmtCache={};
+function formatoDe(q){
+  if(!q)return null;
+  const k=q.id;
+  if(k&&_fmtCache[k])return _fmtCache[k];
+  const r=classificarFormato(q);
+  if(k)_fmtCache[k]=r;
+  return r;
+}
+
+// Registra UMA resposta. Chamada dos dois pontos que contabilizam acerto/erro.
+// Espelha a regra do S61: quem não respondeu não entra aqui — o chamador filtra.
+function registrarFormato(q,acertou){
+  if(!dataLoaded||!q)return;
+  const f=formatoDe(q);
+  if(!f)return;
+  userStats.fmt=userStats.fmt||{};
+  const bump=chave=>{
+    const b=userStats.fmt[chave]||{c:0,w:0};
+    if(acertou)b.c++;else b.w++;
+    userStats.fmt[chave]=b;
+  };
+  bump(f.estrutura);
+  bump(f.negativa?'NEGATIVA':'POSITIVA');
+}
+
+// Monta as linhas do diagnóstico. `pct` só vem preenchido quando a amostra sustenta.
+function diagnosticoFormato(){
+  const fmt=userStats.fmt||{};
+  const linha=(chave,nome)=>{
+    const b=fmt[chave]||{c:0,w:0};
+    const n=(b.c||0)+(b.w||0);
+    return{chave,nome,n,acertos:b.c||0,
+           pct:n>=FMT_MIN_AMOSTRA?Math.round(b.c/n*100):null,
+           noBanco:Object.values(allQuestoes).filter(q=>formatoDe(q).estrutura===chave).length};
+  };
+  const estruturas=FMT_ESTRUTURAS.map(k=>linha(k,FMT_NOMES[k])).filter(l=>l.noBanco>0);
+  const neg=fmt.NEGATIVA||{c:0,w:0},pos=fmt.POSITIVA||{c:0,w:0};
+  const nNeg=(neg.c||0)+(neg.w||0),nPos=(pos.c||0)+(pos.w||0);
+  return{
+    estruturas,
+    polaridade:{
+      negativa:{n:nNeg,pct:nNeg>=FMT_MIN_AMOSTRA?Math.round(neg.c/nNeg*100):null},
+      positiva:{n:nPos,pct:nPos>=FMT_MIN_AMOSTRA?Math.round(pos.c/nPos*100):null}
+    },
+    total:estruturas.reduce((s,l)=>s+l.n,0)
+  };
+}
+
+function renderDiagFormato(){
+  const el=document.getElementById('fmt-diag');
+  if(!el)return;
+  const d=diagnosticoFormato();
+  if(!d.total){
+    el.innerHTML='<div class="fmt-vazio">Responda algumas questões e esta seção passa a mostrar '
+      +'se você erra mais em algum formato de enunciado.</div>';
+    return;
+  }
+  // Referência honesta: a taxa geral do usuário. Sem ela, "72%" não diz nada.
+  const geral=(userStats.correct||0)+(userStats.wrong||0);
+  const pctGeral=geral>0?Math.round((userStats.correct||0)/geral*100):null;
+
+  const barra=l=>{
+    const medida=l.pct===null
+      ? `<span class="fmt-amostra">amostra pequena · ${l.n} resposta${l.n!==1?'s':''}</span>`
+      : `<span class="fmt-pct">${l.pct}%</span>`;
+    const larg=l.pct===null?0:l.pct;
+    // Só chama de "abaixo" quando a amostra sustenta E a diferença é material (5 p.p.).
+    const abaixo=l.pct!==null&&pctGeral!==null&&l.pct<pctGeral-5;
+    return `<div class="fmt-linha">
+      <div class="fmt-linha-top">
+        <span class="fmt-nome">${sanitize(l.nome)}</span>${medida}
+      </div>
+      <div class="fmt-bar"><div class="fmt-bar-fill" style="width:${larg}%;background:${abaixo?'var(--red)':'var(--green)'}"></div></div>
+      <div class="fmt-sub">${l.n} respondida${l.n!==1?'s':''} · ${l.noBanco} no banco${abaixo?' · <b>abaixo da sua média</b>':''}</div>
+    </div>`;
+  };
+
+  const p=d.polaridade;
+  const linhaPol=(rot,o,desc)=>{
+    const medida=o.pct===null
+      ? `<span class="fmt-amostra">amostra pequena · ${o.n}</span>`
+      : `<span class="fmt-pct">${o.pct}%</span>`;
+    return `<div class="fmt-linha">
+      <div class="fmt-linha-top"><span class="fmt-nome">${rot}</span>${medida}</div>
+      <div class="fmt-sub">${desc}</div>
+    </div>`;
+  };
+
+  el.innerHTML=
+    (pctGeral!==null?`<div class="fmt-ref">Sua média geral: <b>${pctGeral}%</b>. As barras abaixo comparam cada formato com ela.</div>`:'')
+    +'<div class="fmt-grupo-tit">Como a resposta é montada</div>'
+    +d.estruturas.map(barra).join('')
+    +'<div class="fmt-grupo-tit">O que o enunciado pede</div>'
+    +linhaPol('Pede a INCORRETA / EXCETO',p.negativa,'17% da prova real — o formato que mais derruba por desatenção.')
+    +linhaPol('Pede a correta',p.positiva,'A maioria das questões.')
+    +'<div class="fmt-rodape">A plataforma <b>não</b> avisa o formato enquanto você responde — de propósito. '
+    +'A prova real não avisa, e treinar com aviso cria uma muleta que some no dia.</div>';
+}
+
 // BLOCO 34 (item 3) — abrir um tópico pelo código impresso no ebook.
 // Mesma whitelist do deep link: regex + chave existente em TOPICOS. Nada digitado
 // pelo usuário chega ao DOM sem passar por este filtro.
@@ -3355,6 +3550,7 @@ async function responderQuiz(idx){
   if(!userStats.byArea[area])userStats.byArea[area]={correct:0,wrong:0};
   if(acertou)userStats.byArea[area].correct++;
   else userStats.byArea[area].wrong++;
+  registrarFormato(q,acertou); // BLOCO 35: diagnóstico por formato de enunciado
 
   // Marcar visto
   const seenKey=q.id+(acertou?'_C':'_E');
@@ -3853,6 +4049,9 @@ async function encerrarSimulado(){
     if(!userStats.byArea)userStats.byArea={};
     if(!userStats.byArea[area])userStats.byArea[area]={correct:0,wrong:0};
     if(ac)userStats.byArea[area].correct++;else userStats.byArea[area].wrong++;
+    // BLOCO 35: fica DEPOIS do `if(!respondeu)return` acima — questão em branco não
+    // entra na medição de formato, mesma regra do S61 que vale para o BKT.
+    registrarFormato(q,ac);
     const sk=q.id+(ac?'_C':'_E'),ek=q.id+'_E';
     if(!userStats.seenIds)userStats.seenIds=[];
     if(!userStats.seenIds.includes(sk))userStats.seenIds.push(sk);
@@ -3987,6 +4186,7 @@ function voltarSimHome(){
 // PADRÕES
 // ═══════════════════════════════
 function renderPadroes(){
+  renderDiagFormato();   // BLOCO 35
   const lista=document.getElementById('padroes-lista');
   // S55: a medida vira texto (pode ser "raro"/"não caiu") e a nota carrega a base
   // amostral. Sem exemplo no banco, o botão dá lugar a uma explicação honesta em
@@ -4609,9 +4809,10 @@ function showInfo(tipo){
     dominio:'Índice composto: Quiz vale 50%, Cards 30% e Resumos 20%. O componente Quiz de cada área só entra no cálculo a partir de '+MIN_RESP_CONF+' respostas, para não inflar o domínio com poucas questões.',
     cobertura:'Progresso de percurso: quantos itens (questões, cards e resumos) de cada área você já tocou, dividido pelo total que existe. Diferente do desempenho — mede o quanto você já viu, não o quanto acertou.',
     bkt:'Probabilidade de você dominar cada tópico (modelo BKT). A cada resposta o sistema ajusta a estimativa considerando acerto por sorte (~20%) e erro por descuido (~10%). O Modo Adaptativo prioriza os tópicos com menor domínio.',
-    prontidao:'Estimativa de quantas das 60 questões você acertaria hoje: domínio BKT médio de cada área multiplicado pela cota do edital (AT1 14 · AT2 8 · AT3 14 · AT4 12 · AT5 12). É uma projeção estatística, não uma garantia. Abaixo de '+MIN_RESP_PRONT+' respostas ela é marcada como preliminar — quanto mais você responde, mais precisa fica. Defina a data da prova em Configurações para ver a contagem regressiva.'
+    prontidao:'Estimativa de quantas das 60 questões você acertaria hoje: domínio BKT médio de cada área multiplicado pela cota do edital (AT1 14 · AT2 8 · AT3 14 · AT4 12 · AT5 12). É uma projeção estatística, não uma garantia. Abaixo de '+MIN_RESP_PRONT+' respostas ela é marcada como preliminar — quanto mais você responde, mais precisa fica. Defina a data da prova em Configurações para ver a contagem regressiva.',
+    formato:'Compara sua taxa de acerto em cada FORMATO de enunciado com a sua média geral. O formato é deduzido do texto da questão pelas mesmas regras usadas para medir as 2 provas reais, então a comparação é maçã com maçã. Cada formato só mostra percentual a partir de '+FMT_MIN_AMOSTRA+' respostas — abaixo disso a base não sustenta um número e a tela diz "amostra pequena" em vez de inventar. Serve para responder uma pergunta só: formato é um problema seu, ou você erra igual em todos? A plataforma não avisa o formato enquanto você responde, de propósito — a prova real também não avisa.'
   };
-  const titulos={desempenho:'Histórico de Acertos por Área',evolucao:'Histórico de Acertos por Área',dominio:'Índice de Domínio Real',cobertura:'Cobertura do Edital',bkt:'Domínio por Tópico (BKT)',prontidao:'Projeção para a Prova'};
+  const titulos={desempenho:'Histórico de Acertos por Área',evolucao:'Histórico de Acertos por Área',dominio:'Índice de Domínio Real',cobertura:'Cobertura do Edital',bkt:'Domínio por Tópico (BKT)',prontidao:'Projeção para a Prova',formato:'Seu Desempenho por Formato'};
   let box=document.getElementById('info-tooltip');
   if(!box){
     box=document.createElement('div');
