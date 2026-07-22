@@ -550,6 +550,8 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 .padrao-info p{font-size:11px;color:var(--text2);overflow-wrap:anywhere;}
 .padrao-sem-exemplo{font-size:11.5px;color:var(--text2);font-style:italic;line-height:1.4;padding:8px 10px;background:var(--paper-2);border-radius:10px;}
 .padroes-base{font-size:11px;color:var(--text2);line-height:1.4;margin:-4px 0 10px;}
+/* S60: versão do app, discreta no fim das Configurações. */
+.config-versao{margin-top:18px;text-align:center;font-family:var(--font-display);font-size:11px;letter-spacing:.08em;color:var(--text3);text-transform:uppercase;}
 .padrao-detail{display:none;border-top:1px solid var(--line-soft);padding-top:12px;margin-top:2px;}
 .padrao-card.open .padrao-detail{display:block;}
 .padrao-dica{background:var(--amber-light);border-radius:10px;padding:10px 12px;font-size:13px;color:#7A5212;line-height:1.5;margin-bottom:10px;border-left:3px solid var(--ember-deep);}
@@ -1376,6 +1378,9 @@ html[data-theme="dark"] .fb-caderno{color:var(--ember);}
       <button class="btn-config-reset" style="color:var(--red);border-color:var(--red)" onclick="reiniciarEstudos()">Reiniciar</button>
     </div>
     <button class="btn-primary" style="margin-top:20px" onclick="salvarConfig()">Salvar</button>
+    <!-- S60: versão visível para conferir num relance se o deploy já entrou no ar.
+         Preenchida por JS a partir de APP_VERSAO — fonte única, não se desatualiza. -->
+    <div class="config-versao" id="config-versao">—</div>
   </div>
 </div>
 <script src="data.js?v=174"></script>
@@ -1837,7 +1842,7 @@ function renderProntidao(){
 // ── S35 BACKUP: exportação e restauração do progresso ──
 function exportarProgresso(){
   try{
-    const payload={app:'ctsp-estudos',versao:'v1.85',exportadoEm:new Date().toISOString(),userStats,userCards};
+    const payload={app:'ctsp-estudos',versao:APP_VERSAO,exportadoEm:new Date().toISOString(),userStats,userCards};
     const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
     const url=URL.createObjectURL(blob);
     const a=document.createElement('a');
@@ -2307,10 +2312,31 @@ async function loadFlashcards(){
 // ═══════════════════════════════
 // STREAK — conta por acesso após meia-noite
 // ═══════════════════════════════
+// S60: fonte ÚNICA da versão. Aparece nas Configurações e vai no backup exportado.
+// Bumpar SÓ aqui — antes o número vivia solto dentro do payload de exportação e não
+// tinha como o João conferir no aparelho se o deploy havia entrado.
+const APP_VERSAO='v1.86';
+
+// ═══════════════════════════════
+// S60 DIA LOCAL (bloco33) — a meta diária não zerava
+// ═══════════════════════════════
+// O app usava `new Date().toISOString().slice(0,10)` como chave do dia. Isso devolve
+// a data em UTC, e no Brasil (UTC−3) o dia UTC vira às 21h LOCAIS. Consequência: tudo
+// estudado das 21h à meia-noite era gravado no dia SEGUINTE. Quem estuda à noite —
+// plantão, depois do serviço — chegava no dia seguinte com o contador já cheio, e a
+// meta aparecia batida em 100% "desde sempre", sem nunca zerar de verdade.
+// O mesmo deslocamento afetava o painel HOJE, a sequência de dias e o gráfico de 7 dias.
+// Agora a chave usa os componentes LOCAIS da data: o dia vira à meia-noite de Brasília.
+function diaLocal(d){
+  const x=d||new Date();
+  const p=n=>String(n).padStart(2,'0');
+  return x.getFullYear()+'-'+p(x.getMonth()+1)+'-'+p(x.getDate());
+}
+
 function updateStreak(){
   const _el=document.getElementById('hdr-streak-n');if(_el)_el.textContent=(userStats.streak||0);
   if(!dataLoaded&&!progressoLocalOk)return; // S30 BUG-DATA: nunca incrementar/gravar sobre estado não carregado
-  const today=new Date().toISOString().slice(0,10);
+  const today=diaLocal();
   const last=userStats.lastAccessDate||userStats.lastStudyDate||'';
   if(last!==today){
     // Sequência real: dia imediatamente seguinte continua; pulou 1+ dia (ou 1º acesso) reinicia em 1.
@@ -2322,7 +2348,7 @@ function updateStreak(){
 }
 
 function registrarAtividade(acertou){
-  const today=new Date().toISOString().slice(0,10);
+  const today=diaLocal();
   const hist=userStats.history||[];
   let todayEntry=hist.find(h=>h.date===today);
   if(!todayEntry){todayEntry={date:today,n:0,c:0,w:0};hist.push(todayEntry);}
@@ -2399,7 +2425,7 @@ function animateBars(container){
 // DASHBOARD
 // ═══════════════════════════════
 function renderHoje(){
-  const today=new Date().toISOString().slice(0,10);
+  const today=diaLocal();
   const h=(userStats.history||[]).find(e=>e.date===today)||{n:0,c:0,w:0};
   const n=h.n||0,c=h.c||0,w=h.w||0,res=c+w;
   const pct=res>0?Math.round(c/res*100):null;
@@ -2422,7 +2448,7 @@ function renderDashboard(){
   const total=(userStats.correct||0)+(userStats.wrong||0);
   const pct=total>0?Math.round((userStats.correct||0)/total*100):0;
   const meta=userStats.metaDiaria||10;
-  const today=new Date().toISOString().slice(0,10);
+  const today=diaLocal();
   const todayN=(userStats.history||[]).find(h=>h.date===today)?.n||0;
   const metaPct=Math.min(100,Math.round(todayN/meta*100));
 
@@ -2444,7 +2470,17 @@ function renderDashboard(){
   const circ=169.6;
   const offset=circ-(circ*metaPct/100);
   const drEl=document.getElementById('dash-ring');if(drEl)drEl.style.strokeDashoffset=offset;
-  const drPct=document.getElementById('dash-ring-pct');if(drPct)drPct.textContent=metaPct+'%';
+  // S60: bater 76 de uma meta de 30 mostrava um "100%" seco, igual a quem fez 30 em
+  // ponto — o esforço extra sumia. Ao superar a meta, o anel fica cheio e o número dá
+  // lugar a um "✓", com o quanto passou logo abaixo (o "76/30" já existente).
+  const drPct=document.getElementById('dash-ring-pct');
+  if(drPct){
+    const bateu=todayN>=meta;
+    drPct.textContent=bateu?'✓':metaPct+'%';
+    drPct.style.fontSize=bateu?'19px':'';
+    drPct.setAttribute('aria-label',bateu?`Meta batida: ${todayN} de ${meta} questões hoje`
+                                          :`${metaPct}% da meta de hoje`);
+  }
 
   // Ponto fraco
   renderPontoFraco();
@@ -2586,7 +2622,7 @@ function renderChart(){
   let html='';
   for(let i=6;i>=0;i--){
     const d=new Date(hoje-i*86400000);
-    const key=d.toISOString().slice(0,10);
+    const key=diaLocal(d);
     const n=(userStats.history||[]).find(h=>h.date===key)?.n||0;
     totalSemana+=n;
     const dias=['D','S','T','Q','Q','S','S'];
@@ -3460,8 +3496,18 @@ async function encerrarSimulado(){
     const area=q.area||'';
     if(!byArea[area])byArea[area]={c:0,t:0};
     byArea[area].t++;
-    const ac=simRespostas[i]===q.g;
+    // S61 (bloco33) — NÃO RESPONDER NÃO É ERRAR.
+    // Antes, `simRespostas[i]===q.g` com resposta ausente dava `undefined===g` → false,
+    // e a questão em branco era tratada como ERRO. Quem abria um simulado de 60 e
+    // encerrava sem responder levava 60 erros para o contador do dia, para o histórico
+    // por área, para o Caderno de Erros e, o mais grave, para o BKT — derrubando o
+    // domínio estimado de tópicos que a pessoa nunca respondeu.
+    const respondeu=simRespostas[i]!==undefined&&simRespostas[i]!==null;
+    const ac=respondeu&&simRespostas[i]===q.g;
     if(ac){correct++;byArea[area].c++;}
+    // A NOTA da prova continua sobre o TOTAL: em branco vale zero, como na prova real.
+    // Mas o MODELO DE APRENDIZADO abaixo só pode aprender com resposta de verdade.
+    if(!respondeu)return;
     registrarRespostaAdaptativa(q,ac); // FASE 2 — simulado alimenta BKT/FSRS
     // S30 BUG-ERRO: simulado conversa com o resto do site (contadores, Modo Erro, meta diária)
     if(ac)userStats.correct=(userStats.correct||0)+1;else userStats.wrong=(userStats.wrong||0)+1;
@@ -4402,6 +4448,9 @@ function agendarAcessibilidade(){
   requestAnimationFrame(()=>{_a11yAgendado=false;aplicarAcessibilidadeTeclado();});
 }
 document.addEventListener('DOMContentLoaded',()=>{
+  // S60: carimba a versão nas Configurações
+  const cv=document.getElementById('config-versao');
+  if(cv)cv.textContent='Bombeiro CTSP · '+APP_VERSAO;
   aplicarAcessibilidadeTeclado();
   const raiz=document.getElementById('app');
   if(raiz&&window.MutationObserver){
