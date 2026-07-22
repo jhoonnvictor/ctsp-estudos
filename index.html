@@ -14,13 +14,13 @@
 <meta property="og:type" content="website"/>
 <meta property="og:site_name" content="Bombeiro CTSP"/>
 <meta property="og:title" content="Bombeiro CTSP 2026 — sua preparação, medida por área e por tópico"/>
-<meta property="og:description" content="454 questões auditadas, simulado no formato real (60Q · 14/8/14/12/12), flashcards com revisão espaçada e um sistema que identifica seu ponto fraco e diz o que estudar."/>
+<meta property="og:description" content="514 questões auditadas, simulado no formato real (60Q · 14/8/14/12/12), flashcards com revisão espaçada e um sistema que identifica seu ponto fraco e diz o que estudar."/>
 <meta property="og:image" content="https://jhoonnvictor.github.io/ctsp-estudos/img/logo.png"/>
 <meta property="og:url" content="https://jhoonnvictor.github.io/ctsp-estudos/"/>
 <meta property="og:locale" content="pt_BR"/>
 <meta name="twitter:card" content="summary_large_image"/>
 <meta name="twitter:title" content="Bombeiro CTSP 2026 — Plataforma de Estudos"/>
-<meta name="twitter:description" content="454 questões auditadas, simulado no formato real e diagnóstico automático do seu desempenho."/>
+<meta name="twitter:description" content="514 questões auditadas, simulado no formato real e diagnóstico automático do seu desempenho."/>
 <meta name="twitter:image" content="https://jhoonnvictor.github.io/ctsp-estudos/img/logo.png"/>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' https://*.googleapis.com https://*.gstatic.com https://*.firebase.com https://*.firebaseio.com https://*.firebaseapp.com https://www.recaptcha.net https://recaptcha.net https://www.google.com https://www.gstatic.com wss://*.firebaseio.com data: blob:; object-src 'none'; base-uri 'self'; form-action 'none';">
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -298,7 +298,18 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 .weak-mat-item{display:flex;align-items:center;gap:8px;padding:7px 0;border-top:1px solid var(--line-soft);font-size:13px;color:var(--text);cursor:pointer;}
 .weak-mat-item:first-of-type{border-top:0;}
 .weak-mat-tag{font-size:10px;font-weight:800;padding:2px 7px;border-radius:8px;background:var(--paper-2);color:var(--text2);flex-shrink:0;}
-.weak-mat-txt{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.weak-mat-txt{flex:1;min-width:0;overflow-wrap:anywhere;}
+/* S51 MOBILE-FIT (bloco31) — corrige ESTOURO HORIZONTAL do painel no celular.
+   Causa: filho flex com `flex:1` mantém `min-width:auto` e não encolhe abaixo da
+   largura intrínseca do texto — o card é empurrado além da viewport e cria scroll
+   lateral (relatado no "Caderno de Erros" e no "Estude isto"). `min-width:0` libera
+   o encolhimento e o texto passa a quebrar. Mesma solução já usada em `.quiz-opt-text`.
+   Mobile-first: vale em qualquer largura, sem media query. */
+.weak-info,.adapt-btn-info,.diag-card-info,.dominio-geral-info,.dominio-area-info,
+.area-row-info,.user-item-info,.header-titles,.topico-name{min-width:0;}
+.weak-area,.weak-pct,.weak-title,.diag-card-title,.diag-card-sub,.adapt-btn-title,
+.adapt-btn-sub,.quick-btn-title,.quick-btn-sub{overflow-wrap:anywhere;}
+.weak-card,.weak-material,.weak-mat-item,.adapt-btn,.diag-card{max-width:100%;}
 
 /* Quick actions */
 .quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
@@ -1762,7 +1773,7 @@ function renderProntidao(){
 // ── S35 BACKUP: exportação e restauração do progresso ──
 function exportarProgresso(){
   try{
-    const payload={app:'ctsp-estudos',versao:'v1.80',exportadoEm:new Date().toISOString(),userStats,userCards};
+    const payload={app:'ctsp-estudos',versao:'v1.81',exportadoEm:new Date().toISOString(),userStats,userCards};
     const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
     const url=URL.createObjectURL(blob);
     const a=document.createElement('a');
