@@ -230,8 +230,17 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 .dash-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;position:relative;z-index:1;}
 .dash-greeting{font-family:var(--font-display);font-size:13px;color:var(--ember);font-weight:600;letter-spacing:.18em;text-transform:uppercase;margin-bottom:2px;}
 .dash-name{font-family:var(--font-display);font-size:30px;font-weight:700;letter-spacing:.02em;line-height:1;}
-.dash-ring-wrap{display:flex;flex-direction:column;align-items:center;gap:2px;}
-.dash-ring-label{font-size:10px;opacity:.7;font-weight:600;}
+.dash-ring-wrap{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0;}
+.dash-ring-label{font-size:10px;opacity:.7;font-weight:600;font-variant-numeric:tabular-nums;}
+/* S62: linha das três metas do dia. `1fr` em cada coluna mantém os anéis do mesmo
+   tamanho e centrados em qualquer largura de tela — sem media query, mobile-first. */
+.dash-metas{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:14px;position:relative;z-index:1;}
+.ring-box{position:relative;width:72px;height:72px;max-width:100%;}
+.dash-metas .ring-svg{width:72px;height:72px;}
+.dash-ring-nome{font-family:var(--font-display);font-size:9.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.62);margin-top:3px;}
+.dash-metas .ring-pct{font-size:14px;}
+.ring-fg.ring-fc{stroke:var(--at3);}
+.ring-fg.ring-rs{stroke:var(--at4);}
 .dash-stat{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:11px 8px;text-align:center;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:transform .15s;}
 .dash-stat-v{font-family:var(--font-display);font-size:24px;font-weight:700;line-height:1;}
 .dash-stat-l{font-size:9px;color:rgba(255,255,255,.65);margin-top:3px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;}
@@ -852,12 +861,34 @@ html[data-theme="dark"] .fb-caderno{color:var(--ember);}
             <div class="dash-greeting" id="dash-greeting">Olá,</div>
             <div class="dash-name" id="dash-nome">Bombeiro</div>
           </div>
-          <div class="dash-ring-wrap">
-            <div style="position:relative;width:86px;height:86px;">
-              <svg class="ring-svg" width="86" height="86" viewBox="0 0 60 60"><circle class="ring-bg" cx="30" cy="30" r="27"/><circle class="ring-fg" id="dash-ring" cx="30" cy="30" r="27" stroke-dasharray="169.6" stroke-dashoffset="169.6"/></svg>
-              <div class="ring-center"><div class="ring-pct" id="dash-ring-pct">0%</div><div class="ring-lbl">META</div></div>
+        </div>
+        <!-- S62: as três metas do dia lado a lado. Antes só existia o anel de questões,
+             encostado na saudação; três anéis ali espremeriam o nome no celular, então
+             ganharam uma linha própria, que também deixa as três metas com o mesmo peso. -->
+        <div class="dash-metas">
+          <div class="dash-ring-wrap" id="meta-q">
+            <div class="ring-box">
+              <svg class="ring-svg" viewBox="0 0 60 60"><circle class="ring-bg" cx="30" cy="30" r="27"/><circle class="ring-fg" id="dash-ring" cx="30" cy="30" r="27" stroke-dasharray="169.6" stroke-dashoffset="169.6"/></svg>
+              <div class="ring-center"><div class="ring-pct" id="dash-ring-pct">0%</div></div>
             </div>
+            <div class="dash-ring-nome">Questões</div>
             <div class="dash-ring-label" id="dash-ring-label">0/10</div>
+          </div>
+          <div class="dash-ring-wrap" id="meta-fc">
+            <div class="ring-box">
+              <svg class="ring-svg" viewBox="0 0 60 60"><circle class="ring-bg" cx="30" cy="30" r="27"/><circle class="ring-fg ring-fc" id="ring-fc" cx="30" cy="30" r="27" stroke-dasharray="169.6" stroke-dashoffset="169.6"/></svg>
+              <div class="ring-center"><div class="ring-pct" id="ring-fc-pct">0%</div></div>
+            </div>
+            <div class="dash-ring-nome">Cards</div>
+            <div class="dash-ring-label" id="ring-fc-lbl">0/15</div>
+          </div>
+          <div class="dash-ring-wrap" id="meta-rs">
+            <div class="ring-box">
+              <svg class="ring-svg" viewBox="0 0 60 60"><circle class="ring-bg" cx="30" cy="30" r="27"/><circle class="ring-fg ring-rs" id="ring-rs" cx="30" cy="30" r="27" stroke-dasharray="169.6" stroke-dashoffset="169.6"/></svg>
+              <div class="ring-center"><div class="ring-pct" id="ring-rs-pct">0%</div></div>
+            </div>
+            <div class="dash-ring-nome">Resumos</div>
+            <div class="dash-ring-label" id="ring-rs-lbl">0/3</div>
           </div>
         </div>
         <div class="dash-statline">
@@ -2315,7 +2346,7 @@ async function loadFlashcards(){
 // S60: fonte ÚNICA da versão. Aparece nas Configurações e vai no backup exportado.
 // Bumpar SÓ aqui — antes o número vivia solto dentro do payload de exportação e não
 // tinha como o João conferir no aparelho se o deploy havia entrado.
-const APP_VERSAO='v1.86';
+const APP_VERSAO='v1.87';
 
 // ═══════════════════════════════
 // S60 DIA LOCAL (bloco33) — a meta diária não zerava
@@ -2347,17 +2378,29 @@ function updateStreak(){
   if(_el)_el.textContent=(userStats.streak||0);
 }
 
-function registrarAtividade(acertou){
+// S62 (bloco33): entrada do dia, compartilhada pelos três contadores.
+// `n` = questões respondidas · `fc` = flashcards avaliados · `rs` = resumos avaliados.
+// Só conta o que o usuário DE FATO avaliou — abrir um card ou um resumo não conta,
+// pelo mesmo princípio que fez a questão em branco deixar de virar erro (S61).
+function entradaHoje(){
   const today=diaLocal();
   const hist=userStats.history||[];
-  let todayEntry=hist.find(h=>h.date===today);
-  if(!todayEntry){todayEntry={date:today,n:0,c:0,w:0};hist.push(todayEntry);}
+  let e=hist.find(h=>h.date===today);
+  if(!e){e={date:today,n:0,c:0,w:0};hist.push(e);}
+  userStats.history=hist.slice(-60);
+  return e;
+}
+
+function registrarAtividade(acertou){
+  const todayEntry=entradaHoje();
   todayEntry.n=(todayEntry.n||0)+1;
   if(acertou===true)todayEntry.c=(todayEntry.c||0)+1;
   else if(acertou===false)todayEntry.w=(todayEntry.w||0)+1;
-  userStats.history=hist.slice(-60);
-  document.getElementById('hdr-streak-n').textContent=(userStats.streak||0);
+  const el=document.getElementById('hdr-streak-n');
+  if(el)el.textContent=(userStats.streak||0);
 }
+function registrarAtividadeCard(){const e=entradaHoje();e.fc=(e.fc||0)+1;}
+function registrarAtividadeResumo(){const e=entradaHoje();e.rs=(e.rs||0)+1;}
 
 // ═══════════════════════════════
 // NAV
@@ -2464,23 +2507,35 @@ function renderDashboard(){
   {const g=document.getElementById('glance-acertos');if(g)g.innerHTML=total>0?pct+'<small>%</small>':'—';}
   animateCount(document.getElementById('dash-cards'),Object.keys(userCards).length);
   const dsk=document.getElementById('dash-streak');if(dsk)dsk.textContent=(userStats.streak||0);
-  const drl=document.getElementById('dash-ring-label');if(drl)drl.textContent=todayN+'/'+meta;
+  // (o rótulo "n/meta" passou a ser escrito por desenharMeta, no S62)
 
-  // Ring
-  const circ=169.6;
-  const offset=circ-(circ*metaPct/100);
-  const drEl=document.getElementById('dash-ring');if(drEl)drEl.style.strokeDashoffset=offset;
+  // S62: as três metas do dia (questões, cards, resumos) desenhadas pela mesma função.
   // S60: bater 76 de uma meta de 30 mostrava um "100%" seco, igual a quem fez 30 em
-  // ponto — o esforço extra sumia. Ao superar a meta, o anel fica cheio e o número dá
-  // lugar a um "✓", com o quanto passou logo abaixo (o "76/30" já existente).
-  const drPct=document.getElementById('dash-ring-pct');
-  if(drPct){
-    const bateu=todayN>=meta;
-    drPct.textContent=bateu?'✓':metaPct+'%';
-    drPct.style.fontSize=bateu?'19px':'';
-    drPct.setAttribute('aria-label',bateu?`Meta batida: ${todayN} de ${meta} questões hoje`
-                                          :`${metaPct}% da meta de hoje`);
-  }
+  // ponto — o esforço extra sumia. Ao superar a meta o anel fica cheio e o número dá
+  // lugar a um "✓", com o quanto passou logo abaixo.
+  const hj=(userStats.history||[]).find(h=>h.date===today)||{};
+  const desenharMeta=(idAnel,idPct,idLbl,feito,alvo,nome)=>{
+    const circ=169.6;
+    const p=alvo>0?Math.min(100,Math.round(feito/alvo*100)):0;
+    const anel=document.getElementById(idAnel);
+    if(anel)anel.style.strokeDashoffset=circ-(circ*p/100);
+    const el=document.getElementById(idPct);
+    if(el){
+      const bateu=alvo>0&&feito>=alvo;
+      el.textContent=bateu?'✓':p+'%';
+      el.style.fontSize=bateu?'17px':'';
+      el.setAttribute('aria-label',bateu?`Meta de ${nome} batida: ${feito} de ${alvo} hoje`
+                                        :`${p}% da meta de ${nome} de hoje`);
+    }
+    const lbl=document.getElementById(idLbl);
+    if(lbl)lbl.textContent=feito+'/'+alvo;
+  };
+  // As metas de card/resumo vivem em `userStats.dose` (é o que a tela de Configurações
+  // grava), com DOSE_PADRAO como piso — não inventar nome de campo aqui.
+  const dose=userStats.dose||{};
+  desenharMeta('dash-ring','dash-ring-pct','dash-ring-label',todayN,meta,'questões');
+  desenharMeta('ring-fc','ring-fc-pct','ring-fc-lbl',hj.fc||0,dose.cards||DOSE_PADRAO.cards,'flashcards');
+  desenharMeta('ring-rs','ring-rs-pct','ring-rs-lbl',hj.rs||0,dose.resumos||DOSE_PADRAO.resumos,'resumos');
 
   // Ponto fraco
   renderPontoFraco();
@@ -3216,6 +3271,7 @@ async function avaliarCard(dif){
   await saveCard(fc.id,updated);
   if(dif==='fac'){userStats.cardStreak=(userStats.cardStreak||0)+1;}
   else userStats.cardStreak=0;
+  registrarAtividadeCard(); // S62: alimenta o anel de meta de flashcards
   saveProg();
   cardIdx++;
   renderCard();
@@ -3369,6 +3425,7 @@ async function avaliarResumo(dif){
   const existing=userStats[key]||{};
   const updated=fsrsCardUpdate(existing,dif);
   userStats[key]=updated;
+  registrarAtividadeResumo(); // S62: alimenta o anel de meta de resumos
   saveProg();
   renderResumos();
   updateBadges();
