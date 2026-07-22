@@ -362,6 +362,15 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 .area-evo-bar-wrap{flex:1;background:var(--paper-2);border-radius:6px;height:18px;overflow:hidden;}
 .area-evo-bar{height:100%;border-radius:6px;transition:width .4s;display:flex;align-items:center;justify-content:flex-end;padding-right:6px;}
 .area-evo-pct{font-size:10px;font-weight:800;color:white;}
+/* S57: coluna de valor com largura fixa — mantém as 5 linhas alinhadas e evita que
+   uma área com número curto pareça ter menos informação que as outras. */
+.area-evo-val{font-size:10.5px;font-weight:700;min-width:78px;text-align:right;flex-shrink:0;font-variant-numeric:tabular-nums;}
+/* S59: selo de tendência semanal. Cinza = sem base para afirmar tendência
+   (regra do bloco21: cinza é "sem dados", não é resultado ruim). */
+.area-evo-tend{font-size:9.5px;font-weight:800;min-width:56px;text-align:right;flex-shrink:0;letter-spacing:.02em;}
+.area-evo-tend.sobe{color:var(--green);}
+.area-evo-tend.desce{color:var(--red);}
+.area-evo-tend.neutra{color:var(--text3);font-weight:600;}
 .chart-bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;}
 .chart-bar{width:100%;background:rgba(16,27,61,.08);border-radius:6px 6px 0 0;transition:height .5s var(--ease-out);min-height:4px;}
 .chart-bar.hoje{background:linear-gradient(180deg,var(--ember),var(--red));}
@@ -1828,7 +1837,7 @@ function renderProntidao(){
 // ── S35 BACKUP: exportação e restauração do progresso ──
 function exportarProgresso(){
   try{
-    const payload={app:'ctsp-estudos',versao:'v1.83',exportadoEm:new Date().toISOString(),userStats,userCards};
+    const payload={app:'ctsp-estudos',versao:'v1.85',exportadoEm:new Date().toISOString(),userStats,userCards};
     const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
     const url=URL.createObjectURL(blob);
     const a=document.createElement('a');
@@ -2110,15 +2119,30 @@ function consumirDeepLink(){
 // acertos, nem streak, nem cards. Só o espelho local salvava.
 // Solução: converter apenas na fronteira com o Firebase — "T2.4" ⇄ "T2_4".
 // Em memória as chaves seguem com ponto (todo o resto do código depende disso).
+// S58 (bloco33): generalizado. Antes só `bkt` era convertido, então QUALQUER campo
+// novo que usasse id de tópico como chave voltaria a derrubar o `set()` inteiro —
+// a armadilha do S48 de novo, com outro nome. Agora a lista manda: para proteger um
+// campo novo, basta acrescentá-lo aqui.
+const CAMPOS_CHAVE_TOPICO=['bkt','foco'];
 function bktParaFirebase(st){
-  if(!st||!st.bkt)return st;
-  const b={};Object.keys(st.bkt).forEach(k=>{b[k.split('.').join('_')]=st.bkt[k];});
-  return {...st,bkt:b};
+  if(!st)return st;
+  const out={...st};
+  CAMPOS_CHAVE_TOPICO.forEach(campo=>{
+    if(!st[campo]||typeof st[campo]!=='object')return;
+    const o={};Object.keys(st[campo]).forEach(k=>{o[k.split('.').join('_')]=st[campo][k];});
+    out[campo]=o;
+  });
+  return out;
 }
 function bktDoFirebase(st){
-  if(!st||!st.bkt)return st;
-  const b={};Object.keys(st.bkt).forEach(k=>{b[k.split('_').join('.')]=st.bkt[k];});
-  return {...st,bkt:b};
+  if(!st)return st;
+  const out={...st};
+  CAMPOS_CHAVE_TOPICO.forEach(campo=>{
+    if(!st[campo]||typeof st[campo]!=='object')return;
+    const o={};Object.keys(st[campo]).forEach(k=>{o[k.split('_').join('.')]=st[campo][k];});
+    out[campo]=o;
+  });
+  return out;
 }
 
 // ═══════════════════════════════
@@ -2391,6 +2415,9 @@ function renderHoje(){
   if(mt)mt.textContent=n>=meta?('Meta do dia batida \u00b7 '+n+'/'+meta):(n+'/'+meta+' da meta di\u00e1ria');
 }
 function renderDashboard(){
+  // S59: atualiza o retrato da semana ANTES de desenhar, para a variação semanal já
+  // sair correta nesta passada. A função se protege sozinha se `dataLoaded` for false.
+  registrarRetratoSemanal();
   renderHoje();
   const total=(userStats.correct||0)+(userStats.wrong||0);
   const pct=total>0?Math.round((userStats.correct||0)/total*100):0;
@@ -2577,6 +2604,56 @@ function renderChart(){
 // Piso de confiança: nº mínimo de respostas numa área para exibir % (abaixo disso = "poucos dados").
 const MIN_RESP_CONF=5;
 
+// ═══════════════════════════════
+// S59 RETRATO SEMANAL (bloco33) — para "Evolução por área" virar evolução de verdade
+// ═══════════════════════════════
+// O painel se chamava "Evolução" mas mostrava um acumulado sem eixo de tempo — o
+// mesmo número do "Histórico de acertos por área", com outra roupa. Não dá para
+// reconstruir o passado (nunca guardamos histórico), e inventar tendência é proibido
+// (lição do bloco 22). Então começamos a acumular AGORA: um retrato por semana ISO.
+// A semana corrente é sempre reescrita; semanas passadas congelam no último valor.
+// Chaves gravadas ('s','ts','areas','AT1'...) não têm ponto — seguras no Firebase.
+const MAX_SEMANAS=26; // ~6 meses; o suficiente para a prova, sem inflar o progresso
+
+function semanaISO(d){
+  const dt=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));
+  dt.setUTCDate(dt.getUTCDate()+4-(dt.getUTCDay()||7));          // quinta da semana ISO
+  const ini=new Date(Date.UTC(dt.getUTCFullYear(),0,1));
+  const n=Math.ceil(((dt-ini)/86400000+1)/7);
+  return dt.getUTCFullYear()+'-W'+String(n).padStart(2,'0');
+}
+
+function registrarRetratoSemanal(){
+  if(!dataLoaded)return;                    // regra inviolável: nada antes do load
+  const ba=userStats.byArea||{};
+  const areas={};
+  Object.keys(AI).forEach(k=>{
+    const c=(ba[k]&&ba[k].correct)||0,w=(ba[k]&&ba[k].wrong)||0;
+    if(c+w>0)areas[k]={c,w};
+  });
+  if(!Object.keys(areas).length)return;     // sem resposta nenhuma: não cria retrato vazio
+  if(!Array.isArray(userStats.semanas))userStats.semanas=[];
+  const s=semanaISO(new Date());
+  const atual=userStats.semanas.find(x=>x.s===s);
+  if(atual){atual.areas=areas;atual.ts=Date.now();}
+  else userStats.semanas.push({s,ts:Date.now(),areas});
+  if(userStats.semanas.length>MAX_SEMANAS)userStats.semanas=userStats.semanas.slice(-MAX_SEMANAS);
+}
+
+// Variação de acerto da área entre o retrato ANTERIOR e agora.
+// Devolve null quando ainda não há semana anterior — nesse caso a interface diz
+// "1ª semana", em vez de fingir uma tendência que não existe.
+function deltaSemanal(area,pctAtual){
+  const h=userStats.semanas;
+  if(!Array.isArray(h)||h.length<2)return null;
+  const s=semanaISO(new Date());
+  const ant=[...h].reverse().find(x=>x.s!==s&&x.areas&&x.areas[area]);
+  if(!ant)return null;
+  const a=ant.areas[area],t=a.c+a.w;
+  if(t<MIN_RESP_CONF)return null;
+  return pctAtual-Math.round(a.c/t*100);
+}
+
 function renderAreaEvolution(){
   const el=document.getElementById('area-evolution');
   if(!el)return;
@@ -2595,12 +2672,24 @@ function renderAreaEvolution(){
     } else {
       const pct=Math.round(c/t*100);
       const cor=pct>=80?'var(--green)':pct>=60?'var(--amber)':'var(--red)';
+      // S57 (bloco33): o percentual sai SEMPRE na coluna da direita, nunca dentro da
+      // barra. Antes, `pct>=20` mandava o número para dentro: as áreas acima de 20%
+      // ficavam com barra preenchida e rótulo branco, e as abaixo ficavam com um fio
+      // quase invisível e o número solto fora. Duas áreas pareciam ter dado e três
+      // pareciam vazias — foi lido como "faltando dados", quando os 130 respondidos
+      // sempre estiveram todos ali. Agora as 5 linhas têm a mesma anatomia, e a barra
+      // tem largura mínima para que 8% continue sendo visível como 8%, não como nada.
+      // S59: variação desde o retrato da semana passada. Só aparece quando existe
+      // semana anterior comparável — antes disso mostra "1ª semana", sem inventar seta.
+      const d=deltaSemanal(k,pct);
+      const tend=d===null?`<span class="area-evo-tend neutra">1ª semana</span>`
+        :d===0?`<span class="area-evo-tend neutra">estável</span>`
+        :`<span class="area-evo-tend ${d>0?'sobe':'desce'}">${d>0?'▲':'▼'} ${Math.abs(d)} pp</span>`;
       html+=`<div class="area-evo-row">
         <div class="area-evo-label">${k}</div>
-        <div class="area-evo-bar-wrap"><div class="area-evo-bar" style="width:${pct}%;background:${cor}">
-          ${pct>=20?`<span class="area-evo-pct">${pct}%</span>`:''}
-        </div></div>
-        <span style="font-size:10.5px;font-weight:700;color:${cor};min-width:96px;text-align:right;">${pct>=20?'':pct+'% · '}${c}/${t} resp.</span>
+        <div class="area-evo-bar-wrap"><div class="area-evo-bar" style="width:${pct}%;min-width:${pct>0?'8px':'0'};background:${cor}"></div></div>
+        <span class="area-evo-val" style="color:${cor}">${pct}% · ${c}/${t}</span>
+        ${tend}
       </div>`;
     }
   });
