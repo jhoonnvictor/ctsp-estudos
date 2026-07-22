@@ -1,0 +1,29 @@
+{
+  "name": "Bombeiro CTSP 2026",
+  "short_name": "CTSP",
+  "description": "Plataforma de estudos para o CTSP 2026 do CBMRS: questoes auditadas contra a norma vigente, simulado no formato real da prova, flashcards com revisao espacada e diagnostico das areas fracas.",
+  "lang": "pt-BR",
+  "dir": "ltr",
+  "start_url": "./",
+  "scope": "./",
+  "id": "/ctsp-estudos/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0B1430",
+  "theme_color": "#101B3D",
+  "categories": ["education"],
+  "icons": [
+    {
+      "src": "img/icon.png",
+      "sizes": "2250x2250",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "img/icon.png",
+      "sizes": "2250x2250",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

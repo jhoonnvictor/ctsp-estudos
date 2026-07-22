@@ -9,6 +9,14 @@
 <meta name="apple-mobile-web-app-title" content="CTSP"/>
 <meta name="theme-color" content="#101B3D"/>
 <link rel="apple-touch-icon" href="img/icon.png"/>
+<!-- BLOCO 34 (item 2) — manifest de PWA.
+     LIMITE CONHECIDO, registrado para não ser reaberto: isto NÃO faz o QR abrir
+     dentro do atalho da tela inicial no iPhone. No iOS, link vindo de fora (câmera,
+     WhatsApp, outro app) sempre abre no navegador; só app NATIVO captura link, via
+     Universal Links, que exigem app na App Store. O manifest serve para: instalação
+     de verdade no Android (ícone, splash, tela cheia sem barra do Chrome) e para o
+     app abrir em modo standalone depois de instalado. É ganho parcial, não conserto. -->
+<link rel="manifest" href="manifest.webmanifest"/>
 <title>Bombeiro CTSP 2026 — Plataforma de Estudos do CBMRS</title>
 <meta name="description" content="Plataforma de estudos para o CTSP 2026 do CBMRS: 514 questões auditadas contra a norma vigente, simulado no formato real da prova, flashcards com revisão espaçada e diagnóstico automático das suas áreas fracas."/>
 <meta property="og:type" content="website"/>
@@ -319,6 +327,62 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 .weak-area,.weak-pct,.weak-title,.diag-card-title,.diag-card-sub,.adapt-btn-title,
 .adapt-btn-sub,.quick-btn-title,.quick-btn-sub{overflow-wrap:anywhere;}
 .weak-card,.weak-material,.weak-mat-item,.adapt-btn,.diag-card{max-width:100%;}
+
+/* ═══ BLOCO 34 — FILA DE FOCO + TELA DE FOCO ═══
+   Mobile-first. Toda largura em % ou flex com min-width:0, seguindo a lição do S51:
+   filho flex com flex:1 não encolhe abaixo do texto e estoura a viewport. */
+.foco-bloco{margin-bottom:16px;}
+.foco-bloco-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;}
+.foco-bloco-n{font-size:11px;font-weight:700;color:var(--text3);font-variant-numeric:tabular-nums;flex-shrink:0;}
+/* Notificação de UMA linha — o oposto do card gordo que ela substitui. */
+.foco-nota{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line-soft);
+  border-radius:12px;padding:10px 12px;margin-bottom:8px;cursor:pointer;max-width:100%;
+  box-shadow:var(--shadow);transition:transform .18s var(--ease-out),border-color .18s;}
+.foco-nota:active{transform:scale(.985);}
+.foco-nota-pip{width:8px;height:8px;border-radius:50%;flex-shrink:0;background:var(--text3);}
+.foco-nota-info{flex:1;min-width:0;}
+.foco-nota-t{font-size:13.5px;font-weight:700;color:var(--text);overflow-wrap:anywhere;line-height:1.3;}
+.foco-nota-s{font-size:11.5px;color:var(--text2);overflow-wrap:anywhere;margin-top:1px;}
+.foco-nota-cta{font-size:11px;font-weight:800;color:var(--ember);flex-shrink:0;letter-spacing:.03em;}
+/* Tela de Foco */
+.foco-head{background:linear-gradient(150deg,var(--navy-2) 0%,var(--navy) 60%,var(--navy-deep) 100%);
+  color:#fff;padding:16px 16px 20px;}
+.foco-head-tag{font-size:10.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;opacity:.65;margin-top:12px;}
+.foco-head-titulo{font-family:var(--font-display);font-size:21px;font-weight:700;line-height:1.25;margin-top:3px;overflow-wrap:anywhere;}
+.foco-head-sub{font-size:12.5px;opacity:.72;margin-top:5px;overflow-wrap:anywhere;}
+.foco-prog{height:6px;border-radius:6px;background:rgba(255,255,255,.16);overflow:hidden;margin-top:14px;}
+.foco-prog-fill{height:100%;width:0%;background:var(--ember);border-radius:6px;transition:width .5s var(--ease-out);}
+.foco-body{padding:16px 14px 90px;}
+.foco-cta{display:block;width:100%;background:var(--ember);color:#fff;border-radius:14px;padding:14px;
+  font-size:15px;font-weight:800;box-shadow:0 6px 18px rgba(240,136,60,.28);margin-bottom:16px;}
+.foco-cta:disabled{background:var(--paper-2);color:var(--text3);box-shadow:none;}
+.foco-etapa-tit{font-size:11px;font-weight:800;color:var(--text2);text-transform:uppercase;letter-spacing:.1em;margin:14px 0 7px;}
+.foco-item{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line-soft);
+  border-radius:12px;padding:11px 12px;margin-bottom:7px;cursor:pointer;max-width:100%;}
+.foco-item.feito{opacity:.55;}
+.foco-item.feito .foco-item-txt{text-decoration:line-through;}
+.foco-check{width:20px;height:20px;border-radius:50%;border:2px solid var(--line);flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:#fff;}
+.foco-item.feito .foco-check{background:var(--green);border-color:var(--green);}
+.foco-item-txt{flex:1;min-width:0;font-size:13.5px;color:var(--text);overflow-wrap:anywhere;line-height:1.35;}
+.foco-item-meta{font-size:11px;color:var(--text3);flex-shrink:0;}
+.foco-rodape{font-size:12px;color:var(--text3);line-height:1.5;margin-top:18px;overflow-wrap:anywhere;}
+/* Barra flutuante de retorno ao foco. `bottom` acima da barra de navegação.
+   NÃO usar env(safe-area-inset-bottom) aqui — lição do viewport-fit no iPhone. */
+.foco-barra{position:fixed;left:12px;right:12px;bottom:76px;z-index:60;display:flex;align-items:center;
+  justify-content:space-between;gap:10px;background:var(--navy);color:#fff;border-radius:12px;
+  padding:11px 14px;box-shadow:0 8px 24px rgba(0,0,0,.28);cursor:pointer;max-width:100%;}
+.foco-barra-txt{font-size:13px;font-weight:800;flex-shrink:0;}
+.foco-barra-topico{font-size:11.5px;opacity:.7;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+/* Entrada de código do tópico (caminho sem leitor de QR) */
+.cod-wrap{background:var(--surface);border:1px solid var(--line-soft);border-radius:12px;padding:11px 12px;margin-bottom:12px;max-width:100%;}
+.cod-label{display:block;font-size:11.5px;font-weight:700;color:var(--text2);margin-bottom:7px;overflow-wrap:anywhere;}
+.cod-row{display:flex;gap:8px;}
+.cod-input{flex:1;min-width:0;border:1.5px solid var(--line);border-radius:10px;padding:9px 11px;
+  font-size:15px;font-weight:700;color:var(--text);background:var(--paper);text-transform:uppercase;}
+.cod-input:focus{outline:2px solid var(--ember);outline-offset:1px;border-color:var(--ember);}
+.cod-btn{flex-shrink:0;background:var(--navy);color:#fff;border-radius:10px;padding:9px 18px;font-size:13px;font-weight:800;}
+.cod-erro{font-size:11.5px;color:var(--red);font-weight:600;margin-top:6px;overflow-wrap:anywhere;}
 
 /* Quick actions */
 .quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
@@ -930,51 +994,18 @@ html[data-theme="dark"] .fb-caderno{color:var(--ember);}
           </div>
           <div class="adapt-btn-arrow">→</div>
         </div>
-        <div class="acoes-grid">
-        <!-- Ponto fraco -->
-        <div id="dash-weak" class="weak-card hidden">
-          <div class="weak-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
-          <div class="weak-info">
-            <div class="weak-title">Ponto mais fraco</div>
-            <div class="weak-area" id="weak-area-name">—</div>
-            <div class="weak-pct" id="weak-area-pct"></div>
+        <!-- ═══ BLOCO 34 — FILA DE FOCO ═══
+             Substitui os 4 cards gordos (ponto fraco, "estude isto", revisões vencidas,
+             caderno de erros) por notificações de UMA linha. O que é de TÓPICO abre a
+             Tela de Foco (screen-foco), que reúne resumo + cards + questões numa lista
+             de tarefas rodada em sequência, sem voltar ao painel entre cada item.
+             Fila vazia = o bloco inteiro some (não deixa moldura órfã no painel). -->
+        <div id="foco-bloco" class="foco-bloco hidden">
+          <div class="foco-bloco-head">
+            <span class="sec-title" style="margin:0">Seu foco agora</span>
+            <span class="foco-bloco-n" id="foco-bloco-n"></span>
           </div>
-          <button class="btn-weak" onclick="estudarFraco()">Estudar</button>
-        </div>
-        <div id="weak-material" class="weak-material hidden"></div>
-        <div id="dash-due" class="weak-card hidden">
-          <div class="weak-icon" style="background:var(--amber-light);color:var(--ember-deep)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><polyline points="3 4 3 9 8 9"/><polyline points="12 7 12 12 15.5 14"/></svg></div>
-          <div class="weak-info">
-            <div class="weak-title">Questões para revisar hoje</div>
-            <div class="weak-area" id="due-count">—</div>
-            <div class="weak-pct">Repetição espaçada de questões</div>
-          </div>
-          <button class="btn-weak" onclick="iniciarRevisaoDue()">Revisar</button>
-        </div>
-        <!-- S35 ERR-DASH: caderno de erros visível no painel -->
-        <div id="dash-erros" class="weak-card hidden">
-          <div class="weak-icon" style="background:var(--red-light);color:var(--red)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="10" y1="8" x2="16" y2="14"/><line x1="16" y1="8" x2="10" y2="14"/></svg></div>
-          <div class="weak-info">
-            <div class="weak-title">Caderno de Erros</div>
-            <div class="weak-area" id="dash-erros-count">—</div>
-            <div class="weak-pct">Refaça até zerar — prioriza as mais erradas</div>
-          </div>
-          <button class="btn-weak" onclick="iniciarModoErro()">Refazer</button>
-        </div>
-        </div>
-        <!-- S35 PRONT: projeção de pontos na prova (BKT × cotas do edital) -->
-        <div id="dash-pront" class="chart-wrap hidden">
-          <div style="display:flex;align-items:center;justify-content:space-between;">
-            <span style="font-size:12px;color:var(--text2);">Projeção para a prova <span class="info-btn" onclick="showInfo('prontidao')" aria-label="Mais informações">?</span></span>
-            <span style="font-size:12px;font-weight:700;color:var(--ember);" id="pront-dias"></span>
-          </div>
-          <div style="display:flex;align-items:baseline;gap:6px;margin-top:6px;">
-            <span style="font-size:30px;font-weight:800;color:var(--ember);" id="pront-num">—</span>
-            <span style="font-size:13px;color:var(--text2);">de 60 questões (estimativa)</span>
-          </div>
-          <div style="height:8px;background:var(--paper-2);border-radius:6px;overflow:hidden;margin-top:8px;"><div id="pront-bar" style="height:100%;width:0%;background:var(--fire-line);border-radius:6px;transition:width .5s;"></div></div>
-          <div style="font-size:11px;color:var(--text3);margin-top:6px;" id="pront-detalhe"></div>
-          <div id="pront-aviso" style="display:none;font-size:11px;color:var(--ember-deep);background:var(--amber-light);border-radius:8px;padding:7px 9px;margin-top:8px;line-height:1.4;"><svg style="width:13px;height:13px;vertical-align:-1px;margin-right:3px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Estimativa preliminar — baseada em poucas respostas. Vai ficar mais precisa conforme você estuda.</div>
+          <div id="foco-fila"></div>
         </div>
         <!-- Quick actions -->
         <div class="sec-title">Estudar agora</div>
@@ -999,8 +1030,32 @@ html[data-theme="dark"] .fb-caderno{color:var(--ember);}
             <div class="quick-btn-sub">15 questões · pontos fracos</div>
           </div>
         </div>
-        <!-- ═══ MEU PROGRESSO — acordeão dos 5 painéis de análise ═══ -->
+        <!-- ═══ MEU PROGRESSO — acordeão dos painéis de análise ═══ -->
         <div class="sec-title" style="margin-top:6px">Meu progresso</div>
+
+        <!-- Painel 0 (bloco 34): projeção para a prova.
+             Estava solta no corpo do painel, disputando atenção com o que é ACIONÁVEL.
+             Projeção é análise, não tarefa — desceu para o acordeão, fechada por padrão. -->
+        <div class="mp-item" id="mp-pront">
+          <div class="mp-head" role="button" tabindex="0" aria-expanded="false" onclick="toggleMp(this)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleMp(this);}">
+            <span class="mp-title">Projeção para a prova <span class="info-btn" onclick="event.stopPropagation();showInfo('prontidao')" aria-label="Mais informações">?</span></span>
+            <span class="mp-right"><span class="mp-glance" id="glance-pront">—</span><span class="mp-chev"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span></span>
+          </div>
+          <div class="mp-body">
+            <div id="dash-pront" class="chart-wrap hidden">
+              <div style="display:flex;align-items:center;justify-content:flex-end;">
+                <span style="font-size:12px;font-weight:700;color:var(--ember);" id="pront-dias"></span>
+              </div>
+              <div style="display:flex;align-items:baseline;gap:6px;margin-top:6px;">
+                <span style="font-size:30px;font-weight:800;color:var(--ember);" id="pront-num">—</span>
+                <span style="font-size:13px;color:var(--text2);">de 60 questões (estimativa)</span>
+              </div>
+              <div style="height:8px;background:var(--paper-2);border-radius:6px;overflow:hidden;margin-top:8px;"><div id="pront-bar" style="height:100%;width:0%;background:var(--fire-line);border-radius:6px;transition:width .5s;"></div></div>
+              <div style="font-size:11px;color:var(--text3);margin-top:6px;" id="pront-detalhe"></div>
+              <div id="pront-aviso" style="display:none;font-size:11px;color:var(--ember-deep);background:var(--amber-light);border-radius:8px;padding:7px 9px;margin-top:8px;line-height:1.4;"><svg style="width:13px;height:13px;vertical-align:-1px;margin-right:3px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>Estimativa preliminar — baseada em poucas respostas. Vai ficar mais precisa conforme você estuda.</div>
+            </div>
+          </div>
+        </div>
 
         <!-- Painel 1: Índice de Domínio Real (aberto por padrão) -->
         <div class="mp-item open">
@@ -1086,6 +1141,35 @@ html[data-theme="dark"] .fb-caderno{color:var(--ember);}
       </div>
     </div>
 
+    <!-- ═══ BLOCO 34 — TELA DE FOCO ═══
+         Uma tela por TÓPICO com todo o material dele como lista de tarefas:
+         resumos → flashcards → questões, rodados em sequência. Não entra na barra
+         de navegação de propósito: só se chega por uma notificação da fila ou pelo
+         deep link do ebook. Voltar daqui vai para o painel. -->
+    <div class="screen" id="screen-foco">
+      <div class="foco-head">
+        <button class="btn-voltar-quiz" onclick="sairDoFoco()">← Painel</button>
+        <div class="foco-head-tag" id="foco-tag">Foco</div>
+        <div class="foco-head-titulo" id="foco-titulo">—</div>
+        <div class="foco-head-sub" id="foco-sub"></div>
+        <div class="foco-prog"><div class="foco-prog-fill" id="foco-prog-fill"></div></div>
+      </div>
+      <div class="foco-body">
+        <button class="foco-cta" id="foco-cta" onclick="focoContinuar()">Começar</button>
+        <div id="foco-lista"></div>
+        <div class="foco-rodape" id="foco-rodape"></div>
+      </div>
+    </div>
+
+    <!-- Barra flutuante de retorno: aparece quando o usuário saiu da Tela de Foco
+         para cumprir uma etapa (ler resumo, ver cards). Sem ela o caminho de volta
+         seria o painel, que é justamente o que este bloco veio eliminar. -->
+    <div id="foco-barra" class="foco-barra hidden" role="button" tabindex="0"
+         onclick="voltarAoFoco()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();voltarAoFoco();}">
+      <span class="foco-barra-txt">← Voltar ao foco</span>
+      <span class="foco-barra-topico" id="foco-barra-topico"></span>
+    </div>
+
     <!-- QUIZ -->
     <div class="screen" id="screen-quiz">
       <div id="quiz-home-view">
@@ -1099,6 +1183,21 @@ html[data-theme="dark"] .fb-caderno{color:var(--ember);}
             </div>
           </button>
           <button class="btn-intercalado" onclick="iniciarInterleaving()"><svg style="width:17px;height:17px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg> Intercalado — Alternar entre áreas</button>
+          <!-- BLOCO 34 (item 3): caminho SEM leitor de QR.
+               O ebook mandava "Quiz → <nome do tópico>", mas a aba Quiz só lista ÁREAS
+               e clicar numa área já dispara o quiz — esse caminho nunca existiu.
+               Agora o ebook imprime o CÓDIGO do tópico ao lado do QR e ele é digitado aqui. -->
+          <div class="cod-wrap">
+            <label class="cod-label" for="cod-topico">Veio do ebook? Digite o código do tópico</label>
+            <div class="cod-row">
+              <input id="cod-topico" class="cod-input" type="text" inputmode="text" autocapitalize="characters"
+                     autocomplete="off" spellcheck="false" maxlength="5" placeholder="ex.: T3.4"
+                     aria-label="Código do tópico impresso no ebook"
+                     onkeydown="if(event.key==='Enter'){event.preventDefault();abrirPorCodigo();}">
+              <button class="cod-btn" onclick="abrirPorCodigo()">Ir</button>
+            </div>
+            <div class="cod-erro hidden" id="cod-erro" role="alert"></div>
+          </div>
           <div class="sec-title" style="margin-top:4px">Escolha uma área</div>
           <div class="area-list" id="area-list"></div>
         </div>
@@ -2346,7 +2445,7 @@ async function loadFlashcards(){
 // S60: fonte ÚNICA da versão. Aparece nas Configurações e vai no backup exportado.
 // Bumpar SÓ aqui — antes o número vivia solto dentro do payload de exportação e não
 // tinha como o João conferir no aparelho se o deploy havia entrado.
-const APP_VERSAO='v1.87';
+const APP_VERSAO='v1.88';
 
 // ═══════════════════════════════
 // S60 DIA LOCAL (bloco33) — a meta diária não zerava
@@ -2413,12 +2512,19 @@ function navTo(s){
   const nav=document.getElementById('nav-'+s);
   if(nav)nav.classList.add('active');
   window.scrollTo(0,0);
+  // Voltar ao painel encerra o ciclo de foco — senão a barra flutuante ficaria
+  // pendurada para sempre, já que só `sairDoFoco()` a limparia.
+  if(s==='inicio')focoAtivo=null;
   if(s==='inicio'){renderDashboard();}
   if(s==='quiz'){renderAreaList();}
   if(s==='cards'){renderCards();}
   if(s==='resumos'){renderResumos();updateBadges();}
   if(s==='padroes'){renderPadroes();}
+  if(s==='foco'){renderFoco();}
   if(s==='admin'&&isAdmin()){loadAdminUsers();loadReportes();}
+  // BLOCO 34: a barra de retorno ao foco depende da tela ATUAL, então é atualizada
+  // aqui, depois do troca-de-classe — em qualquer navegação, não só nas do foco.
+  atualizarBarraFoco();
 }
 
 function animateScreenEntrance(sc){
@@ -2537,19 +2643,11 @@ function renderDashboard(){
   desenharMeta('ring-fc','ring-fc-pct','ring-fc-lbl',hj.fc||0,dose.cards||DOSE_PADRAO.cards,'flashcards');
   desenharMeta('ring-rs','ring-rs-pct','ring-rs-lbl',hj.rs||0,dose.resumos||DOSE_PADRAO.resumos,'resumos');
 
-  // Ponto fraco
-  renderPontoFraco();
+  // BLOCO 34: uma só chamada substitui renderPontoFraco + card de vencidas +
+  // card de erros. Tudo virou fila de notificações compactas.
+  renderFilaFoco();
 
-  // S34 REV-HOJE: card de revisões vencidas
-  const due=questoesDueHoje();
-  const dueCard=document.getElementById('dash-due');
-  if(dueCard){
-    dueCard.classList.toggle('hidden',due.length===0);
-    const dc=document.getElementById('due-count');
-    if(dc)dc.textContent=due.length+(due.length===1?' questão vencida':' questões vencidas');
-  }
-
-  // S35 PRONT: projeção para a prova
+  // S35 PRONT: projeção para a prova (agora dentro do acordeão)
   renderProntidao();
 
   // FEAT-01: card de nivelamento só enquanto não concluído
@@ -2591,13 +2689,7 @@ function renderDashboard(){
   const erros=Object.values(allQuestoes).filter(q=>userStats.seenIds?.includes(q.id+'_E')).length;
   const erroSubEl=document.getElementById('erro-sub');
   if(erroSubEl)erroSubEl.textContent=erros>0?erros+' para revisar':'Sem erros ainda';
-  // S35 ERR-DASH: card no painel
-  const errosCard=document.getElementById('dash-erros');
-  if(errosCard){
-    errosCard.classList.toggle('hidden',erros===0);
-    const ec=document.getElementById('dash-erros-count');
-    if(ec)ec.textContent=erros+(erros===1?' questão pendente':' questões pendentes');
-  }
+  // (o card gordo do Caderno de Erros no painel virou linha da fila de foco — bloco 34)
   updateBadges();
   renderDominio();
   renderObjetivoSemana();
@@ -2614,48 +2706,235 @@ function areaMaisFraca(){
   return{area:worstArea,pct:worstPct};
 }
 
-function renderPontoFraco(){
-  const card=document.getElementById('dash-weak');
-  const mat=document.getElementById('weak-material');
-  // BLOCO B: o ponto fraco passa a ser um TÓPICO, e vem acompanhado do material nominal.
-  const fraco=topicosFracos(1)[0];
-  const {area:worstArea,pct:worstPct}=areaMaisFraca();
+// ═══════════════════════════════════════════════════════════════
+// BLOCO 34 — FILA DE FOCO E TELA DE FOCO
+// ═══════════════════════════════════════════════════════════════
+// Substitui os 4 cards do painel (ponto fraco, "estude isto", revisões vencidas,
+// caderno de erros) por notificações de uma linha. As de TÓPICO abrem a Tela de
+// Foco, que roda resumo → flashcards → questões em sequência sem voltar ao painel.
+//
+// PERSISTÊNCIA: `userStats.foco[topico] = {r:[ids de resumo lidos], fc:bool, q:bool,
+// done:bool, pL:<domínio no momento da conclusão>}`. O campo `foco` já está em
+// CAMPOS_CHAVE_TOPICO (S58), então o ponto de "T3.4" é encodado na fronteira do
+// Firebase — sem isso o `set()` INTEIRO seria recusado, não só este campo.
 
-  if(fraco){
-    card.classList.remove('hidden');
-    document.getElementById('weak-area-name').textContent=nomeTopico(fraco.t);
-    document.getElementById('weak-area-pct').textContent='Domínio estimado '+Math.round(fraco.pL*100)+'% · '+fraco.n+' resposta'+(fraco.n!==1?'s':'');
-  } else if(worstArea&&worstPct<80){
-    card.classList.remove('hidden');
-    document.getElementById('weak-area-name').textContent=AI[worstArea].nome;
-    document.getElementById('weak-area-pct').textContent=worstPct+'% de acertos';
-  } else {
-    card.classList.add('hidden');
-    if(mat)mat.classList.add('hidden');
-    return;
-  }
+// Quantos tópicos fracos viram notificação de uma vez. Mais que isso volta a ser
+// a parede de informação que este bloco veio remover.
+const FOCO_MAX_NOTAS=3;
 
-  // Material nominal do tópico fraco — só aparece quando há tópico identificado.
-  if(!mat)return;
-  if(!fraco){mat.classList.add('hidden');mat.innerHTML='';return;}
-  const m=materialDoTopico(fraco.t);
-  if(!m.resumos.length&&!m.cards.length){
-    mat.classList.remove('hidden');
-    mat.innerHTML=`<div class="weak-material-title">Para estudar</div>
-      <div style="font-size:12.5px;color:var(--text2)">Este tópico ainda não tem resumo nem flashcard. Treine pelas ${m.questoes.length} questões.</div>`;
-    return;
-  }
-  let html='<div class="weak-material-title">Estude isto — '+sanitize(nomeTopico(fraco.t))+'</div>';
-  m.resumos.slice(0,3).forEach(r=>{
-    html+=`<div class="weak-mat-item" onclick="abrirResumoDoPainel('${r.id}')">
-      <span class="weak-mat-tag">RESUMO</span><span class="weak-mat-txt">${sanitize(r.titulo)}</span></div>`;
+function focoEstado(t){
+  const f=(userStats.foco||{})[t];
+  return f&&typeof f==='object'?f:{r:[],fc:false,q:false,done:false,pL:0};
+}
+function focoGravar(t,patch){
+  if(!dataLoaded)return;            // regra fixa: nunca gravar antes do dataLoaded
+  userStats.foco=userStats.foco||{};
+  userStats.foco[t]={...focoEstado(t),...patch};
+  saveProg();
+}
+
+// Etapas do tópico, já com o estado de conclusão de cada uma.
+function focoEtapas(t){
+  const m=materialDoTopico(t);
+  const f=focoEstado(t);
+  const lidos=Array.isArray(f.r)?f.r:[];
+  return{
+    resumos:m.resumos.map(r=>({tipo:'resumo',id:r.id,titulo:r.titulo,feito:lidos.includes(r.id)})),
+    cards:m.cards.length?[{tipo:'cards',id:t,titulo:m.cards.length+' flashcard'+(m.cards.length!==1?'s':'')+' deste tópico',feito:!!f.fc}]:[],
+    questoes:m.questoes.length?[{tipo:'questoes',id:t,titulo:m.questoes.length+' questão'+(m.questoes.length!==1?'ões':'')+' deste tópico',feito:!!f.q}]:[]
+  };
+}
+function focoTodasEtapas(t){const e=focoEtapas(t);return[...e.resumos,...e.cards,...e.questoes];}
+
+// Um tópico "concluído" some da fila. Volta SÓ se o BKT cair abaixo do que estava
+// quando foi concluído — é a semântica que o João pediu: não ressuscita por acaso.
+function focoConcluido(t,pLAtual){
+  const f=focoEstado(t);
+  if(!f.done)return false;
+  return !(typeof f.pL==='number'&&pLAtual<f.pL-0.05);
+}
+
+function renderFilaFoco(){
+  const bloco=document.getElementById('foco-bloco');
+  const fila=document.getElementById('foco-fila');
+  if(!bloco||!fila)return;
+  const notas=[];
+
+  // (1) Tópicos fracos pelo BKT — cada um abre a Tela de Foco.
+  topicosFracos(FOCO_MAX_NOTAS).forEach(p=>{
+    if(focoConcluido(p.t,p.pL))return;
+    const etapas=focoTodasEtapas(p.t);
+    if(!etapas.length)return;                       // tópico sem material nenhum
+    const faltam=etapas.filter(e=>!e.feito).length;
+    notas.push({
+      cor:'var(--red)',
+      titulo:nomeTopico(p.t),
+      sub:'Domínio '+Math.round(p.pL*100)+'% · '+faltam+' de '+etapas.length+' item'+(etapas.length!==1?'s':'')+' pendente'+(faltam!==1?'s':''),
+      cta:'ABRIR',
+      acao:'abrirFoco(\''+p.t+'\')'
+    });
   });
-  if(m.cards.length){
-    html+=`<div class="weak-mat-item" onclick="revisarCardsDoTopico('${fraco.t}')">
-      <span class="weak-mat-tag">CARDS</span><span class="weak-mat-txt">${m.cards.length} flashcard${m.cards.length!==1?'s':''} deste tópico</span></div>`;
+
+  // Fallback: sem BKT suficiente por tópico, aponta a ÁREA mais fraca.
+  if(!notas.length){
+    const {area,pct}=areaMaisFraca();
+    if(area&&pct<80){
+      notas.push({cor:'var(--red)',titulo:AI[area].nome,sub:pct+'% de acertos — sua área mais fraca',
+        cta:'TREINAR',acao:'iniciarQuiz(\''+area+'\')'});
+    }
   }
-  mat.classList.remove('hidden');
-  mat.innerHTML=html;
+
+  // (2) Revisões vencidas — atravessa tópicos, então é ação direta, não Tela de Foco.
+  const due=questoesDueHoje();
+  if(due.length){
+    notas.push({cor:'var(--ember)',titulo:'Revisar hoje',
+      sub:due.length+(due.length===1?' questão vencida':' questões vencidas')+' · repetição espaçada',
+      cta:'REVISAR',acao:'iniciarRevisaoDue()'});
+  }
+
+  // (3) Caderno de erros — idem, é transversal.
+  const erros=Object.values(allQuestoes).filter(q=>userStats.seenIds?.includes(q.id+'_E')).length;
+  if(erros){
+    notas.push({cor:'var(--red)',titulo:'Caderno de erros',
+      sub:erros+(erros===1?' questão pendente':' questões pendentes')+' · prioriza as mais erradas',
+      cta:'REFAZER',acao:'iniciarModoErro()'});
+  }
+
+  if(!notas.length){bloco.classList.add('hidden');fila.innerHTML='';return;}
+  bloco.classList.remove('hidden');
+  const n=document.getElementById('foco-bloco-n');
+  if(n)n.textContent=notas.length+(notas.length===1?' item':' itens');
+  fila.innerHTML=notas.map(o=>
+    `<div class="foco-nota" role="button" tabindex="0" onclick="${o.acao}"
+       onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();${o.acao}}">
+      <span class="foco-nota-pip" style="background:${o.cor}"></span>
+      <span class="foco-nota-info">
+        <span class="foco-nota-t">${sanitize(o.titulo)}</span>
+        <span class="foco-nota-s">${sanitize(o.sub)}</span>
+      </span>
+      <span class="foco-nota-cta">${o.cta}</span>
+    </div>`).join('');
+}
+
+// ── Tela de Foco ──────────────────────────────────────────────
+let focoAtivo=null;   // tópico em foco; controla a barra flutuante de retorno
+
+function abrirFoco(t){
+  if(!Object.prototype.hasOwnProperty.call(TOPICOS,t)){showToast('Tópico não encontrado.');return;}
+  focoAtivo=t;
+  navTo('foco');
+}
+
+function sairDoFoco(){focoAtivo=null;atualizarBarraFoco();navTo('inicio');}
+function voltarAoFoco(){if(focoAtivo)navTo('foco');}
+
+// A barra só aparece quando há foco ativo E o usuário está FORA da tela de foco.
+function atualizarBarraFoco(){
+  const b=document.getElementById('foco-barra');
+  if(!b)return;
+  const naTela=document.getElementById('screen-foco')?.classList.contains('active');
+  const mostrar=!!focoAtivo&&!naTela;
+  b.classList.toggle('hidden',!mostrar);
+  if(mostrar){
+    const el=document.getElementById('foco-barra-topico');
+    if(el)el.textContent=nomeTopico(focoAtivo);
+  }
+}
+
+function renderFoco(){
+  const t=focoAtivo;
+  const lista=document.getElementById('foco-lista');
+  if(!lista)return;
+  if(!t){lista.innerHTML='';return;}
+  const e=focoEtapas(t);
+  const todas=[...e.resumos,...e.cards,...e.questoes];
+  const feitas=todas.filter(x=>x.feito).length;
+  const pct=todas.length?Math.round(feitas/todas.length*100):0;
+
+  document.getElementById('foco-tag').textContent=(AI[TOPICOS[t].a]?.nome||'').split('—')[0].trim()||'Foco';
+  document.getElementById('foco-titulo').textContent=(TOPICOS[t]&&TOPICOS[t].n)||t;
+  document.getElementById('foco-sub').textContent=t+' · '+feitas+' de '+todas.length+' concluído'+(feitas!==1?'s':'');
+  document.getElementById('foco-prog-fill').style.width=pct+'%';
+
+  const grupo=(titulo,itens)=>{
+    if(!itens.length)return '';
+    return `<div class="foco-etapa-tit">${titulo}</div>`+itens.map(it=>
+      `<div class="foco-item ${it.feito?'feito':''}" role="button" tabindex="0"
+         onclick="focoAbrirEtapa('${it.tipo}','${it.id}')"
+         onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();focoAbrirEtapa('${it.tipo}','${it.id}')}">
+        <span class="foco-check">${it.feito?'✓':''}</span>
+        <span class="foco-item-txt">${sanitize(it.titulo)}</span>
+        <span class="foco-item-meta">${it.feito?'':'→'}</span>
+      </div>`).join('');
+  };
+  lista.innerHTML=grupo('1 · Entender',e.resumos)+grupo('2 · Memorizar',e.cards)+grupo('3 · Testar',e.questoes);
+
+  const cta=document.getElementById('foco-cta');
+  const prox=todas.find(x=>!x.feito);
+  if(cta){
+    cta.disabled=!prox;
+    cta.textContent=prox?(feitas?'Continuar':'Começar')+' — '+({resumo:'ler o resumo',cards:'revisar os cards',questoes:'responder as questões'}[prox.tipo]):'Tópico concluído ✓';
+  }
+  const rod=document.getElementById('foco-rodape');
+  if(rod){
+    rod.textContent=prox
+      ? 'Cada etapa volta para cá quando terminar — você não precisa passar pelo painel.'
+      : 'Este tópico sai da sua fila de foco. Se o domínio cair de novo, ele volta sozinho.';
+  }
+  // Conclusão do tópico: grava com o domínio DO MOMENTO, para saber depois se caiu.
+  if(todas.length&&!prox&&!focoEstado(t).done){
+    const p=perfilTopicos().find(x=>x.t===t);
+    focoGravar(t,{done:true,pL:p?p.pL:1});
+    showToast('Tópico concluído! Saiu da sua fila de foco.');
+  }
+}
+
+// Despacha uma etapa e marca o que já pode ser marcado. Resumo e cards só contam
+// como feitos quando o usuário efetivamente abre — questões, quando responde.
+function focoAbrirEtapa(tipo,id){
+  const t=focoAtivo;
+  if(!t)return;
+  if(tipo==='resumo'){
+    const f=focoEstado(t);
+    const lidos=Array.isArray(f.r)?f.r.slice():[];
+    if(!lidos.includes(id)){lidos.push(id);focoGravar(t,{r:lidos});}
+    navTo('resumos');mostrarResumoDirecto(id);
+  } else if(tipo==='cards'){
+    focoGravar(t,{fc:true});
+    revisarCardsDoTopico(t);
+  } else if(tipo==='questoes'){
+    focoGravar(t,{q:true});
+    praticarTopico(t);
+  }
+  atualizarBarraFoco();
+}
+
+function focoContinuar(){
+  const t=focoAtivo;
+  if(!t)return;
+  const prox=focoTodasEtapas(t).find(x=>!x.feito);
+  if(prox)focoAbrirEtapa(prox.tipo,prox.id);
+}
+
+// BLOCO 34 (item 3) — abrir um tópico pelo código impresso no ebook.
+// Mesma whitelist do deep link: regex + chave existente em TOPICOS. Nada digitado
+// pelo usuário chega ao DOM sem passar por este filtro.
+// Normaliza o que o dedo erra no celular: minúscula, espaço, vírgula, hífen e o
+// ponto omitido ("t34" → "T3.4"). Erro é mostrado no campo, não em toast que some.
+function abrirPorCodigo(){
+  const inp=document.getElementById('cod-topico');
+  const err=document.getElementById('cod-erro');
+  const falhar=msg=>{if(err){err.textContent=msg;err.classList.remove('hidden');}};
+  if(!inp)return;
+  // ordem importa: vírgula VIRA ponto antes de a limpeza remover separadores.
+  let v=(inp.value||'').trim().toUpperCase().replace(/,/g,'.').replace(/[\s\-–—_]/g,'');
+  if(/^T[1-5][1-9]$/.test(v))v=v[0]+v[1]+'.'+v[2];       // "T34" → "T3.4"
+  if(err)err.classList.add('hidden');
+  if(!v){falhar('Digite o código impresso no ebook, como T3.4.');return;}
+  if(!/^T[1-5]\.[1-9]$/.test(v)){falhar('Código inválido. O formato é T + área + ponto + número, como T3.4.');return;}
+  if(!Object.prototype.hasOwnProperty.call(TOPICOS,v)){falhar('O código '+v+' não existe nesta edição do material.');return;}
+  inp.value='';
+  abrirFoco(v);   // abre a Tela de Foco: resumo, cards e questões do tópico juntos
 }
 
 function abrirResumoDoPainel(id){
@@ -2665,7 +2944,7 @@ function abrirResumoDoPainel(id){
 
 function estudarFraco(){
   const fraco=topicosFracos(1)[0];
-  if(fraco){praticarTopico(fraco.t);return;}
+  if(fraco){abrirFoco(fraco.t);return;}
   const {area}=areaMaisFraca();
   if(area)iniciarQuiz(area);
 }
@@ -2815,6 +3094,9 @@ function voltarMenuQuiz(){
   document.getElementById('quiz-home-view').classList.remove('hidden');
   document.querySelector('.btn-revelar')?.remove();
   quizQueue=[];quizIdx=0;quizSessao={c:0,t:0};
+  // BLOCO 34: se a sessão nasceu de um tópico em foco, "voltar" tem de devolver
+  // à Tela de Foco. Cair no menu do quiz é justamente o desvio que este bloco corta.
+  if(focoAtivo){navTo('foco');return;}
   renderAreaList();
 }
 
