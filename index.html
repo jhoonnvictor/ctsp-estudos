@@ -4256,6 +4256,43 @@ function showToast(msg){
   setTimeout(()=>t.classList.remove('show'),2500);
 }
 
+// S54 A11Y (bloco31) — cards clicáveis alcançáveis por teclado.
+// Boa parte da UI é montada por template string, então anotar as ~33 marcações à
+// mão resolveria hoje e quebraria no próximo card. Em vez disso, uma passada varre
+// o DOM e promove todo elemento com `onclick` que não é focável por natureza.
+// Exclusões: overlay e box de modal — o overlay fecha ao clicar no fundo e a box é
+// só contêiner; ambos viram armadilha na ordem de tabulação se entrarem nela.
+const A11Y_IGNORA='.modal-overlay,.modal-box';
+function aplicarAcessibilidadeTeclado(raiz){
+  const alvo=raiz||document.getElementById('app');
+  if(!alvo||!alvo.querySelectorAll)return 0;
+  let n=0;
+  alvo.querySelectorAll('[onclick]').forEach(el=>{
+    const t=(el.tagName||'').toLowerCase();
+    if(t==='button'||t==='a'||t==='input'||t==='select'||t==='textarea')return; // já focável
+    if(el.matches&&el.matches(A11Y_IGNORA))return;
+    if(!el.hasAttribute('tabindex')){el.setAttribute('tabindex','0');n++;}
+    if(!el.hasAttribute('role'))el.setAttribute('role','button');
+  });
+  return n;
+}
+// O app troca listas inteiras por innerHTML, então reaplica após cada re-render.
+// Observa só childList/subtree — NÃO observa atributos, senão o setAttribute
+// acima realimentaria o observer em laço infinito.
+let _a11yAgendado=false;
+function agendarAcessibilidade(){
+  if(_a11yAgendado)return;
+  _a11yAgendado=true;
+  requestAnimationFrame(()=>{_a11yAgendado=false;aplicarAcessibilidadeTeclado();});
+}
+document.addEventListener('DOMContentLoaded',()=>{
+  aplicarAcessibilidadeTeclado();
+  const raiz=document.getElementById('app');
+  if(raiz&&window.MutationObserver){
+    new MutationObserver(agendarAcessibilidade).observe(raiz,{childList:true,subtree:true});
+  }
+});
+
 // S35 A11Y — Atalhos de teclado: Enter no login · 1–5 responde o quiz · Enter avança
 document.addEventListener('keydown',e=>{
   const tag=(e.target&&e.target.tagName||'').toLowerCase();
@@ -4265,6 +4302,15 @@ document.addEventListener('keydown',e=>{
       if(tl&&!tl.classList.contains('hidden'))doLogin();
     }
     return; // digitando em campo: não interceptar
+  }
+  // S54: Enter/Espaço ativam o card focado. Fica ANTES do guard de modal (card
+  // dentro de modal também precisa responder) e devolve cedo, para o atalho
+  // genérico de Enter não disparar junto e causar ação dupla.
+  const cardFocado=e.target&&e.target.closest?e.target.closest('[role="button"][tabindex]'):null;
+  if(cardFocado&&(e.key==='Enter'||e.key===' '||e.key==='Spacebar')){
+    e.preventDefault(); // Espaço não pode rolar a página
+    cardFocado.click();
+    return;
   }
   if(document.querySelector('.modal-overlay:not(.hidden)'))return; // modal aberto: não interceptar
   if(e.key==='Enter'){
